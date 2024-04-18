@@ -60,12 +60,12 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Bas
             String loanExternalIdStr = UUID.randomUUID().toString();
 
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepaymentsWithEnableDownPayment();
 
-            SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+            SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(REQUEST_SPEC, RESPONSE_SPEC);
 
             // Create approve and activate savings account
             Integer savingsAccountId = createApproveActivateSavingsAccountDailyPosting(clientId.intValue(), "01 March 2023",
@@ -79,7 +79,7 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Bas
                     loanExternalIdStr);
 
             // disburse to savings
-            PostLoansLoanIdResponse responseLoanDisburseToSavings = loanTransactionHelper.disburseToSavingsLoan(loanExternalIdStr,
+            PostLoansLoanIdResponse responseLoanDisburseToSavings = LOAN_TRANSACTION_HELPER.disburseToSavingsLoan(loanExternalIdStr,
                     new PostLoansLoanIdRequest().actualDisbursementDate("01 March 2023").transactionAmount(new BigDecimal("1000"))
                             .locale("en").dateFormat("dd MMMM yyyy"));
 
@@ -134,11 +134,11 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Bas
     }
 
     private void mapLiabilityTransferFinancialActivity(Long loanProductId) {
-        FinancialActivityAccountHelper financialActivityAccountHelper = new FinancialActivityAccountHelper(requestSpec);
-        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = loanProductHelper.retrieveLoanProductById(loanProductId);
+        FinancialActivityAccountHelper financialActivityAccountHelper = new FinancialActivityAccountHelper(REQUEST_SPEC);
+        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = LOAN_PRODUCT_HELPER.retrieveLoanProductById(loanProductId);
         Integer financialActivityAccountId = (Integer) financialActivityAccountHelper.createFinancialActivityAccount(
                 AccountingConstants.FinancialActivity.LIABILITY_TRANSFER.getValue(),
-                getLoanProductsProductIdResponse.getAccountingMappings().getFundSourceAccount().getId().intValue(), responseSpec,
+                getLoanProductsProductIdResponse.getAccountingMappings().getFundSourceAccount().getId().intValue(), RESPONSE_SPEC,
                 CommonConstants.RESPONSE_RESOURCE_ID);
         assertNotNull(financialActivityAccountId);
     }
@@ -153,8 +153,8 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Bas
                 .withSubmittedOnDate("01 March 2023").withLoanType("individual").withExternalId(externalId)
                 .withCreateStandingInstructionAtDisbursement().build(clientID.toString(), loanProductID.toString(), savingsId.toString());
 
-        final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
-        loanTransactionHelper.approveLoan("01 March 2023", "1000", loanId, null);
+        final Integer loanId = LOAN_TRANSACTION_HELPER.getLoanId(loanApplicationJSON);
+        LOAN_TRANSACTION_HELPER.approveLoan("01 March 2023", "1000", loanId, null);
         return loanId.longValue();
     }
 
@@ -169,7 +169,7 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Bas
         SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
         final String savingsProductJSON = savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
                 .withInterestPostingPeriodTypeAsMonthly().withInterestCalculationPeriodTypeAsDailyBalance().build();
-        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
+        return SavingsProductHelper.createSavingsProduct(savingsProductJSON, REQUEST_SPEC, RESPONSE_SPEC);
     }
 
     private Long createLoanProductWithMultiDisbursalAndRepaymentsWithEnableDownPayment() {
@@ -190,8 +190,8 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Bas
         product.setDisbursedAmountPercentageForDownPayment(DOWN_PAYMENT_PERCENTAGE);
         product.setEnableAutoRepaymentForDownPayment(true);
 
-        PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = loanProductHelper
+        PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(product);
+        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = LOAN_PRODUCT_HELPER
                 .retrieveLoanProductById(loanProductResponse.getResourceId());
         assertNotNull(getLoanProductsProductIdResponse);
         return loanProductResponse.getResourceId();
@@ -200,7 +200,8 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Bas
 
     private void verifyTransactionIsAccountTransfer(final LocalDate transactionDate, final Float transactionAmount, final Integer loanID,
             final String transactionOfType) {
-        ArrayList<HashMap> transactions = (ArrayList<HashMap>) loanTransactionHelper.getLoanTransactions(requestSpec, responseSpec, loanID);
+        ArrayList<HashMap> transactions = (ArrayList<HashMap>) LOAN_TRANSACTION_HELPER.getLoanTransactions(REQUEST_SPEC, RESPONSE_SPEC,
+                loanID);
         boolean isTransactionFound = false;
         for (int i = 0; i < transactions.size(); i++) {
             HashMap transactionType = (HashMap) transactions.get(i).get("type");
@@ -242,12 +243,12 @@ public class LoanAccountDisbursementToSavingsWithAutoDownPaymentTest extends Bas
      */
     @AfterEach
     public void tearDown() {
-        FinancialActivityAccountHelper financialActivityAccountHelper = new FinancialActivityAccountHelper(requestSpec);
-        List<HashMap> financialActivities = financialActivityAccountHelper.getAllFinancialActivityAccounts(responseSpec);
+        FinancialActivityAccountHelper financialActivityAccountHelper = new FinancialActivityAccountHelper(REQUEST_SPEC);
+        List<HashMap> financialActivities = financialActivityAccountHelper.getAllFinancialActivityAccounts(RESPONSE_SPEC);
         for (HashMap financialActivity : financialActivities) {
             Integer financialActivityAccountId = (Integer) financialActivity.get("id");
             Integer deletedFinancialActivityAccountId = financialActivityAccountHelper
-                    .deleteFinancialActivityAccount(financialActivityAccountId, responseSpec, CommonConstants.RESPONSE_RESOURCE_ID);
+                    .deleteFinancialActivityAccount(financialActivityAccountId, RESPONSE_SPEC, CommonConstants.RESPONSE_RESOURCE_ID);
             Assertions.assertNotNull(deletedFinancialActivityAccountId);
             Assertions.assertEquals(financialActivityAccountId, deletedFinancialActivityAccountId);
         }

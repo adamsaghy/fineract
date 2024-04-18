@@ -27,7 +27,6 @@ import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanRescheduleRequestTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.junit.jupiter.api.Test;
@@ -40,14 +39,11 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
     public static final BigDecimal DOWN_PAYMENT_PERCENTAGE_25 = new BigDecimal(25);
     public static final BigDecimal DOWN_PAYMENT_PERCENTAGE_33 = new BigDecimal(33);
 
-    private final LoanRescheduleRequestHelper loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(this.requestSpec,
-            this.responseSpec);
-
     @Test
     public void testRescheduleWithDownPayment() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith25PctDownPayment(true, true);
@@ -73,10 +69,10 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
             );
 
             // verify journal entries
-            verifyJournalEntries(loanId, journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT"), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT") //
+            verifyJournalEntries(loanId, journalEntry(250.0, LOANS_RECEIVABLE_ACCOUNT, "CREDIT"), //
+                    journalEntry(250.0, FUND_SOURCE, "DEBIT"), //
+                    journalEntry(1000.0, LOANS_RECEIVABLE_ACCOUNT, "DEBIT"), //
+                    journalEntry(1000.0, FUND_SOURCE, "CREDIT") //
             );
 
             // Verify Repayment Schedule
@@ -92,10 +88,10 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
                     .updateAdjustedDueDate("15 February 2023").updateSubmittedOnDate("01 January 2023").updateRescheduleReasonId("1")
                     .build(loanId.toString());
 
-            Integer loanRescheduleRequest = loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
+            Integer loanRescheduleRequest = LOAN_RESCHEDULE_REQUEST_HELPER.createLoanRescheduleRequest(requestJSON);
             requestJSON = new LoanRescheduleRequestTestBuilder().updateSubmittedOnDate("01 January 2023")
                     .getApproveLoanRescheduleRequestJSON();
-            Integer approveLoanRescheduleRequest = loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequest,
+            Integer approveLoanRescheduleRequest = LOAN_RESCHEDULE_REQUEST_HELPER.approveLoanRescheduleRequest(loanRescheduleRequest,
                     requestJSON);
 
             verifyRepaymentSchedule(loanId, //
@@ -111,7 +107,7 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
     public void testRescheduleAddExtraInstallmentsWithDownPayment() {
         runAt("01 November 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith33PctDownPayment(true, true);
@@ -151,10 +147,10 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
                     .updateAdjustedDueDate(null).updateSubmittedOnDate("01 November 2023").updateRescheduleReasonId("1")
                     .build(loanId.toString());
 
-            Integer loanRescheduleRequest = loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
+            Integer loanRescheduleRequest = LOAN_RESCHEDULE_REQUEST_HELPER.createLoanRescheduleRequest(requestJSON);
             requestJSON = new LoanRescheduleRequestTestBuilder().updateSubmittedOnDate("01 November 2023")
                     .getApproveLoanRescheduleRequestJSON();
-            Integer approveLoanRescheduleRequest = loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequest,
+            Integer approveLoanRescheduleRequest = LOAN_RESCHEDULE_REQUEST_HELPER.approveLoanRescheduleRequest(loanRescheduleRequest,
                     requestJSON);
 
             // Verify Repayment Schedule
@@ -174,7 +170,7 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
     public void testRescheduleAddExtraInstallmentsMultipleDisbursementWithDownPayment() {
         runAt("31 December 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith33PctDownPayment(true, true);
@@ -236,10 +232,10 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
                     .updateAdjustedDueDate(null).updateSubmittedOnDate("31 December 2023").updateRescheduleReasonId("1")
                     .build(loanId.toString());
 
-            Integer loanRescheduleRequest = loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
+            Integer loanRescheduleRequest = LOAN_RESCHEDULE_REQUEST_HELPER.createLoanRescheduleRequest(requestJSON);
             requestJSON = new LoanRescheduleRequestTestBuilder().updateSubmittedOnDate("31 December 2023")
                     .getApproveLoanRescheduleRequestJSON();
-            Integer approveLoanRescheduleRequest = loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequest,
+            Integer approveLoanRescheduleRequest = LOAN_RESCHEDULE_REQUEST_HELPER.approveLoanRescheduleRequest(loanRescheduleRequest,
                     requestJSON);
 
             // Verify Repayment Schedule
@@ -261,7 +257,7 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
     public void testRescheduleAddExtraInstallmentsDisbursementWithDownPaymentWithInterest() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith20PctDownPaymentWithDecliningBalanceInterest(true, true, 5.0);
@@ -314,10 +310,10 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
                     .updateExtraTerms("2").updateNewInterestRate(null).updateRescheduleFromDate("01 June 2023").updateAdjustedDueDate(null)
                     .updateSubmittedOnDate("01 June 2023").updateRescheduleReasonId("1").build(loanId.toString());
 
-            Integer loanRescheduleRequest = loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
+            Integer loanRescheduleRequest = LOAN_RESCHEDULE_REQUEST_HELPER.createLoanRescheduleRequest(requestJSON);
             requestJSON = new LoanRescheduleRequestTestBuilder().updateSubmittedOnDate("01 June 2023")
                     .getApproveLoanRescheduleRequestJSON();
-            Integer approveLoanRescheduleRequest = loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequest,
+            Integer approveLoanRescheduleRequest = LOAN_RESCHEDULE_REQUEST_HELPER.approveLoanRescheduleRequest(loanRescheduleRequest,
                     requestJSON);
 
             // Verify Repayment Schedule
@@ -340,7 +336,7 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
     public void testRescheduleAddExtraInstallmentsMultipleDisbursementWithDownPaymentWithInterest() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
             // Create Loan Product
             Long loanProductId = createLoanProductWith20PctDownPaymentWithDecliningBalanceInterest(true, true, 5.0);
@@ -419,10 +415,10 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
                     .updateExtraTerms("2").updateNewInterestRate(null).updateRescheduleFromDate("01 June 2023").updateAdjustedDueDate(null)
                     .updateSubmittedOnDate("01 June 2023").updateRescheduleReasonId("1").build(loanId.toString());
 
-            Integer loanRescheduleRequest = loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
+            Integer loanRescheduleRequest = LOAN_RESCHEDULE_REQUEST_HELPER.createLoanRescheduleRequest(requestJSON);
             requestJSON = new LoanRescheduleRequestTestBuilder().updateSubmittedOnDate("01 June 2023")
                     .getApproveLoanRescheduleRequestJSON();
-            Integer approveLoanRescheduleRequest = loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequest,
+            Integer approveLoanRescheduleRequest = LOAN_RESCHEDULE_REQUEST_HELPER.approveLoanRescheduleRequest(loanRescheduleRequest,
                     requestJSON);
 
             // Verify Repayment Schedule
@@ -458,8 +454,8 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
         product.setDisbursedAmountPercentageForDownPayment(DOWN_PAYMENT_PERCENTAGE_25);
         product.setEnableAutoRepaymentForDownPayment(autoDownPaymentEnabled);
 
-        PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = loanProductHelper
+        PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(product);
+        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = LOAN_PRODUCT_HELPER
                 .retrieveLoanProductById(loanProductResponse.getResourceId());
 
         Long loanProductId = loanProductResponse.getResourceId();
@@ -491,8 +487,8 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
         product.setDisbursedAmountPercentageForDownPayment(DOWN_PAYMENT_PERCENTAGE_33);
         product.setEnableAutoRepaymentForDownPayment(autoDownPaymentEnabled);
 
-        PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = loanProductHelper
+        PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(product);
+        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = LOAN_PRODUCT_HELPER
                 .retrieveLoanProductById(loanProductResponse.getResourceId());
 
         Long loanProductId = loanProductResponse.getResourceId();
@@ -526,8 +522,8 @@ public class LoanRescheduleTestWithDownpayment extends BaseLoanIntegrationTest {
         product.setDisbursedAmountPercentageForDownPayment(DOWN_PAYMENT_PERCENTAGE_20);
         product.setEnableAutoRepaymentForDownPayment(autoDownPaymentEnabled);
 
-        PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = loanProductHelper
+        PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(product);
+        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = LOAN_PRODUCT_HELPER
                 .retrieveLoanProductById(loanProductResponse.getResourceId());
 
         Long loanProductId = loanProductResponse.getResourceId();

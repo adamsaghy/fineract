@@ -20,18 +20,12 @@ package org.apache.fineract.integrationtests;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -54,17 +48,13 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionI
 import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.integrationtests.common.BatchHelper;
-import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
-import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
-import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -85,50 +75,26 @@ public class ConcurrencyIntegrationTest extends BaseLoanIntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConcurrencyIntegrationTest.class);
     private static final String NO_ACCOUNTING = "1";
-
     private static final int MYTHREADS = 30;
-
-    private static final String DATETIME_PATTERN = "dd MMMM yyyy";
-    private static ResponseSpecification responseSpec;
-    private static RequestSpecification requestSpec;
-    private static BusinessDateHelper businessDateHelper;
-    private static LoanTransactionHelper loanTransactionHelper;
-    private static AccountHelper accountHelper;
     private static Integer commonLoanProductId;
     private static PostClientsResponse client;
-    private static LoanRescheduleRequestHelper loanRescheduleRequestHelper;
-    private static BatchHelper batchHelper;
 
     @BeforeAll
     public static void setup() {
         Utils.initializeRESTAssured();
-        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        requestSpec.header("Fineract-Platform-TenantId", "default");
-        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-        businessDateHelper = new BusinessDateHelper();
-        accountHelper = new AccountHelper(requestSpec, responseSpec);
-        ClientHelper clientHelper = new ClientHelper(requestSpec, responseSpec);
-        loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(requestSpec, responseSpec);
-
-        final Account assetAccount = accountHelper.createAssetAccount();
-        final Account incomeAccount = accountHelper.createIncomeAccount();
-        final Account expenseAccount = accountHelper.createExpenseAccount();
-        final Account overpaymentAccount = accountHelper.createLiabilityAccount();
-
         commonLoanProductId = createLoanProduct("500", "15", "4", true, "25", true, LoanScheduleType.PROGRESSIVE,
-                LoanScheduleProcessingType.HORIZONTAL, assetAccount, incomeAccount, expenseAccount, overpaymentAccount);
-        client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+                LoanScheduleProcessingType.HORIZONTAL, LOANS_RECEIVABLE_ACCOUNT, FEE_INCOME_ACCOUNT, CHARGE_OFF_EXPENSE_ACCOUNT,
+                OVERPAYMENT_ACCOUNT);
+        client = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest());
     }
 
     private static Integer createLoanProduct(final String principal, final String repaymentAfterEvery, final String numberOfRepayments,
             boolean downPaymentEnabled, String downPaymentPercentage, boolean autoPayForDownPayment, LoanScheduleType loanScheduleType,
             LoanScheduleProcessingType loanScheduleProcessingType, final Account... accounts) {
         AdvancedPaymentData defaultAllocation = createDefaultPaymentAllocation("NEXT_INSTALLMENT");
-        AdvancedPaymentData goodwillCreditAllocation = createDefaultPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT");
-        AdvancedPaymentData merchantIssuedRefundAllocation = createDefaultPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION");
-        AdvancedPaymentData payoutRefundAllocation = createDefaultPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT");
+        AdvancedPaymentData goodwillCreditAllocation = createPaymentAllocation("GOODWILL_CREDIT", "LAST_INSTALLMENT");
+        AdvancedPaymentData merchantIssuedRefundAllocation = createPaymentAllocation("MERCHANT_ISSUED_REFUND", "REAMORTIZATION");
+        AdvancedPaymentData payoutRefundAllocation = createPaymentAllocation("PAYOUT_REFUND", "NEXT_INSTALLMENT");
         LOG.info("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         final String loanProductJSON = new LoanProductTestBuilder().withMinPrincipal(principal).withPrincipal(principal)
                 .withRepaymentTypeAsDays().withRepaymentAfterEvery(repaymentAfterEvery).withNumberOfRepayments(numberOfRepayments)
@@ -142,7 +108,7 @@ public class ConcurrencyIntegrationTest extends BaseLoanIntegrationTest {
                 .withDisallowExpectedDisbursements(true).withLoanScheduleType(loanScheduleType)
                 .withLoanScheduleProcessingType(loanScheduleProcessingType).withDaysInMonth("30").withDaysInYear("365")
                 .withMoratorium("0", "0").build(null);
-        return loanTransactionHelper.getLoanProductId(loanProductJSON);
+        return LOAN_TRANSACTION_HELPER.getLoanProductId(loanProductJSON);
     }
 
     private static PostLoansResponse applyForLoanApplication(final Long clientId, final Integer loanProductId, final BigDecimal principal,
@@ -150,8 +116,8 @@ public class ConcurrencyIntegrationTest extends BaseLoanIntegrationTest {
             final String expectedDisbursementDate, final String submittedOnDate, String transactionProcessorCode,
             String loanScheduleProcessingType) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
-        return loanTransactionHelper.applyLoan(new PostLoansRequest().clientId(clientId).productId(loanProductId.longValue())
-                .expectedDisbursementDate(expectedDisbursementDate).dateFormat(DATETIME_PATTERN)
+        return LOAN_TRANSACTION_HELPER.applyLoan(new PostLoansRequest().clientId(clientId).productId(loanProductId.longValue())
+                .expectedDisbursementDate(expectedDisbursementDate).dateFormat(DATE_PATTERN)
                 .transactionProcessingStrategyCode(transactionProcessorCode).locale("en").submittedOnDate(submittedOnDate)
                 .amortizationType(1).interestRatePerPeriod(interestRate).interestCalculationPeriodType(1).interestType(0)
                 .repaymentFrequencyType(0).repaymentEvery(repaymentAfterEvery).repaymentFrequencyType(0)
@@ -159,12 +125,6 @@ public class ConcurrencyIntegrationTest extends BaseLoanIntegrationTest {
                 .loanType("individual").loanScheduleProcessingType(loanScheduleProcessingType).externalId(UUID.randomUUID().toString())
                 .maxOutstandingLoanBalance(BigDecimal.valueOf(35000)));
     }
-
-    // UC1: Reverse-replay parallel
-    // ADVANCED_PAYMENT_ALLOCATION_STRATEGY
-    // 1. Disburse the loan
-    // 2. Pay down payment
-    // 3. Pay installments on due dates
 
     private static Stream<Arguments> enclosingTransaction() {
         return Stream.of(Arguments.of(Named.of("withEnclosingTransaction", true)), //
@@ -180,15 +140,14 @@ public class ConcurrencyIntegrationTest extends BaseLoanIntegrationTest {
                     AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY,
                     LoanScheduleProcessingType.HORIZONTAL.name());
 
-            loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
-                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(500)).dateFormat(DATETIME_PATTERN)
-                            .approvedOnDate("01 January 2023").locale("en"));
+            LOAN_TRANSACTION_HELPER.approveLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest()
+                    .approvedLoanAmount(BigDecimal.valueOf(500)).dateFormat(DATE_PATTERN).approvedOnDate("01 January 2023").locale("en"));
 
-            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
-                    new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2023").dateFormat(DATETIME_PATTERN)
+            LOAN_TRANSACTION_HELPER.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2023").dateFormat(DATE_PATTERN)
                             .transactionAmount(BigDecimal.valueOf(500.00)).locale("en"));
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 375.0, 125.0, 375.0, 125.0, null);
             validateRepaymentPeriod(loanDetails, 1, 125.0, 125.0, 0.0, 0.0, 0.0);
             validateRepaymentPeriod(loanDetails, 2, 125.0, 0.0, 125.0, 0.0, 0.0);
@@ -203,18 +162,18 @@ public class ConcurrencyIntegrationTest extends BaseLoanIntegrationTest {
             addCharge(loanResponse.getLoanId(), false, 50, "10 January 2023");
 
             String firstRepaymentExternalId = UUID.randomUUID().toString();
-            loanTransactionHelper.makeLoanRepayment(loanResponse.getLoanId(),
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("11 January 2023").locale("en")
+            LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanResponse.getLoanId(),
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATE_PATTERN).transactionDate("11 January 2023").locale("en")
                             .transactionAmount(10.0).externalId(firstRepaymentExternalId));
 
             String secondRepaymentExternalId = UUID.randomUUID().toString();
-            loanTransactionHelper.makeLoanRepayment(loanResponse.getLoanId(),
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("12 January 2023").locale("en")
+            LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanResponse.getLoanId(),
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATE_PATTERN).transactionDate("12 January 2023").locale("en")
                             .transactionAmount(41.0).externalId(secondRepaymentExternalId));
 
             String thirdRepaymentExternalId = UUID.randomUUID().toString();
-            loanTransactionHelper.makeLoanRepayment(loanResponse.getLoanId(),
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("13 January 2023").locale("en")
+            LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanResponse.getLoanId(),
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATE_PATTERN).transactionDate("13 January 2023").locale("en")
                             .transactionAmount(16.0).externalId(thirdRepaymentExternalId));
 
             verifyTransactions(loanResponse.getLoanId(), //
@@ -253,15 +212,14 @@ public class ConcurrencyIntegrationTest extends BaseLoanIntegrationTest {
                     LoanScheduleProcessingType.HORIZONTAL.name());
 
             loanId = loanResponse.getLoanId();
-            loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
-                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(500)).dateFormat(DATETIME_PATTERN)
-                            .approvedOnDate("01 January 2023").locale("en"));
+            LOAN_TRANSACTION_HELPER.approveLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest()
+                    .approvedLoanAmount(BigDecimal.valueOf(500)).dateFormat(DATE_PATTERN).approvedOnDate("01 January 2023").locale("en"));
 
-            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
-                    new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2023").dateFormat(DATETIME_PATTERN)
+            LOAN_TRANSACTION_HELPER.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2023").dateFormat(DATE_PATTERN)
                             .transactionAmount(BigDecimal.valueOf(500.00)).locale("en"));
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 375.0, 125.0, 375.0, 125.0, null);
             validateRepaymentPeriod(loanDetails, 1, 125.0, 125.0, 0.0, 0.0, 0.0);
             validateRepaymentPeriod(loanDetails, 2, 125.0, 0.0, 125.0, 0.0, 0.0);
@@ -276,18 +234,18 @@ public class ConcurrencyIntegrationTest extends BaseLoanIntegrationTest {
             addCharge(loanResponse.getLoanId(), false, 50, "10 January 2023");
 
             String firstRepaymentExternalId = UUID.randomUUID().toString();
-            loanTransactionHelper.makeLoanRepayment(loanResponse.getLoanId(),
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("11 January 2023").locale("en")
+            LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanResponse.getLoanId(),
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATE_PATTERN).transactionDate("11 January 2023").locale("en")
                             .transactionAmount(10.0).externalId(firstRepaymentExternalId));
 
             String secondRepaymentExternalId = UUID.randomUUID().toString();
-            loanTransactionHelper.makeLoanRepayment(loanResponse.getLoanId(),
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("12 January 2023").locale("en")
+            LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanResponse.getLoanId(),
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATE_PATTERN).transactionDate("12 January 2023").locale("en")
                             .transactionAmount(41.0).externalId(secondRepaymentExternalId));
 
             String thirdRepaymentExternalId = UUID.randomUUID().toString();
-            loanTransactionHelper.makeLoanRepayment(loanResponse.getLoanId(),
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("13 January 2023").locale("en")
+            LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanResponse.getLoanId(),
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATE_PATTERN).transactionDate("13 January 2023").locale("en")
                             .transactionAmount(16.0).externalId(thirdRepaymentExternalId));
 
             verifyTransactions(loanResponse.getLoanId(), //
@@ -298,12 +256,12 @@ public class ConcurrencyIntegrationTest extends BaseLoanIntegrationTest {
                     transaction(16.0, "Repayment", "13 January 2023", 358.0, 16.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
             );
             ExecutorService executor = Executors.newFixedThreadPool(MYTHREADS);
-            Callable<PostLoansLoanIdTransactionsResponse> worker1 = new LoanReversalExecutor(loanTransactionHelper,
-                    loanResponse.getResourceExternalId(), firstRepaymentExternalId, LocalDate.of(2023, 1, 14));
-            Callable<PostLoansLoanIdTransactionsResponse> worker2 = new LoanReversalExecutor(loanTransactionHelper,
-                    loanResponse.getResourceExternalId(), secondRepaymentExternalId, LocalDate.of(2023, 1, 14));
-            Callable<PostLoansLoanIdTransactionsResponse> worker3 = new LoanReversalExecutor(loanTransactionHelper,
-                    loanResponse.getResourceExternalId(), thirdRepaymentExternalId, LocalDate.of(2023, 1, 14));
+            Callable<PostLoansLoanIdTransactionsResponse> worker1 = new LoanReversalExecutor(loanResponse.getResourceExternalId(),
+                    firstRepaymentExternalId, LocalDate.of(2023, 1, 14));
+            Callable<PostLoansLoanIdTransactionsResponse> worker2 = new LoanReversalExecutor(loanResponse.getResourceExternalId(),
+                    secondRepaymentExternalId, LocalDate.of(2023, 1, 14));
+            Callable<PostLoansLoanIdTransactionsResponse> worker3 = new LoanReversalExecutor(loanResponse.getResourceExternalId(),
+                    thirdRepaymentExternalId, LocalDate.of(2023, 1, 14));
 
             try {
                 List<Future<PostLoansLoanIdTransactionsResponse>> futures = executor.invokeAll(List.of(worker1, worker2, worker3));
@@ -318,25 +276,23 @@ public class ConcurrencyIntegrationTest extends BaseLoanIntegrationTest {
 
     @Test
     public void verifyConcurrentLoanRepayments() {
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer clientID = ClientHelper.createClient(REQUEST_SPEC, RESPONSE_SPEC);
+        ClientHelper.verifyClientCreatedOnServer(REQUEST_SPEC, RESPONSE_SPEC, clientID);
         final Integer loanProductID = createLoanProduct(false, NO_ACCOUNTING);
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, "12,000.00");
-        this.loanTransactionHelper.approveLoan("20 September 2011", loanID);
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("20 September 2011", loanID, "12,000.00",
+        LOAN_TRANSACTION_HELPER.approveLoan("20 September 2011", loanID);
+        String loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(REQUEST_SPEC, RESPONSE_SPEC, loanID);
+        LOAN_TRANSACTION_HELPER.disburseLoanWithNetDisbursalAmount("20 September 2011", loanID, "12,000.00",
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         ExecutorService executor = Executors.newFixedThreadPool(MYTHREADS);
-        Calendar date = Calendar.getInstance();
-        date.set(2011, 9, 20);
+
+        LocalDate date = LocalDate.of(2011, 9, 20);
         Float repaymentAmount = 100.0f;
         for (int i = 0; i < 10; i++) {
             LOG.info("Starting concurrent transaction number {}", i);
-            date.add(Calendar.DAY_OF_MONTH, 1);
+            date = date.plusMonths(1);
             repaymentAmount = repaymentAmount + 100;
-            Runnable worker = new LoanRepaymentExecutor(loanTransactionHelper, loanID, repaymentAmount, date);
+            Runnable worker = new LoanRepaymentExecutor(loanID, repaymentAmount, date.format(DATE_FORMATTER));
             executor.execute(worker);
         }
 
@@ -367,15 +323,15 @@ public class ConcurrencyIntegrationTest extends BaseLoanIntegrationTest {
             builder = builder.withInterestCalculationPeriodTypeAsRepaymentPeriod(true);
         }
         final String loanProductJSON = builder.build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        return LOAN_TRANSACTION_HELPER.getLoanProductId(loanProductJSON);
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, String principal) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(REQUEST_SPEC, RESPONSE_SPEC);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(REQUEST_SPEC, RESPONSE_SPEC,
                 clientID.toString(), collateralId);
         Assertions.assertNotNull(clientCollateralId);
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
@@ -393,7 +349,7 @@ public class ConcurrencyIntegrationTest extends BaseLoanIntegrationTest {
                 .withExpectedDisbursementDate("20 September 2011") //
                 .withSubmittedOnDate("20 September 2011") //
                 .withCollaterals(collaterals).build(clientID.toString(), loanProductID.toString(), null);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        return LOAN_TRANSACTION_HELPER.getLoanId(loanApplicationJSON);
     }
 
     private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {
@@ -412,21 +368,19 @@ public class ConcurrencyIntegrationTest extends BaseLoanIntegrationTest {
         private final Integer loanId;
         private final Float repaymentAmount;
         private final String repaymentDate;
-        private final LoanTransactionHelper loanTransactionHelper;
 
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
 
-        LoanRepaymentExecutor(LoanTransactionHelper loanTransactionHelper, Integer loanId, Float repaymentAmount, Calendar repaymentDate) {
+        LoanRepaymentExecutor(Integer loanId, Float repaymentAmount, String repaymentDate) {
             this.loanId = loanId;
             this.repaymentAmount = repaymentAmount;
-            this.repaymentDate = dateFormat.format(repaymentDate.getTime());
-            this.loanTransactionHelper = loanTransactionHelper;
+            this.repaymentDate = repaymentDate;
         }
 
         @Override
         public void run() {
             try {
-                this.loanTransactionHelper.makeRepayment(repaymentDate, repaymentAmount, loanId);
+                LOAN_TRANSACTION_HELPER.makeRepayment(repaymentDate, repaymentAmount, loanId);
             } catch (Exception e) {
                 LOG.info("Found an exception {}", e.getMessage());
                 LOG.info("Details of failed concurrent transaction (date, amount, loanId) are {},{},{}", repaymentDate, repaymentAmount,
@@ -443,21 +397,18 @@ public class ConcurrencyIntegrationTest extends BaseLoanIntegrationTest {
         private final String loanExternalId;
         private final String transactionExternalId;
         private final LocalDate reversalDate;
-        private final LoanTransactionHelper loanTransactionHelper;
 
-        LoanReversalExecutor(LoanTransactionHelper loanTransactionHelper, String loanExternalId, String transactionExternalId,
-                LocalDate reversalDate) {
+        LoanReversalExecutor(String loanExternalId, String transactionExternalId, LocalDate reversalDate) {
             this.loanExternalId = loanExternalId;
             this.transactionExternalId = transactionExternalId;
             this.reversalDate = reversalDate;
-            this.loanTransactionHelper = loanTransactionHelper;
         }
 
         @Override
         public PostLoansLoanIdTransactionsResponse call() {
-            return this.loanTransactionHelper.reverseLoanTransaction(loanExternalId, transactionExternalId,
-                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN)
-                            .transactionDate(dateTimeFormatter.format(reversalDate)).locale("en").transactionAmount(0.0));
+            return LOAN_TRANSACTION_HELPER.reverseLoanTransaction(loanExternalId, transactionExternalId,
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATE_PATTERN)
+                            .transactionDate(DATE_FORMATTER.format(reversalDate)).locale("en").transactionAmount(0.0));
         }
     }
 
@@ -484,10 +435,10 @@ public class ConcurrencyIntegrationTest extends BaseLoanIntegrationTest {
                     loanExternalId, transactionExternalId, "0", reversalDate);
             List<BatchResponse> response;
             if (enclosingTransaction) {
-                response = BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec,
+                response = BatchHelper.postBatchRequestsWithEnclosingTransaction(REQUEST_SPEC, RESPONSE_SPEC,
                         BatchHelper.toJsonString(List.of(repaymentReversalRequest)));
             } else {
-                response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
+                response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(REQUEST_SPEC, RESPONSE_SPEC,
                         BatchHelper.toJsonString(List.of(repaymentReversalRequest)));
             }
 

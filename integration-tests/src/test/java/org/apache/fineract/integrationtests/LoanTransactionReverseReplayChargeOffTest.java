@@ -45,22 +45,22 @@ public class LoanTransactionReverseReplayChargeOffTest extends BaseLoanIntegrati
     @Test
     public void loanTransactionReverseReplayWithChargeOff() {
         runAt("4 October 2022", () -> {
-            final Account assetAccount = accountHelper.createAssetAccount();
-            final Account chargeOffFraudExpenseAccount = accountHelper.createExpenseAccount();
-            final Account chargeOffExpenseAccount = accountHelper.createExpenseAccount();
+            final Account assetAccount = ACCOUNT_HELPER.createAssetAccount();
+            final Account chargeOffFraudExpenseAccount = ACCOUNT_HELPER.createExpenseAccount();
+            final Account chargeOffExpenseAccount = ACCOUNT_HELPER.createExpenseAccount();
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
             // Client and Loan account creation
 
-            final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            final Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
             PostLoanProductsRequest loanProductsRequest = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct()
                     .chargeOffExpenseAccountId(chargeOffExpenseAccount.getAccountID().longValue())
                     .chargeOffFraudExpenseAccountId(chargeOffFraudExpenseAccount.getAccountID().longValue())
                     .loanPortfolioAccountId(assetAccount.getAccountID().longValue());
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+            PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(loanProductsRequest);
 
             Long loanId = applyAndApproveLoan(clientId, loanProductResponse.getResourceId(), "2 September 2022", 1000.0, 1,
                     postLoansRequest -> {
@@ -71,31 +71,31 @@ public class LoanTransactionReverseReplayChargeOffTest extends BaseLoanIntegrati
 
             // make repayment
             String loanTransactionExternalIdStr = UUID.randomUUID().toString();
-            PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("03 October 2022").locale("en")
+            PostLoansLoanIdTransactionsResponse repaymentTransaction = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanExternalIdStr,
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATE_PATTERN).transactionDate("03 October 2022").locale("en")
                             .transactionAmount(10.0).externalId(loanTransactionExternalIdStr));
 
             // mark loan as fraud
             final String command = "markAsFraud";
-            String payload = loanTransactionHelper.getLoanFraudPayloadAsJSON("fraud", "true");
-            loanTransactionHelper.modifyLoanCommand(loanId.intValue(), command, payload, responseSpec);
+            String payload = LOAN_TRANSACTION_HELPER.getLoanFraudPayloadAsJSON("fraud", "true");
+            LOAN_TRANSACTION_HELPER.modifyLoanCommand(loanId.intValue(), command, payload, RESPONSE_SPEC);
 
             // charge-off loan
             String randomText = Utils.randomStringGenerator("en", 5) + Utils.randomNumberGenerator(6)
                     + Utils.randomStringGenerator("is", 5);
-            Integer chargeOffReasonId = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText, 1);
+            Integer chargeOffReasonId = CodeHelper.createChargeOffCodeValue(REQUEST_SPEC, RESPONSE_SPEC, randomText, 1);
             String transactionExternalId = UUID.randomUUID().toString();
-            PostLoansLoanIdTransactionsResponse chargeOffTransaction = loanTransactionHelper.chargeOffLoan((long) loanId,
+            PostLoansLoanIdTransactionsResponse chargeOffTransaction = LOAN_TRANSACTION_HELPER.chargeOffLoan((long) loanId,
                     new PostLoansLoanIdTransactionsRequest().transactionDate("4 October 2022").locale("en").dateFormat("dd MMMM yyyy")
                             .externalId(transactionExternalId).chargeOffReasonId((long) chargeOffReasonId));
 
             updateBusinessDate("6 October 2022");
 
-            loanTransactionHelper.reverseLoanTransaction(loanExternalIdStr, repaymentTransaction.getResourceId(),
+            LOAN_TRANSACTION_HELPER.reverseLoanTransaction(loanExternalIdStr, repaymentTransaction.getResourceId(),
                     new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate("6 October 2022").locale("en")
-                            .dateFormat(DATETIME_PATTERN).transactionAmount(0.0));
+                            .dateFormat(DATE_PATTERN).transactionAmount(0.0));
 
-            ArrayList<HashMap> journalEntriesForChargeOffTransaction = journalEntryHelper
+            ArrayList<HashMap> journalEntriesForChargeOffTransaction = JOURNAL_ENTRY_HELPER
                     .getJournalEntriesByTransactionId("L" + chargeOffTransaction.getResourceId());
             assertNotNull(journalEntriesForChargeOffTransaction);
 

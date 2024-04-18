@@ -18,27 +18,16 @@
  */
 package org.apache.fineract.integrationtests;
 
-import static org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder.DEFAULT_STRATEGY;
-import static org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.impl.AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
-import org.apache.fineract.client.models.PaymentAllocationOrder;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
@@ -51,23 +40,17 @@ import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
 import org.apache.fineract.integrationtests.common.accounting.JournalEntry;
-import org.apache.fineract.integrationtests.common.accounting.JournalEntryHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanStatusChecker;
 import org.apache.fineract.integrationtests.common.loans.LoanTestLifecycleExtension;
 import org.apache.fineract.integrationtests.common.loans.LoanTransactionHelper;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
-import org.apache.fineract.portfolio.loanproduct.domain.PaymentAllocationType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -75,47 +58,26 @@ import org.junit.jupiter.params.provider.MethodSource;
 @Slf4j
 public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extends BaseLoanIntegrationTest {
 
-    private ResponseSpecification responseSpec;
-    private ResponseSpecification responseSpec403;
-    private RequestSpecification requestSpec;
-    private LoanTransactionHelper loanTransactionHelper;
-    private LoanTransactionHelper loanTransactionHelperValidationError;
-    private JournalEntryHelper journalEntryHelper;
-    private AccountHelper accountHelper;
-    private Integer disbursedLoanID;
     private static final String CASH_BASED = "2";
     private static final String ACCRUAL_PERIODIC = "3";
-    private Account assetAccount;
-    private Account incomeAccount;
-    private Account expenseAccount;
-    private Account overpaymentAccount;
     private static final String REPAYMENT = "repayment";
     private static final String MERCHANT_ISSUED_REFUND = "merchantIssuedRefund";
     private static final String PAYOUT_REFUND = "payoutRefund";
     private static final String GOODWILL_CREDIT = "goodwillCredit";
+    private LoanTransactionHelper loanTransactionHelperValidationError;
+    private Integer disbursedLoanID;
 
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseSpec403 = new ResponseSpecBuilder().expectStatusCode(403).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.loanTransactionHelperValidationError = new LoanTransactionHelper(this.requestSpec, new ResponseSpecBuilder().build());
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-        this.assetAccount = this.accountHelper.createAssetAccount();
-        this.incomeAccount = this.accountHelper.createIncomeAccount();
-        this.expenseAccount = this.accountHelper.createExpenseAccount();
-        this.overpaymentAccount = this.accountHelper.createLiabilityAccount();
-        this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
+        loanTransactionHelperValidationError = new LoanTransactionHelper(REQUEST_SPEC, RESPONSE_SPEC_403);
     }
 
     private void disburseLoanOfAccountingRule(final String accountingType, LoanProductTestBuilder loanProductTestBuilder) {
         final String principal = "12000.00";
         final String submitApproveDisburseDate = "01 January 2022";
-        this.disbursedLoanID = fromStartToDisburseLoan(loanProductTestBuilder, submitApproveDisburseDate, principal, accountingType,
-                assetAccount, incomeAccount, expenseAccount, overpaymentAccount);
+        disbursedLoanID = fromStartToDisburseLoan(loanProductTestBuilder, submitApproveDisburseDate, principal, accountingType,
+                LOANS_RECEIVABLE_ACCOUNT, FEE_INCOME_ACCOUNT, CHARGE_OFF_EXPENSE_ACCOUNT, OVERPAYMENT_ACCOUNT);
     }
 
     private Integer createLoanProduct(LoanProductTestBuilder loanProductTestBuilder, final String principal,
@@ -138,7 +100,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
             loanProductTestBuilder = loanProductTestBuilder.withMaxTrancheCount("30");
         }
         final String loanProductJSON = loanProductTestBuilder.build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        return LOAN_TRANSACTION_HELPER.getLoanProductId(loanProductJSON);
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, String principal, String submitDate,
@@ -159,14 +121,14 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
                 .withSubmittedOnDate(submitDate) //
                 .withRepaymentStrategy(repaymentStrategy) //
                 .build(clientID.toString(), loanProductID.toString(), null);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        return LOAN_TRANSACTION_HELPER.getLoanId(loanApplicationJSON);
     }
 
     private Integer fromStartToDisburseLoan(LoanProductTestBuilder loanProductTestBuilder, String submitApproveDisburseDate,
             String principal, final String accountingRule, final Account... accounts) {
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer clientID = ClientHelper.createClient(REQUEST_SPEC, RESPONSE_SPEC);
+        ClientHelper.verifyClientCreatedOnServer(REQUEST_SPEC, RESPONSE_SPEC, clientID);
 
         boolean allowMultipleDisbursals = false;
         final Integer loanProductID = createLoanProduct(loanProductTestBuilder, principal, allowMultipleDisbursals, accountingRule,
@@ -176,26 +138,25 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, principal, submitApproveDisburseDate,
                 loanProductTestBuilder.getTransactionProcessingStrategyCode());
         Assertions.assertNotNull(loanID);
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(REQUEST_SPEC, RESPONSE_SPEC, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         log.info("-----------------------------------APPROVE LOAN-----------------------------------------");
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(submitApproveDisburseDate, loanID);
+        loanStatusHashMap = LOAN_TRANSACTION_HELPER.approveLoan(submitApproveDisburseDate, loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         log.info("-------------------------------DISBURSE LOAN -------------------------------------------"); //
-        // String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(submitApproveDisburseDate, loanID, principal);
+        // String loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(REQUEST_SPEC, RESPONSE_SPEC, loanID);
+        loanStatusHashMap = LOAN_TRANSACTION_HELPER.disburseLoanWithNetDisbursalAmount(submitApproveDisburseDate, loanID, principal);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
         return loanID;
     }
 
     private HashMap makeRepayment(final String repaymentDate, final Float repayment) {
         log.info("-------------Make repayment -----------");
-        this.loanTransactionHelper.makeRepayment(repaymentDate, repayment, disbursedLoanID);
-        HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, disbursedLoanID,
-                "status");
+        LOAN_TRANSACTION_HELPER.makeRepayment(repaymentDate, repayment, disbursedLoanID);
+        HashMap loanStatusHashMap = (HashMap) LOAN_TRANSACTION_HELPER.getLoanDetail(REQUEST_SPEC, RESPONSE_SPEC, disbursedLoanID, "status");
         return loanStatusHashMap;
     }
 
@@ -248,18 +209,17 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
         HashMap loanStatusHashMap = makeRepayment("06 January 2022", 20000.00f); // overpayment
         LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
 
-        final Float totalOverpaid = (Float) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, disbursedLoanID,
+        final Float totalOverpaid = (Float) LOAN_TRANSACTION_HELPER.getLoanDetail(REQUEST_SPEC, RESPONSE_SPEC, disbursedLoanID,
                 "totalOverpaid");
 
         final String creditBalanceRefundDate = "09 January 2022";
         final String externalId = null;
-        loanTransactionHelper.creditBalanceRefund(creditBalanceRefundDate, totalOverpaid, externalId, disbursedLoanID, null);
-        loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, disbursedLoanID,
-                "status");
+        LOAN_TRANSACTION_HELPER.creditBalanceRefund(creditBalanceRefundDate, totalOverpaid, externalId, disbursedLoanID, null);
+        loanStatusHashMap = (HashMap) LOAN_TRANSACTION_HELPER.getLoanDetail(REQUEST_SPEC, RESPONSE_SPEC, disbursedLoanID, "status");
         LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
 
         final Float floatZero = 0.0f;
-        Float totalOverpaidAtEnd = (Float) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, disbursedLoanID,
+        Float totalOverpaidAtEnd = (Float) LOAN_TRANSACTION_HELPER.getLoanDetail(REQUEST_SPEC, RESPONSE_SPEC, disbursedLoanID,
                 "totalOverpaid");
         if (totalOverpaidAtEnd == null) {
             totalOverpaidAtEnd = floatZero;
@@ -275,19 +235,18 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
             HashMap loanStatusHashMap = makeRepayment("06 January 2022", 20000.00f); // overpayment
             LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
 
-            final Float totalOverpaid = (Float) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec,
-                    disbursedLoanID, "totalOverpaid");
+            final Float totalOverpaid = (Float) LOAN_TRANSACTION_HELPER.getLoanDetail(REQUEST_SPEC, RESPONSE_SPEC, disbursedLoanID,
+                    "totalOverpaid");
 
             final String creditBalanceRefundDate = "09 January 2022";
             final String externalId = null;
-            loanTransactionHelper.creditBalanceRefund(creditBalanceRefundDate, totalOverpaid, externalId, disbursedLoanID, null);
-            loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, disbursedLoanID,
-                    "status");
+            LOAN_TRANSACTION_HELPER.creditBalanceRefund(creditBalanceRefundDate, totalOverpaid, externalId, disbursedLoanID, null);
+            loanStatusHashMap = (HashMap) LOAN_TRANSACTION_HELPER.getLoanDetail(REQUEST_SPEC, RESPONSE_SPEC, disbursedLoanID, "status");
             LoanStatusChecker.verifyLoanAccountIsClosed(loanStatusHashMap);
 
             final Float floatZero = 0.0f;
-            Float totalOverpaidAtEnd = (Float) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec,
-                    disbursedLoanID, "totalOverpaid");
+            Float totalOverpaidAtEnd = (Float) LOAN_TRANSACTION_HELPER.getLoanDetail(REQUEST_SPEC, RESPONSE_SPEC, disbursedLoanID,
+                    "totalOverpaid");
             if (totalOverpaidAtEnd == null) {
                 totalOverpaidAtEnd = floatZero;
             }
@@ -303,8 +262,8 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
             HashMap loanStatusHashMap = makeRepayment("06 January 2022", 20000.00f); // overpayment
             LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
 
-            final Float totalOverpaid = (Float) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec,
-                    disbursedLoanID, "totalOverpaid");
+            final Float totalOverpaid = (Float) LOAN_TRANSACTION_HELPER.getLoanDetail(REQUEST_SPEC, RESPONSE_SPEC, disbursedLoanID,
+                    "totalOverpaid");
 
             final String creditBalanceRefundDate = "09 January 2022";
             final String externalId = null;
@@ -328,9 +287,8 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
 
         final String creditBalanceRefundDate = "09 January 2022";
         final String externalId = null;
-        loanTransactionHelper.creditBalanceRefund(creditBalanceRefundDate, refund, externalId, disbursedLoanID, null);
-        loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, disbursedLoanID,
-                "status");
+        LOAN_TRANSACTION_HELPER.creditBalanceRefund(creditBalanceRefundDate, refund, externalId, disbursedLoanID, null);
+        loanStatusHashMap = (HashMap) LOAN_TRANSACTION_HELPER.getLoanDetail(REQUEST_SPEC, RESPONSE_SPEC, disbursedLoanID, "status");
         LoanStatusChecker.verifyLoanAccountIsOverPaid(loanStatusHashMap);
 
     }
@@ -345,11 +303,11 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
         final Float refund = 1000.00f; // partial refund
         final String creditBalanceRefundDate = "09 January 2022";
         final String externalId = "cbrextID" + disbursedLoanID.toString();
-        Integer resourceId = (Integer) loanTransactionHelper.creditBalanceRefund(creditBalanceRefundDate, refund, externalId,
+        Integer resourceId = (Integer) LOAN_TRANSACTION_HELPER.creditBalanceRefund(creditBalanceRefundDate, refund, externalId,
                 disbursedLoanID, "resourceId");
         Assertions.assertNotNull(resourceId);
 
-        HashMap creditBalanceRefundMap = (HashMap) this.loanTransactionHelper.getLoanTransactionDetails(disbursedLoanID, resourceId, "");
+        HashMap creditBalanceRefundMap = (HashMap) LOAN_TRANSACTION_HELPER.getLoanTransactionDetails(disbursedLoanID, resourceId, "");
         Assertions.assertNotNull(creditBalanceRefundMap.get("externalId"));
         Assertions.assertEquals(creditBalanceRefundMap.get("externalId"), externalId, "Incorrect External Id Saved");
 
@@ -365,7 +323,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
         final Float refund = 1000.00f; // partial refund
         final String creditBalanceRefundDate = "09 January 2022";
         final String externalId = "cbrextID" + disbursedLoanID.toString();
-        final Integer resourceId = (Integer) loanTransactionHelper.creditBalanceRefund(creditBalanceRefundDate, refund, externalId,
+        final Integer resourceId = (Integer) LOAN_TRANSACTION_HELPER.creditBalanceRefund(creditBalanceRefundDate, refund, externalId,
                 disbursedLoanID, "resourceId");
         Assertions.assertNotNull(resourceId);
 
@@ -388,13 +346,13 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
         final Float refund = 1000.00f; // partial refund
         final String creditBalanceRefundDate = "09 January 2022";
         final String externalId = null;
-        final Integer resourceId = (Integer) loanTransactionHelper.creditBalanceRefund(creditBalanceRefundDate, refund, externalId,
+        final Integer resourceId = (Integer) LOAN_TRANSACTION_HELPER.creditBalanceRefund(creditBalanceRefundDate, refund, externalId,
                 disbursedLoanID, "resourceId");
         Assertions.assertNotNull(resourceId);
 
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, creditBalanceRefundDate,
+        JOURNAL_ENTRY_HELPER.checkJournalEntryForAssetAccount(LOANS_RECEIVABLE_ACCOUNT, creditBalanceRefundDate,
                 new JournalEntry(refund, JournalEntry.TransactionType.CREDIT));
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, creditBalanceRefundDate,
+        JOURNAL_ENTRY_HELPER.checkJournalEntryForLiabilityAccount(OVERPAYMENT_ACCOUNT, creditBalanceRefundDate,
                 new JournalEntry(refund, JournalEntry.TransactionType.DEBIT));
 
     }
@@ -409,13 +367,13 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
         final Float refund = 1000.00f; // partial refund
         final String creditBalanceRefundDate = "09 January 2022";
         final String externalId = null;
-        final Integer resourceId = (Integer) loanTransactionHelper.creditBalanceRefund(creditBalanceRefundDate, refund, externalId,
+        final Integer resourceId = (Integer) LOAN_TRANSACTION_HELPER.creditBalanceRefund(creditBalanceRefundDate, refund, externalId,
                 disbursedLoanID, "resourceId");
         Assertions.assertNotNull(resourceId);
 
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, creditBalanceRefundDate,
+        JOURNAL_ENTRY_HELPER.checkJournalEntryForAssetAccount(LOANS_RECEIVABLE_ACCOUNT, creditBalanceRefundDate,
                 new JournalEntry(refund, JournalEntry.TransactionType.CREDIT));
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, creditBalanceRefundDate,
+        JOURNAL_ENTRY_HELPER.checkJournalEntryForLiabilityAccount(OVERPAYMENT_ACCOUNT, creditBalanceRefundDate,
                 new JournalEntry(refund, JournalEntry.TransactionType.DEBIT));
 
     }
@@ -431,10 +389,10 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
     }
 
     private void verifyRepaymentTransactionTypeMatches(final String repaymentTransactionType) {
-        HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.makeRepaymentTypePayment(repaymentTransactionType,
-                "06 January 2022", 200.00f, this.disbursedLoanID, "");
+        HashMap loanStatusHashMap = (HashMap) LOAN_TRANSACTION_HELPER.makeRepaymentTypePayment(repaymentTransactionType, "06 January 2022",
+                200.00f, disbursedLoanID, "");
         Integer newTransactionId = (Integer) loanStatusHashMap.get("resourceId");
-        loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanTransactionDetails(this.disbursedLoanID, newTransactionId, "");
+        loanStatusHashMap = (HashMap) LOAN_TRANSACTION_HELPER.getLoanTransactionDetails(disbursedLoanID, newTransactionId, "");
 
         HashMap typeMap = (HashMap) loanStatusHashMap.get("type");
         Boolean isTypeCorrect = (Boolean) typeMap.get(repaymentTransactionType);
@@ -455,11 +413,11 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
     private void verifyRepaymentTransactionTypeWhenPaid(final String repaymentTransactionType) {
 
         // Overpay loan
-        Integer resourceId = (Integer) this.loanTransactionHelper.makeRepaymentTypePayment(REPAYMENT, "06 January 2022", 13000.00f,
-                this.disbursedLoanID, "resourceId");
+        Integer resourceId = (Integer) LOAN_TRANSACTION_HELPER.makeRepaymentTypePayment(REPAYMENT, "06 January 2022", 13000.00f,
+                disbursedLoanID, "resourceId");
         Assertions.assertNotNull(resourceId);
-        resourceId = (Integer) this.loanTransactionHelper.makeRepaymentTypePayment(repaymentTransactionType, "06 January 2022", 1.00f,
-                this.disbursedLoanID, "resourceId");
+        resourceId = (Integer) LOAN_TRANSACTION_HELPER.makeRepaymentTypePayment(repaymentTransactionType, "06 January 2022", 1.00f,
+                disbursedLoanID, "resourceId");
         Assertions.assertNotNull(resourceId);
     }
 
@@ -468,16 +426,16 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
     public void goodWillCreditWillCloseTheLoanCorrectly(LoanProductTestBuilder loanProductTestBuilder) {
 
         disburseLoanOfAccountingRule(ACCRUAL_PERIODIC, loanProductTestBuilder);
-        HashMap loanSummaryMap = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, disbursedLoanID);
+        HashMap loanSummaryMap = LOAN_TRANSACTION_HELPER.getLoanSummary(REQUEST_SPEC, RESPONSE_SPEC, disbursedLoanID);
 
         // pay off all of principal, interest (no fees or penalties)
         final Float totalOutstanding = (Float) loanSummaryMap.get("totalOutstanding");
         final Float goodwillAmount = totalOutstanding;
         final String goodwillDate = "09 March 2022";
-        HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.makeRepaymentTypePayment(GOODWILL_CREDIT, goodwillDate,
-                goodwillAmount, this.disbursedLoanID, "");
+        HashMap loanStatusHashMap = (HashMap) LOAN_TRANSACTION_HELPER.makeRepaymentTypePayment(GOODWILL_CREDIT, goodwillDate,
+                goodwillAmount, disbursedLoanID, "");
 
-        GetLoansLoanIdResponse details = this.loanTransactionHelper.getLoan(this.requestSpec, this.responseSpec, disbursedLoanID);
+        GetLoansLoanIdResponse details = LOAN_TRANSACTION_HELPER.getLoan(REQUEST_SPEC, RESPONSE_SPEC, disbursedLoanID);
 
         Assertions.assertNull(details.getSummary().getInArrears());
         Assertions.assertTrue(details.getStatus().getClosedObligationsMet());
@@ -488,16 +446,16 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
     public void paymentRefundWillCloseTheLoanCorrectly(LoanProductTestBuilder loanProductTestBuilder) {
 
         disburseLoanOfAccountingRule(ACCRUAL_PERIODIC, loanProductTestBuilder);
-        HashMap loanSummaryMap = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, disbursedLoanID);
+        HashMap loanSummaryMap = LOAN_TRANSACTION_HELPER.getLoanSummary(REQUEST_SPEC, RESPONSE_SPEC, disbursedLoanID);
 
         // pay off all of principal, interest (no fees or penalties)
         final Float totalOutstanding = (Float) loanSummaryMap.get("totalOutstanding");
         final Float goodwillAmount = totalOutstanding;
         final String goodwillDate = "09 March 2022";
-        HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.makeRepaymentTypePayment(PAYOUT_REFUND, goodwillDate,
-                goodwillAmount, this.disbursedLoanID, "");
+        HashMap loanStatusHashMap = (HashMap) LOAN_TRANSACTION_HELPER.makeRepaymentTypePayment(PAYOUT_REFUND, goodwillDate, goodwillAmount,
+                disbursedLoanID, "");
 
-        GetLoansLoanIdResponse details = this.loanTransactionHelper.getLoan(this.requestSpec, this.responseSpec, disbursedLoanID);
+        GetLoansLoanIdResponse details = LOAN_TRANSACTION_HELPER.getLoan(REQUEST_SPEC, RESPONSE_SPEC, disbursedLoanID);
 
         Assertions.assertNull(details.getSummary().getInArrears());
         Assertions.assertTrue(details.getStatus().getClosedObligationsMet());
@@ -508,7 +466,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
     public void newGoodwillCreditCreatesCorrectJournalEntriesForPeriodicAccrualsTest(LoanProductTestBuilder loanProductTestBuilder) {
 
         disburseLoanOfAccountingRule(ACCRUAL_PERIODIC, loanProductTestBuilder);
-        HashMap loanSummaryMap = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, disbursedLoanID);
+        HashMap loanSummaryMap = LOAN_TRANSACTION_HELPER.getLoanSummary(REQUEST_SPEC, RESPONSE_SPEC, disbursedLoanID);
 
         // pay off all of principal, interest (no fees or penalties)
         final Float principalOutstanding = (Float) loanSummaryMap.get("principalOutstanding");
@@ -518,15 +476,15 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
         final Float goodwillAmount = totalOutstanding + overpaidAmount;
         final Float goodwillAmountInExpense = principalOutstanding + overpaidAmount;
         final String goodwillDate = "09 January 2022";
-        HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.makeRepaymentTypePayment(GOODWILL_CREDIT, goodwillDate,
-                goodwillAmount, this.disbursedLoanID, "");
+        HashMap loanStatusHashMap = (HashMap) LOAN_TRANSACTION_HELPER.makeRepaymentTypePayment(GOODWILL_CREDIT, goodwillDate,
+                goodwillAmount, disbursedLoanID, "");
 
         // only a single credit for principal and interest as test sets up same GL account for both (summed up)
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, goodwillDate,
+        JOURNAL_ENTRY_HELPER.checkJournalEntryForAssetAccount(LOANS_RECEIVABLE_ACCOUNT, goodwillDate,
                 new JournalEntry(totalOutstanding, JournalEntry.TransactionType.CREDIT));
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, goodwillDate,
+        JOURNAL_ENTRY_HELPER.checkJournalEntryForLiabilityAccount(OVERPAYMENT_ACCOUNT, goodwillDate,
                 new JournalEntry(overpaidAmount, JournalEntry.TransactionType.CREDIT));
-        this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, goodwillDate,
+        JOURNAL_ENTRY_HELPER.checkJournalEntryForExpenseAccount(CHARGE_OFF_EXPENSE_ACCOUNT, goodwillDate,
                 new JournalEntry(goodwillAmountInExpense, JournalEntry.TransactionType.DEBIT));
 
     }
@@ -536,7 +494,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
     public void newGoodwillCreditCreatesCorrectJournalEntriesForCashAccountingTest(LoanProductTestBuilder loanProductTestBuilder) {
 
         disburseLoanOfAccountingRule(CASH_BASED, loanProductTestBuilder);
-        HashMap loanSummaryMap = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, disbursedLoanID);
+        HashMap loanSummaryMap = LOAN_TRANSACTION_HELPER.getLoanSummary(REQUEST_SPEC, RESPONSE_SPEC, disbursedLoanID);
 
         // pay off all of principal, interest (no fees or penalties)
         final Float principalOutstanding = (Float) loanSummaryMap.get("principalOutstanding");
@@ -546,17 +504,17 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
         final Float goodwillAmount = totalOutstanding + overpaidAmount;
         final Float goodwillAmountInExpense = principalOutstanding + overpaidAmount;
         final String goodwillDate = "09 January 2022";
-        HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.makeRepaymentTypePayment(GOODWILL_CREDIT, goodwillDate,
-                goodwillAmount, this.disbursedLoanID, "");
+        HashMap loanStatusHashMap = (HashMap) LOAN_TRANSACTION_HELPER.makeRepaymentTypePayment(GOODWILL_CREDIT, goodwillDate,
+                goodwillAmount, disbursedLoanID, "");
 
-        this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, goodwillDate,
+        JOURNAL_ENTRY_HELPER.checkJournalEntryForAssetAccount(LOANS_RECEIVABLE_ACCOUNT, goodwillDate,
                 new JournalEntry(principalOutstanding, JournalEntry.TransactionType.CREDIT));
-        this.journalEntryHelper.checkJournalEntryForIncomeAccount(incomeAccount, goodwillDate,
+        JOURNAL_ENTRY_HELPER.checkJournalEntryForIncomeAccount(FEE_INCOME_ACCOUNT, goodwillDate,
                 new JournalEntry(interestOutstanding, JournalEntry.TransactionType.CREDIT));
 
-        this.journalEntryHelper.checkJournalEntryForLiabilityAccount(overpaymentAccount, goodwillDate,
+        JOURNAL_ENTRY_HELPER.checkJournalEntryForLiabilityAccount(OVERPAYMENT_ACCOUNT, goodwillDate,
                 new JournalEntry(overpaidAmount, JournalEntry.TransactionType.CREDIT));
-        this.journalEntryHelper.checkJournalEntryForExpenseAccount(expenseAccount, goodwillDate,
+        JOURNAL_ENTRY_HELPER.checkJournalEntryForExpenseAccount(CHARGE_OFF_EXPENSE_ACCOUNT, goodwillDate,
                 new JournalEntry(goodwillAmountInExpense, JournalEntry.TransactionType.DEBIT));
 
     }
@@ -566,7 +524,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
     public void undoGoodWillCreditTransactionTest(LoanProductTestBuilder loanProductTestBuilder) {
         // Given
         disburseLoanOfAccountingRule(CASH_BASED, loanProductTestBuilder);
-        HashMap loanSummaryMap = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, disbursedLoanID);
+        HashMap loanSummaryMap = LOAN_TRANSACTION_HELPER.getLoanSummary(REQUEST_SPEC, RESPONSE_SPEC, disbursedLoanID);
 
         // pay off all of principal, interest (no fees or penalties)
         final Float principalOutstanding = (Float) loanSummaryMap.get("principalOutstanding");
@@ -575,14 +533,14 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
         final Float overpaidAmount = 159.00f;
         final Float transactionAmount = totalOutstanding + overpaidAmount;
         final String transactionDate = "09 January 2022";
-        PostLoansLoanIdTransactionsResponse loanTransactionResponse = loanTransactionHelper.makeLoanRepayment(GOODWILL_CREDIT,
-                transactionDate, transactionAmount, this.disbursedLoanID);
+        PostLoansLoanIdTransactionsResponse loanTransactionResponse = LOAN_TRANSACTION_HELPER.makeLoanRepayment(GOODWILL_CREDIT,
+                transactionDate, transactionAmount, disbursedLoanID);
         Assertions.assertNotNull(loanTransactionResponse);
         Assertions.assertNotNull(loanTransactionResponse.getResourceId());
 
         // Then
-        loanTransactionHelper.reverseLoanTransaction(this.disbursedLoanID, loanTransactionResponse.getResourceId(), transactionDate,
-                responseSpec);
+        LOAN_TRANSACTION_HELPER.reverseLoanTransaction(disbursedLoanID, loanTransactionResponse.getResourceId(), transactionDate,
+                RESPONSE_SPEC);
     }
 
     @ParameterizedTest
@@ -590,7 +548,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
     public void undoPayoutRefundTransactionTest(LoanProductTestBuilder loanProductTestBuilder) {
         // Given
         disburseLoanOfAccountingRule(CASH_BASED, loanProductTestBuilder);
-        HashMap loanSummaryMap = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, disbursedLoanID);
+        HashMap loanSummaryMap = LOAN_TRANSACTION_HELPER.getLoanSummary(REQUEST_SPEC, RESPONSE_SPEC, disbursedLoanID);
 
         // pay off all of principal, interest (no fees or penalties)
         final Float principalOutstanding = (Float) loanSummaryMap.get("principalOutstanding");
@@ -599,14 +557,14 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
         final Float overpaidAmount = 159.00f;
         final Float transactionAmount = totalOutstanding + overpaidAmount;
         final String transactionDate = "09 January 2022";
-        PostLoansLoanIdTransactionsResponse loanTransactionResponse = loanTransactionHelper.makeLoanRepayment(PAYOUT_REFUND,
-                transactionDate, transactionAmount, this.disbursedLoanID);
+        PostLoansLoanIdTransactionsResponse loanTransactionResponse = LOAN_TRANSACTION_HELPER.makeLoanRepayment(PAYOUT_REFUND,
+                transactionDate, transactionAmount, disbursedLoanID);
         Assertions.assertNotNull(loanTransactionResponse);
         Assertions.assertNotNull(loanTransactionResponse.getResourceId());
 
         // Then
-        loanTransactionHelper.reverseLoanTransaction(this.disbursedLoanID, loanTransactionResponse.getResourceId(), transactionDate,
-                responseSpec);
+        LOAN_TRANSACTION_HELPER.reverseLoanTransaction(disbursedLoanID, loanTransactionResponse.getResourceId(), transactionDate,
+                RESPONSE_SPEC);
     }
 
     @ParameterizedTest
@@ -614,7 +572,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
     public void undoMerchantIssuedRefundTransactionTest(LoanProductTestBuilder loanProductTestBuilder) {
         // Given
         disburseLoanOfAccountingRule(CASH_BASED, loanProductTestBuilder);
-        HashMap loanSummaryMap = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, disbursedLoanID);
+        HashMap loanSummaryMap = LOAN_TRANSACTION_HELPER.getLoanSummary(REQUEST_SPEC, RESPONSE_SPEC, disbursedLoanID);
 
         // pay off all of principal, interest (no fees or penalties)
         final Float principalOutstanding = (Float) loanSummaryMap.get("principalOutstanding");
@@ -623,14 +581,14 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
         final Float overpaidAmount = 159.00f;
         final Float transactionAmount = totalOutstanding + overpaidAmount;
         final String transactionDate = "09 January 2022";
-        PostLoansLoanIdTransactionsResponse loanTransactionResponse = loanTransactionHelper.makeLoanRepayment(MERCHANT_ISSUED_REFUND,
-                transactionDate, transactionAmount, this.disbursedLoanID);
+        PostLoansLoanIdTransactionsResponse loanTransactionResponse = LOAN_TRANSACTION_HELPER.makeLoanRepayment(MERCHANT_ISSUED_REFUND,
+                transactionDate, transactionAmount, disbursedLoanID);
         Assertions.assertNotNull(loanTransactionResponse);
         Assertions.assertNotNull(loanTransactionResponse.getResourceId());
 
         // Then
-        loanTransactionHelper.reverseLoanTransaction(this.disbursedLoanID, loanTransactionResponse.getResourceId(), transactionDate,
-                responseSpec);
+        LOAN_TRANSACTION_HELPER.reverseLoanTransaction(disbursedLoanID, loanTransactionResponse.getResourceId(), transactionDate,
+                RESPONSE_SPEC);
     }
 
     @ParameterizedTest
@@ -638,7 +596,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
     public void adjustGoodWillCreditTransactionTest(LoanProductTestBuilder loanProductTestBuilder) {
         // Given
         disburseLoanOfAccountingRule(CASH_BASED, loanProductTestBuilder);
-        HashMap loanSummaryMap = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, disbursedLoanID);
+        HashMap loanSummaryMap = LOAN_TRANSACTION_HELPER.getLoanSummary(REQUEST_SPEC, RESPONSE_SPEC, disbursedLoanID);
 
         // pay off all of principal, interest (no fees or penalties)
         final Float principalOutstanding = (Float) loanSummaryMap.get("principalOutstanding");
@@ -647,14 +605,14 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
         final Float overpaidAmount = 159.00f;
         final Float transactionAmount = totalOutstanding + overpaidAmount;
         final String transactionDate = "09 January 2022";
-        PostLoansLoanIdTransactionsResponse loanTransactionResponse = loanTransactionHelper.makeLoanRepayment(GOODWILL_CREDIT,
-                transactionDate, transactionAmount, this.disbursedLoanID);
+        PostLoansLoanIdTransactionsResponse loanTransactionResponse = LOAN_TRANSACTION_HELPER.makeLoanRepayment(GOODWILL_CREDIT,
+                transactionDate, transactionAmount, disbursedLoanID);
         Assertions.assertNotNull(loanTransactionResponse);
         Assertions.assertNotNull(loanTransactionResponse.getResourceId());
 
         // Then
-        loanTransactionHelper.adjustLoanTransaction(this.disbursedLoanID, loanTransactionResponse.getResourceId(), transactionDate,
-                responseSpec403);
+        LOAN_TRANSACTION_HELPER.adjustLoanTransaction(disbursedLoanID, loanTransactionResponse.getResourceId(), transactionDate,
+                RESPONSE_SPEC_403);
     }
 
     @ParameterizedTest
@@ -662,7 +620,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
     public void adjustPayoutRefundTransactionTest(LoanProductTestBuilder loanProductTestBuilder) {
         // Given
         disburseLoanOfAccountingRule(CASH_BASED, loanProductTestBuilder);
-        HashMap loanSummaryMap = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, disbursedLoanID);
+        HashMap loanSummaryMap = LOAN_TRANSACTION_HELPER.getLoanSummary(REQUEST_SPEC, RESPONSE_SPEC, disbursedLoanID);
 
         // pay off all of principal, interest (no fees or penalties)
         final Float principalOutstanding = (Float) loanSummaryMap.get("principalOutstanding");
@@ -671,14 +629,14 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
         final Float overpaidAmount = 159.00f;
         final Float transactionAmount = totalOutstanding + overpaidAmount;
         final String transactionDate = "09 January 2022";
-        PostLoansLoanIdTransactionsResponse loanTransactionResponse = loanTransactionHelper.makeLoanRepayment(PAYOUT_REFUND,
-                transactionDate, transactionAmount, this.disbursedLoanID);
+        PostLoansLoanIdTransactionsResponse loanTransactionResponse = LOAN_TRANSACTION_HELPER.makeLoanRepayment(PAYOUT_REFUND,
+                transactionDate, transactionAmount, disbursedLoanID);
         Assertions.assertNotNull(loanTransactionResponse);
         Assertions.assertNotNull(loanTransactionResponse.getResourceId());
 
         // Then
-        loanTransactionHelper.adjustLoanTransaction(this.disbursedLoanID, loanTransactionResponse.getResourceId(), transactionDate,
-                responseSpec403);
+        LOAN_TRANSACTION_HELPER.adjustLoanTransaction(disbursedLoanID, loanTransactionResponse.getResourceId(), transactionDate,
+                RESPONSE_SPEC_403);
     }
 
     @ParameterizedTest
@@ -686,7 +644,7 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
     public void adjustMerchantIssuedRefundTransactionTest(LoanProductTestBuilder loanProductTestBuilder) {
         // Given
         disburseLoanOfAccountingRule(CASH_BASED, loanProductTestBuilder);
-        HashMap loanSummaryMap = this.loanTransactionHelper.getLoanSummary(this.requestSpec, this.responseSpec, disbursedLoanID);
+        HashMap loanSummaryMap = LOAN_TRANSACTION_HELPER.getLoanSummary(REQUEST_SPEC, RESPONSE_SPEC, disbursedLoanID);
 
         // pay off all of principal, interest (no fees or penalties)
         final Float principalOutstanding = (Float) loanSummaryMap.get("principalOutstanding");
@@ -695,23 +653,23 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
         final Float overpaidAmount = 159.00f;
         final Float transactionAmount = totalOutstanding + overpaidAmount;
         final String transactionDate = "09 January 2022";
-        PostLoansLoanIdTransactionsResponse loanTransactionResponse = loanTransactionHelper.makeLoanRepayment(MERCHANT_ISSUED_REFUND,
-                transactionDate, transactionAmount, this.disbursedLoanID);
+        PostLoansLoanIdTransactionsResponse loanTransactionResponse = LOAN_TRANSACTION_HELPER.makeLoanRepayment(MERCHANT_ISSUED_REFUND,
+                transactionDate, transactionAmount, disbursedLoanID);
         Assertions.assertNotNull(loanTransactionResponse);
         Assertions.assertNotNull(loanTransactionResponse.getResourceId());
 
         // Then
-        loanTransactionHelper.adjustLoanTransaction(this.disbursedLoanID, loanTransactionResponse.getResourceId(), transactionDate,
-                responseSpec403);
+        LOAN_TRANSACTION_HELPER.adjustLoanTransaction(disbursedLoanID, loanTransactionResponse.getResourceId(), transactionDate,
+                RESPONSE_SPEC_403);
     }
 
     @Test
     public void cbrReverseReplayTest() {
         runAt("06 March 2024", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             PostLoanProductsRequest product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct().numberOfRepayments(1)
                     .repaymentEvery(30).enableDownPayment(false);
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(product);
             PostLoansRequest applicationRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), "25 January 2024", 1000.0,
                     4);
 
@@ -720,77 +678,76 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
                             LoanProductTestBuilder.DUE_PENALTY_FEE_INTEREST_PRINCIPAL_IN_ADVANCE_PRINCIPAL_PENALTY_FEE_INTEREST_STRATEGY)
                     .repaymentEvery(30);
 
-            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansResponse loanResponse = LOAN_TRANSACTION_HELPER.applyLoan(applicationRequest);
 
-            loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
-                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN)
-                            .approvedOnDate("25 January 2024").locale("en"));
+            LOAN_TRANSACTION_HELPER.approveLoan(loanResponse.getLoanId(), new PostLoansLoanIdRequest()
+                    .approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATE_PATTERN).approvedOnDate("25 January 2024").locale("en"));
 
-            loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
-                    new PostLoansLoanIdRequest().actualDisbursementDate("25 January 2024").dateFormat(DATETIME_PATTERN)
+            LOAN_TRANSACTION_HELPER.disburseLoan(loanResponse.getLoanId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("25 January 2024").dateFormat(DATE_PATTERN)
                             .transactionAmount(BigDecimal.valueOf(100.0)).locale("en"));
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 100.0, 0.0, 100.0, 0.0, null);
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 0.0, 100.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getActive());
 
             String repaymentExternalId = UUID.randomUUID().toString();
-            loanTransactionHelper.makeLoanRepayment(loanResponse.getLoanId(),
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("24 February 2024").locale("en")
+            LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanResponse.getLoanId(),
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATE_PATTERN).transactionDate("24 February 2024").locale("en")
                             .transactionAmount(100.0).externalId(repaymentExternalId));
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 0.0, 100.0, 0.0, 100.0, null);
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getClosedObligationsMet());
 
             String mir1ExternalId = UUID.randomUUID().toString();
-            loanTransactionHelper.makeMerchantIssuedRefund(loanResponse.getLoanId(),
-                    new PostLoansLoanIdTransactionsRequest().transactionDate("28 February 2024").dateFormat(DATETIME_PATTERN)
+            LOAN_TRANSACTION_HELPER.makeMerchantIssuedRefund(loanResponse.getLoanId(),
+                    new PostLoansLoanIdTransactionsRequest().transactionDate("28 February 2024").dateFormat(DATE_PATTERN)
                             .transactionAmount(36.99).locale("en").externalId(mir1ExternalId));
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 0.0, 100.0, 0.0, 100.0, 36.99);
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getOverpaid());
 
-            loanTransactionHelper.makeMerchantIssuedRefund(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
-                    .transactionDate("28 February 2024").dateFormat(DATETIME_PATTERN).transactionAmount(18.94).locale("en"));
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            LOAN_TRANSACTION_HELPER.makeMerchantIssuedRefund(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
+                    .transactionDate("28 February 2024").dateFormat(DATE_PATTERN).transactionAmount(18.94).locale("en"));
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 0.0, 100.0, 0.0, 100.0, 55.93);
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getOverpaid());
 
-            loanTransactionHelper.makeMerchantIssuedRefund(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
-                    .transactionDate("28 February 2024").dateFormat(DATETIME_PATTERN).transactionAmount(36.99).locale("en"));
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            LOAN_TRANSACTION_HELPER.makeMerchantIssuedRefund(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
+                    .transactionDate("28 February 2024").dateFormat(DATE_PATTERN).transactionAmount(36.99).locale("en"));
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 0.0, 100.0, 0.0, 100.0, 92.92);
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getOverpaid());
 
-            loanTransactionHelper.makeMerchantIssuedRefund(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
-                    .transactionDate("28 February 2024").dateFormat(DATETIME_PATTERN).transactionAmount(31.99).locale("en"));
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            LOAN_TRANSACTION_HELPER.makeMerchantIssuedRefund(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
+                    .transactionDate("28 February 2024").dateFormat(DATE_PATTERN).transactionAmount(31.99).locale("en"));
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 0.0, 100.0, 0.0, 100.0, 124.91);
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getOverpaid());
 
-            loanTransactionHelper.makeCreditBalanceRefund(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
-                    .transactionDate("01 March 2024").dateFormat(DATETIME_PATTERN).transactionAmount(124.91).locale("en"));
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            LOAN_TRANSACTION_HELPER.makeCreditBalanceRefund(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
+                    .transactionDate("01 March 2024").dateFormat(DATE_PATTERN).transactionAmount(124.91).locale("en"));
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 0.0, 100.0, 0.0, 100.0, null);
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getClosedObligationsMet());
 
-            loanTransactionHelper.makeMerchantIssuedRefund(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
-                    .transactionDate("02 March 2024").dateFormat(DATETIME_PATTERN).transactionAmount(19.99).locale("en"));
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            LOAN_TRANSACTION_HELPER.makeMerchantIssuedRefund(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
+                    .transactionDate("02 March 2024").dateFormat(DATE_PATTERN).transactionAmount(19.99).locale("en"));
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 0.0, 100.0, 0.0, 100.0, 19.99);
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getOverpaid());
 
-            loanTransactionHelper.makeMerchantIssuedRefund(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
-                    .transactionDate("02 March 2024").dateFormat(DATETIME_PATTERN).transactionAmount(19.99).locale("en"));
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            LOAN_TRANSACTION_HELPER.makeMerchantIssuedRefund(loanResponse.getLoanId(), new PostLoansLoanIdTransactionsRequest()
+                    .transactionDate("02 March 2024").dateFormat(DATE_PATTERN).transactionAmount(19.99).locale("en"));
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 0.0, 100.0, 0.0, 100.0, 39.98);
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
             assertTrue(loanDetails.getStatus().getOverpaid());
@@ -807,11 +764,11 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
                     transaction(19.99, "Merchant Issued Refund", "02 March 2024", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 19.99) //
             );
 
-            loanTransactionHelper.reverseLoanTransaction(loanResponse.getLoanId(), mir1ExternalId,
-                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN).transactionDate("02 March 2024")
+            LOAN_TRANSACTION_HELPER.reverseLoanTransaction(loanResponse.getLoanId(), mir1ExternalId,
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATE_PATTERN).transactionDate("02 March 2024")
                             .transactionAmount(0.0).locale("en"));
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 0.0, 224.91, 0.0, 224.91, 2.99);
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
             validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2024, 3, 1), 124.91, 124.91, 0.0, 0.0, 36.99);
@@ -829,10 +786,10 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
                     transaction(19.99, "Merchant Issued Refund", "02 March 2024", 0.0, 17.0, 0.0, 0.0, 0.0, 0.0, 2.99) //
             );
 
-            loanTransactionHelper.chargebackLoanTransaction(loanResponse.getLoanId(), repaymentExternalId,
+            LOAN_TRANSACTION_HELPER.chargebackLoanTransaction(loanResponse.getLoanId(), repaymentExternalId,
                     new PostLoansLoanIdTransactionsTransactionIdRequest().locale("en").transactionAmount(2.0));
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 0.0, 224.91, 0.0, 224.91, 0.99);
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
             validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2024, 3, 1), 124.91, 124.91, 0.0, 0.0, 36.99);
@@ -851,10 +808,10 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
                     transaction(2.0, "Chargeback", "06 March 2024", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0) //
             );
 
-            loanTransactionHelper.chargebackLoanTransaction(loanResponse.getLoanId(), repaymentExternalId,
+            LOAN_TRANSACTION_HELPER.chargebackLoanTransaction(loanResponse.getLoanId(), repaymentExternalId,
                     new PostLoansLoanIdTransactionsTransactionIdRequest().locale("en").transactionAmount(1.0));
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getLoanId());
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getLoanId());
             validateLoanSummaryBalances(loanDetails, 0.01, 225.90, 0.01, 225.90, null);
             validateRepaymentPeriod(loanDetails, 1, LocalDate.of(2024, 2, 24), 100.0, 100.0, 0.0, 0.0, 0.0);
             validateRepaymentPeriod(loanDetails, 2, LocalDate.of(2024, 3, 6), 125.91, 125.90, 0.01, 0.0, 36.99);
@@ -875,44 +832,6 @@ public class ClientLoanCreditBalanceRefundandRepaymentTypeIntegrationTest extend
             );
 
         });
-    }
-
-    private static AdvancedPaymentData createRepaymentPaymentAllocation() {
-        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
-        advancedPaymentData.setTransactionType("REPAYMENT");
-        advancedPaymentData.setFutureInstallmentAllocationRule("NEXT_INSTALLMENT");
-
-        List<PaymentAllocationOrder> paymentAllocationOrders = getPaymentAllocationOrder(PaymentAllocationType.PAST_DUE_PENALTY,
-                PaymentAllocationType.PAST_DUE_FEE, PaymentAllocationType.PAST_DUE_INTEREST, PaymentAllocationType.PAST_DUE_PRINCIPAL,
-                PaymentAllocationType.DUE_PENALTY, PaymentAllocationType.DUE_FEE, PaymentAllocationType.DUE_INTEREST,
-                PaymentAllocationType.DUE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_PENALTY, PaymentAllocationType.IN_ADVANCE_FEE,
-                PaymentAllocationType.IN_ADVANCE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_INTEREST);
-
-        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
-        return advancedPaymentData;
-    }
-
-    private static AdvancedPaymentData createDefaultPaymentAllocation() {
-        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
-        advancedPaymentData.setTransactionType("DEFAULT");
-        advancedPaymentData.setFutureInstallmentAllocationRule("NEXT_INSTALLMENT");
-
-        List<PaymentAllocationOrder> paymentAllocationOrders = getPaymentAllocationOrder(PaymentAllocationType.PAST_DUE_PENALTY,
-                PaymentAllocationType.PAST_DUE_FEE, PaymentAllocationType.PAST_DUE_PRINCIPAL, PaymentAllocationType.PAST_DUE_INTEREST,
-                PaymentAllocationType.DUE_PENALTY, PaymentAllocationType.DUE_FEE, PaymentAllocationType.DUE_PRINCIPAL,
-                PaymentAllocationType.DUE_INTEREST, PaymentAllocationType.IN_ADVANCE_PENALTY, PaymentAllocationType.IN_ADVANCE_FEE,
-                PaymentAllocationType.IN_ADVANCE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_INTEREST);
-
-        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
-        return advancedPaymentData;
-    }
-
-    private static Stream<Arguments> loanProductFactory() {
-        return Stream.of(Arguments.of(Named.of("DEFAULT_STRATEGY", new LoanProductTestBuilder().withRepaymentStrategy(DEFAULT_STRATEGY))),
-                Arguments.of(Named.of("ADVANCED_PAYMENT_ALLOCATION_STRATEGY",
-                        new LoanProductTestBuilder().withRepaymentStrategy(ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
-                                .withLoanScheduleType(LoanScheduleType.PROGRESSIVE)
-                                .addAdvancedPaymentAllocation(createDefaultPaymentAllocation(), createRepaymentPaymentAllocation()))));
     }
 
 }

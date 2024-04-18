@@ -51,7 +51,7 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
 
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
             int numberOfRepayments = 3;
             int repaymentEvery = 1;
@@ -66,7 +66,7 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
                     .enableAutoRepaymentForDownPayment(true) //
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue()); //
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(product);
             Long loanProductId = loanProductResponse.getResourceId();
 
             // Apply and Approve Loan
@@ -79,9 +79,9 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
                     .loanTermFrequencyType(RepaymentFrequencyType.MONTHS);
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansResponse postLoansResponse = LOAN_TRANSACTION_HELPER.applyLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+            PostLoansLoanIdResponse approvedLoanResult = LOAN_TRANSACTION_HELPER.approveLoan(postLoansResponse.getResourceId(),
                     approveLoanRequest(amount, "01 January 2023"));
 
             Long loanId = approvedLoanResult.getLoanId();
@@ -187,7 +187,7 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
         runAt("13 April 2023", () -> {
             long loanId = createdLoanId.get();
 
-            loanTransactionHelper.makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+            LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATE_PATTERN)
                     .transactionDate("13 April 2023").locale("en").transactionAmount(100.0).externalId(repaymentExternalId));
 
             // verify transactions
@@ -276,7 +276,7 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
 
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
             int numberOfRepayments = 3;
             int repaymentEvery = 1;
@@ -291,7 +291,7 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
                     .enableAutoRepaymentForDownPayment(true) //
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue()); //
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(product);
             Long loanProductId = loanProductResponse.getResourceId();
 
             // Apply and Approve Loan
@@ -304,9 +304,9 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
                     .loanTermFrequencyType(RepaymentFrequencyType.MONTHS);
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansResponse postLoansResponse = LOAN_TRANSACTION_HELPER.applyLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+            PostLoansLoanIdResponse approvedLoanResult = LOAN_TRANSACTION_HELPER.approveLoan(postLoansResponse.getResourceId(),
                     approveLoanRequest(amount, "01 January 2023"));
 
             Long loanId = approvedLoanResult.getLoanId();
@@ -336,7 +336,7 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
         runAt("01 February 2023", () -> {
             long loanId = createdLoanId.get();
 
-            loanTransactionHelper.makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+            LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATE_PATTERN)
                     .transactionDate("01 February 2023").locale("en").transactionAmount(100.0).externalId(repaymentExternalId));
 
             // verify transactions
@@ -360,7 +360,7 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
             long loanId = createdLoanId.get();
 
             // disburse Loan
-            loanTransactionHelper.chargebackLoanTransaction(loanId, repaymentExternalId,
+            LOAN_TRANSACTION_HELPER.chargebackLoanTransaction(loanId, repaymentExternalId,
                     new PostLoansLoanIdTransactionsTransactionIdRequest().locale("en").transactionAmount(100.0));
 
             // verify transactions
@@ -420,7 +420,7 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
 
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
             int numberOfRepayments = 3;
             int repaymentEvery = 15;
@@ -435,7 +435,7 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
                     .enableAutoRepaymentForDownPayment(true) //
                     .repaymentFrequencyType(RepaymentFrequencyType.DAYS.longValue()); //
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(product);
             Long loanProductId = loanProductResponse.getResourceId();
 
             // Apply and Approve Loan
@@ -448,9 +448,9 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
                     .repaymentFrequencyType(RepaymentFrequencyType.DAYS)//
                     .loanTermFrequencyType(RepaymentFrequencyType.DAYS);
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansResponse postLoansResponse = LOAN_TRANSACTION_HELPER.applyLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+            PostLoansLoanIdResponse approvedLoanResult = LOAN_TRANSACTION_HELPER.approveLoan(postLoansResponse.getResourceId(),
                     approveLoanRequest(amount, "01 January 2023"));
 
             Long loanId = approvedLoanResult.getLoanId();
@@ -505,7 +505,7 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
             );
             checkMaturityDates(loanId, LocalDate.of(2023, 8, 1), LocalDate.of(2023, 8, 1));
 
-            loanTransactionHelper.makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
+            LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().dateFormat(DATE_PATTERN)
                     .transactionDate("01 February 2023").locale("en").transactionAmount(125.0));
 
             // verify transactions
@@ -534,8 +534,8 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
         runAt("28 February 2023", () -> {
 
             long loanId = createdLoanId.get();
-            PostLoansLoanIdTransactionsResponse repaymentResponse = loanTransactionHelper.makeLoanRepayment(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("02 February 2023").locale("en")
+            PostLoansLoanIdTransactionsResponse repaymentResponse = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanId,
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATE_PATTERN).transactionDate("02 February 2023").locale("en")
                             .transactionAmount(250.0));
 
             // verify transactions
@@ -564,8 +564,8 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
 
             verifyLoanStatus(loanId, LoanStatus.CLOSED_OBLIGATIONS_MET);
 
-            loanTransactionHelper.reverseLoanTransaction(loanId, repaymentResponse.getResourceId(),
-                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN).transactionDate("28 February 2023")
+            LOAN_TRANSACTION_HELPER.reverseLoanTransaction(loanId, repaymentResponse.getResourceId(),
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATE_PATTERN).transactionDate("28 February 2023")
                             .transactionAmount(0.0).locale("en"));
 
             // verify transactions
@@ -625,7 +625,7 @@ public class LoanReAgingIntegrationTest extends BaseLoanIntegrationTest {
             long loanId = createdLoanId.get();
             // create re-age transaction
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
-                    () -> loanTransactionHelper.undoReAge(loanId, new PostLoansLoanIdTransactionsRequest()));
+                    () -> LOAN_TRANSACTION_HELPER.undoReAge(loanId, new PostLoansLoanIdTransactionsRequest()));
             assertEquals(404, exception.getResponse().code());
             assertTrue(exception.getMessage().contains("error.msg.loan.transaction.not.found"));
         });

@@ -25,7 +25,6 @@ import com.google.common.collect.Streams;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Stream;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostChargesResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
@@ -37,17 +36,10 @@ import org.apache.fineract.client.models.PostLoansRequest;
 import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
-import org.junit.jupiter.api.Named;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
-
-    private static Stream<Arguments> processingStrategy() {
-        return Stream.of(Arguments.of(Named.of("originalStrategy", false)), //
-                Arguments.of(Named.of("advancedStrategy", true)));
-    }
 
     @ParameterizedTest
     @MethodSource("processingStrategy")
@@ -57,7 +49,7 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
 
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
             // Create Loan Product
             PostLoanProductsRequest product;
@@ -67,7 +59,7 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
                 product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct();
             }
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(product);
             Long loanProductId = loanProductResponse.getResourceId();
 
             // Apply and Approve Loan
@@ -78,9 +70,9 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
                         .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
             }
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansResponse postLoansResponse = LOAN_TRANSACTION_HELPER.applyLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+            PostLoansLoanIdResponse approvedLoanResult = LOAN_TRANSACTION_HELPER.approveLoan(postLoansResponse.getResourceId(),
                     approveLoanRequest(amount, "01 January 2023"));
 
             Long loanId = approvedLoanResult.getLoanId();
@@ -123,7 +115,7 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
             addRepaymentForLoan(loanId, amount, "03 February 2023");
 
             // verify maturity
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId);
+            GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanId);
             assertTrue(loanDetails.getStatus().getClosedObligationsMet());
 
             // verify N+1 installment completion
@@ -150,7 +142,7 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
 
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
             // Create Loan Product
             PostLoanProductsRequest product;
@@ -160,7 +152,7 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
                 product = createOnePeriod30DaysLongNoInterestPeriodicAccrualProduct();
             }
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(product);
             Long loanProductId = loanProductResponse.getResourceId();
 
             // Apply and Approve Loan
@@ -171,9 +163,9 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
                         .transactionProcessingStrategyCode(LoanProductTestBuilder.ADVANCED_PAYMENT_ALLOCATION_STRATEGY);
             }
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansResponse postLoansResponse = LOAN_TRANSACTION_HELPER.applyLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+            PostLoansLoanIdResponse approvedLoanResult = LOAN_TRANSACTION_HELPER.approveLoan(postLoansResponse.getResourceId(),
                     approveLoanRequest(amount, "01 January 2023"));
 
             Long loanId = approvedLoanResult.getLoanId();
@@ -198,7 +190,7 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
 
             PostLoansLoanIdChargesResponse loanChargeResult = addLoanCharge(loanId, chargeId, "09 January 2023", chargeAmount);
             loanChargeResult.getResourceId();
-            this.schedulerJobHelper.executeAndAwaitJob(LoanCoBJobName);
+            SCHEDULER_JOB_HELPER.executeAndAwaitJob(LoanCoBJobName);
 
             verifyRepaymentSchedule(loanId, //
                     installment(0.0, null, "01 January 2023"), //
@@ -219,7 +211,7 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
 
             PostLoansLoanIdChargesResponse loanChargeResult = addLoanCharge(loanId, chargeId, "10 January 2023", chargeAmount);
             Long loanChargeId = loanChargeResult.getResourceId();
-            this.schedulerJobHelper.executeAndAwaitJob(LoanCoBJobName);
+            SCHEDULER_JOB_HELPER.executeAndAwaitJob(LoanCoBJobName);
             // waive charge
             waiveLoanCharge(loanId, loanChargeId, 1);
 
@@ -247,7 +239,7 @@ public class LoanWaiveChargeTest extends BaseLoanIntegrationTest {
             PostLoansLoanIdChargesResponse loanChargeResult = addLoanCharge(loanId, chargeId, "11 January 2023", chargeAmount);
             loanChargeResult.getResourceId();
 
-            loanTransactionHelper.makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().transactionDate("12 January 2023")
+            LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanId, new PostLoansLoanIdTransactionsRequest().transactionDate("12 January 2023")
                     .dateFormat("dd MMMM yyyy").locale("en").transactionAmount(1018.0));
 
             verifyTransactions(loanId, //

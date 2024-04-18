@@ -33,16 +33,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.builder.ResponseSpecBuilder;
-import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
-import io.restassured.specification.RequestSpecification;
-import io.restassured.specification.ResponseSpecification;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -63,17 +57,14 @@ import org.apache.fineract.client.models.PostInitiateTransferResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.infrastructure.event.external.service.validation.ExternalEventDTO;
+import org.apache.fineract.integrationtests.BaseLoanIntegrationTest;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
-import org.apache.fineract.integrationtests.common.ExternalAssetOwnerHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
-import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
-import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
-import org.apache.fineract.integrationtests.common.accounting.FinancialActivityAccountHelper;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.externalevents.ExternalEventHelper;
 import org.apache.fineract.integrationtests.common.externalevents.ExternalEventsExtension;
@@ -88,55 +79,24 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("rawtypes")
 @ExtendWith({ LoanTestLifecycleExtension.class, ExternalEventsExtension.class })
-public class InitiateExternalAssetOwnerTransferTest {
+public class InitiateExternalAssetOwnerTransferTest extends BaseLoanIntegrationTest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(InitiateExternalAssetOwnerTransferTest.class);
-    private static ResponseSpecification RESPONSE_SPEC;
-    private static RequestSpecification REQUEST_SPEC;
-    private static Account ASSET_ACCOUNT;
-    private static Account FEE_PENALTY_ACCOUNT;
-    private static Account TRANSFER_ACCOUNT;
-    private static Account EXPENSE_ACCOUNT;
-    private static Account INCOME_ACCOUNT;
-    private static Account OVERPAYMENT_ACCOUNT;
-    private static FinancialActivityAccountHelper FINANCIAL_ACTIVITY_ACCOUNT_HELPER;
-    private static ExternalAssetOwnerHelper EXTERNAL_ASSET_OWNER_HELPER;
-    private static LoanTransactionHelper LOAN_TRANSACTION_HELPER;
-    private static SchedulerJobHelper SCHEDULER_JOB_HELPER;
     private static LocalDate TODAYS_DATE;
     public String ownerExternalId;
-    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
 
     @BeforeAll
     public static void setupInvestorBusinessStep() {
         Utils.initializeRESTAssured();
-        REQUEST_SPEC = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        REQUEST_SPEC.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        RESPONSE_SPEC = new ResponseSpecBuilder().expectStatusCode(200).build();
-        AccountHelper accountHelper = new AccountHelper(REQUEST_SPEC, RESPONSE_SPEC);
-        EXTERNAL_ASSET_OWNER_HELPER = new ExternalAssetOwnerHelper();
-        SCHEDULER_JOB_HELPER = new SchedulerJobHelper(REQUEST_SPEC);
-        FINANCIAL_ACTIVITY_ACCOUNT_HELPER = new FinancialActivityAccountHelper(REQUEST_SPEC);
-        LOAN_TRANSACTION_HELPER = new LoanTransactionHelper(REQUEST_SPEC, RESPONSE_SPEC);
 
         TODAYS_DATE = Utils.getLocalDateOfTenant();
         new BusinessStepHelper().updateSteps("LOAN_CLOSE_OF_BUSINESS", "APPLY_CHARGE_TO_OVERDUE_LOANS", "LOAN_DELINQUENCY_CLASSIFICATION",
                 "CHECK_LOAN_REPAYMENT_DUE", "CHECK_LOAN_REPAYMENT_OVERDUE", "UPDATE_LOAN_ARREARS_AGING", "ADD_PERIODIC_ACCRUAL_ENTRIES",
                 "EXTERNAL_ASSET_OWNER_TRANSFER");
 
-        ASSET_ACCOUNT = accountHelper.createAssetAccount();
-        FEE_PENALTY_ACCOUNT = accountHelper.createAssetAccount();
-        TRANSFER_ACCOUNT = accountHelper.createAssetAccount();
-        EXPENSE_ACCOUNT = accountHelper.createExpenseAccount();
-        INCOME_ACCOUNT = accountHelper.createIncomeAccount();
-        OVERPAYMENT_ACCOUNT = accountHelper.createLiabilityAccount();
-
-        setProperFinancialActivity(TRANSFER_ACCOUNT);
+        setProperFinancialActivity(SUSPENSE_ACCOUNT);
     }
 
     private static void setProperFinancialActivity(Account transferAccount) {
@@ -201,7 +161,7 @@ public class InitiateExternalAssetOwnerTransferTest {
                             new BigDecimal("757.420000"), new BigDecimal("10.000000"), new BigDecimal("0.000000"),
                             new BigDecimal("0.000000")));
 
-            updateBusinessDateAndExecuteCOBJob("2020-03-03");
+            updateBusinessDateAndExecuteCOBJob("03 March 2020");
             getAndValidateExternalAssetOwnerTransferByLoan(loanID,
                     ExpectedExternalTransferData.expected(PENDING, oldSaleTransferResponse.getResourceExternalId(), "2020-03-02",
                             "2020-03-02", "2020-03-02", false, new BigDecimal("15767.420000"), new BigDecimal("15000.000000"),
@@ -233,17 +193,17 @@ public class InitiateExternalAssetOwnerTransferTest {
             LocalDate expectedDate = LocalDate.of(2020, 3, 2);
             int initial = 2;
             getAndValidateThereIsJournalEntriesForTransfer(retrieveResponse.getContent().get(initial + 1).getTransferId(),
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
-                            BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) FEE_PENALTY_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
-                            BigDecimal.valueOf(10.000000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) TRANSFER_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.CREDIT.getValue(), BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) FEE_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.CREDIT.getValue(), BigDecimal.valueOf(10.000000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) SUSPENSE_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
                             BigDecimal.valueOf(15767.420000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) FEE_PENALTY_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(10.000000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) TRANSFER_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) FEE_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(10.000000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) SUSPENSE_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
                             BigDecimal.valueOf(15767.420000), expectedDate, expectedDate));
 
             PostInitiateTransferResponse buybackTransferResponse = createBuybackTransfer(loanID, "2020-03-03");
@@ -274,19 +234,21 @@ public class InitiateExternalAssetOwnerTransferTest {
             getAndValidateThereIsNoJournalEntriesForTransfer(retrieveResponse.getContent().get(initial + 2).getTransferId());
 
             LOAN_TRANSACTION_HELPER.makeLoanRepayment((long) loanID, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
-                    .transactionDate(dateFormatter.format(expectedDate)).locale("en").transactionAmount(5.0));
+                    .transactionDate(DATE_FORMATTER.format(expectedDate)).locale("en").transactionAmount(5.0));
             LocalDate repaymentSubmittedOnDate = expectedDate.plusDays(1);
             getAndValidateOwnerJournalEntries(ownerExternalId,
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) FEE_PENALTY_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(10.000000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) FEE_PENALTY_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
-                            BigDecimal.valueOf(5.000000), expectedDate, repaymentSubmittedOnDate),
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(5.000000), expectedDate, repaymentSubmittedOnDate));
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) FEE_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(10.000000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) FEE_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.CREDIT.getValue(), BigDecimal.valueOf(5.000000), expectedDate,
+                            repaymentSubmittedOnDate),
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(5.000000), expectedDate,
+                            repaymentSubmittedOnDate));
 
-            updateBusinessDateAndExecuteCOBJob("2020-03-04");
+            updateBusinessDateAndExecuteCOBJob("04 March 2020");
             getAndValidateExternalAssetOwnerTransferByLoan(loanID,
                     ExpectedExternalTransferData.expected(PENDING, oldSaleTransferResponse.getResourceExternalId(), "2020-03-02",
                             "2020-03-02", "2020-03-02", false, new BigDecimal("15767.420000"), new BigDecimal("15000.000000"),
@@ -312,36 +274,36 @@ public class InitiateExternalAssetOwnerTransferTest {
             retrieveResponse = EXTERNAL_ASSET_OWNER_HELPER.retrieveTransfersByLoanId(loanID.longValue());
             expectedDate = LocalDate.of(2020, 3, 3);
             getAndValidateThereIsJournalEntriesForTransfer(retrieveResponse.getContent().get(initial + 2).getTransferId(),
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) FEE_PENALTY_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(5.000000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) TRANSFER_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) FEE_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(5.000000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) SUSPENSE_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
                             BigDecimal.valueOf(15762.420000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
-                            BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) FEE_PENALTY_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
-                            BigDecimal.valueOf(5.000000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) TRANSFER_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.CREDIT.getValue(), BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) FEE_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.CREDIT.getValue(), BigDecimal.valueOf(5.000000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) SUSPENSE_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
                             BigDecimal.valueOf(15762.420000), expectedDate, expectedDate));
             LocalDate previousDayDate = LocalDate.of(2020, 3, 2);
             getAndValidateOwnerJournalEntries(ownerExternalId,
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(15757.420000), previousDayDate, previousDayDate),
-                    ExpectedJournalEntryData.expected((long) FEE_PENALTY_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(10.000000), previousDayDate, previousDayDate),
-                    ExpectedJournalEntryData.expected((long) FEE_PENALTY_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
-                            BigDecimal.valueOf(5.000000), previousDayDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(5.000000), previousDayDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(9.680000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) INCOME_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
-                            BigDecimal.valueOf(9.680000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
-                            BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) FEE_PENALTY_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
-                            BigDecimal.valueOf(5.000000), expectedDate, expectedDate));
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(15757.420000), previousDayDate, previousDayDate),
+                    ExpectedJournalEntryData.expected((long) FEE_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(10.000000), previousDayDate, previousDayDate),
+                    ExpectedJournalEntryData.expected((long) FEE_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.CREDIT.getValue(), BigDecimal.valueOf(5.000000), previousDayDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(5.000000), previousDayDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(9.680000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) INTEREST_INCOME_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.CREDIT.getValue(), BigDecimal.valueOf(9.680000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.CREDIT.getValue(), BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) FEE_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.CREDIT.getValue(), BigDecimal.valueOf(5.000000), expectedDate, expectedDate));
         } finally {
             cleanUpAndRestoreBusinessDate();
         }
@@ -368,7 +330,7 @@ public class InitiateExternalAssetOwnerTransferTest {
             PageExternalTransferData retrieveResponse = EXTERNAL_ASSET_OWNER_HELPER.retrieveTransfersByLoanId(loanID.longValue());
             retrieveResponse.getContent().forEach(transfer -> getAndValidateThereIsNoJournalEntriesForTransfer(transfer.getTransferId()));
 
-            updateBusinessDateAndExecuteCOBJob("2020-03-03");
+            updateBusinessDateAndExecuteCOBJob("03 March 2020");
             getAndValidateExternalAssetOwnerTransferByLoan(loanID,
                     ExpectedExternalTransferData.expected(PENDING, saleTransferResponse.getResourceExternalId(), "2020-03-02", "2020-03-02",
                             "2020-03-02", false, new BigDecimal("15767.420000"), new BigDecimal("15000.000000"),
@@ -382,17 +344,17 @@ public class InitiateExternalAssetOwnerTransferTest {
             retrieveResponse = EXTERNAL_ASSET_OWNER_HELPER.retrieveTransfersByLoanId(loanID.longValue());
             LocalDate expectedDate = LocalDate.of(2020, 3, 2);
             getAndValidateThereIsJournalEntriesForTransfer(retrieveResponse.getContent().get(1).getTransferId(),
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
-                            BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) FEE_PENALTY_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
-                            BigDecimal.valueOf(10.000000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) TRANSFER_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.CREDIT.getValue(), BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) FEE_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.CREDIT.getValue(), BigDecimal.valueOf(10.000000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) SUSPENSE_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
                             BigDecimal.valueOf(15767.420000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) FEE_PENALTY_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(10.000000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) TRANSFER_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) FEE_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(10.000000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) SUSPENSE_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
                             BigDecimal.valueOf(15767.420000), expectedDate, expectedDate));
 
             PostInitiateTransferResponse buybackTransferResponse = createBuybackTransfer(loanID, "2020-03-03");
@@ -415,19 +377,21 @@ public class InitiateExternalAssetOwnerTransferTest {
             getAndValidateThereIsNoJournalEntriesForTransfer(retrieveResponse.getContent().get(2).getTransferId());
 
             LOAN_TRANSACTION_HELPER.makeLoanRepayment((long) loanID, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
-                    .transactionDate(dateFormatter.format(expectedDate)).locale("en").transactionAmount(5.0));
+                    .transactionDate(DATE_FORMATTER.format(expectedDate)).locale("en").transactionAmount(5.0));
             LocalDate repaymentSubmittedOnDate = expectedDate.plusDays(1);
             getAndValidateOwnerJournalEntries(ownerExternalId,
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) FEE_PENALTY_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(10.000000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) FEE_PENALTY_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
-                            BigDecimal.valueOf(5.000000), expectedDate, repaymentSubmittedOnDate),
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(5.000000), expectedDate, repaymentSubmittedOnDate));
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) FEE_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(10.000000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) FEE_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.CREDIT.getValue(), BigDecimal.valueOf(5.000000), expectedDate,
+                            repaymentSubmittedOnDate),
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(5.000000), expectedDate,
+                            repaymentSubmittedOnDate));
 
-            updateBusinessDateAndExecuteCOBJob("2020-03-04");
+            updateBusinessDateAndExecuteCOBJob("04 March 2020");
             getAndValidateExternalAssetOwnerTransferByLoan(loanID,
                     ExpectedExternalTransferData.expected(PENDING, saleTransferResponse.getResourceExternalId(), "2020-03-02", "2020-03-02",
                             "2020-03-02", false, new BigDecimal("15767.420000"), new BigDecimal("15000.000000"),
@@ -445,36 +409,36 @@ public class InitiateExternalAssetOwnerTransferTest {
             retrieveResponse = EXTERNAL_ASSET_OWNER_HELPER.retrieveTransfersByLoanId(loanID.longValue());
             expectedDate = LocalDate.of(2020, 3, 3);
             getAndValidateThereIsJournalEntriesForTransfer(retrieveResponse.getContent().get(2).getTransferId(),
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) FEE_PENALTY_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(5.000000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) TRANSFER_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) FEE_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(5.000000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) SUSPENSE_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
                             BigDecimal.valueOf(15762.420000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
-                            BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) FEE_PENALTY_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
-                            BigDecimal.valueOf(5.000000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) TRANSFER_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.CREDIT.getValue(), BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) FEE_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.CREDIT.getValue(), BigDecimal.valueOf(5.000000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) SUSPENSE_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
                             BigDecimal.valueOf(15762.420000), expectedDate, expectedDate));
             LocalDate previousDayDate = LocalDate.of(2020, 3, 2);
             getAndValidateOwnerJournalEntries(ownerExternalId,
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(15757.420000), previousDayDate, previousDayDate),
-                    ExpectedJournalEntryData.expected((long) FEE_PENALTY_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(10.000000), previousDayDate, previousDayDate),
-                    ExpectedJournalEntryData.expected((long) FEE_PENALTY_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
-                            BigDecimal.valueOf(5.000000), previousDayDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(5.000000), previousDayDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(9.680000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) INCOME_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
-                            BigDecimal.valueOf(9.680000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
-                            BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) FEE_PENALTY_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
-                            BigDecimal.valueOf(5.000000), expectedDate, expectedDate));
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(15757.420000), previousDayDate, previousDayDate),
+                    ExpectedJournalEntryData.expected((long) FEE_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(10.000000), previousDayDate, previousDayDate),
+                    ExpectedJournalEntryData.expected((long) FEE_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.CREDIT.getValue(), BigDecimal.valueOf(5.000000), previousDayDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(5.000000), previousDayDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(9.680000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) INTEREST_INCOME_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.CREDIT.getValue(), BigDecimal.valueOf(9.680000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.CREDIT.getValue(), BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) FEE_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.CREDIT.getValue(), BigDecimal.valueOf(5.000000), expectedDate, expectedDate));
         } finally {
             cleanUpAndRestoreBusinessDate();
         }
@@ -501,7 +465,7 @@ public class InitiateExternalAssetOwnerTransferTest {
             PageExternalTransferData retrieveResponse = EXTERNAL_ASSET_OWNER_HELPER.retrieveTransfersByLoanId(loanID.longValue());
             retrieveResponse.getContent().forEach(transfer -> getAndValidateThereIsNoJournalEntriesForTransfer(transfer.getTransferId()));
 
-            updateBusinessDateAndExecuteCOBJob("2020-03-03");
+            updateBusinessDateAndExecuteCOBJob("03 March 2020");
             getAndValidateExternalAssetOwnerTransferByLoan(loanID,
                     ExpectedExternalTransferData.expected(PENDING, saleTransferResponse.getResourceExternalId(), "2020-03-02", "2020-03-02",
                             "2020-03-02", false, new BigDecimal("15767.420000"), new BigDecimal("15000.000000"),
@@ -515,17 +479,17 @@ public class InitiateExternalAssetOwnerTransferTest {
             retrieveResponse = EXTERNAL_ASSET_OWNER_HELPER.retrieveTransfersByLoanId(loanID.longValue());
             LocalDate expectedDate = LocalDate.of(2020, 3, 2);
             getAndValidateThereIsJournalEntriesForTransfer(retrieveResponse.getContent().get(1).getTransferId(),
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
-                            BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) FEE_PENALTY_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
-                            BigDecimal.valueOf(10.000000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) TRANSFER_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.CREDIT.getValue(), BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) FEE_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.CREDIT.getValue(), BigDecimal.valueOf(10.000000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) SUSPENSE_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
                             BigDecimal.valueOf(15767.420000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) FEE_PENALTY_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(10.000000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) TRANSFER_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) FEE_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(10.000000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) SUSPENSE_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
                             BigDecimal.valueOf(15767.420000), expectedDate, expectedDate));
 
             PostInitiateTransferResponse buybackTransferResponse = createBuybackTransfer(loanID, "2020-03-03");
@@ -548,17 +512,17 @@ public class InitiateExternalAssetOwnerTransferTest {
             getAndValidateThereIsNoJournalEntriesForTransfer(retrieveResponse.getContent().get(2).getTransferId());
 
             LOAN_TRANSACTION_HELPER.makeLoanRepayment((long) loanID, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
-                    .transactionDate(dateFormatter.format(expectedDate)).locale("en").transactionAmount(15777.42));
+                    .transactionDate(DATE_FORMATTER.format(expectedDate)).locale("en").transactionAmount(15777.42));
             LocalDate repaymentSubmittedOnDate = expectedDate.plusDays(1);
             getAndValidateOwnerJournalEntries(ownerExternalId,
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) FEE_PENALTY_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(10.000000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(15757.420000), expectedDate, expectedDate),
+                    ExpectedJournalEntryData.expected((long) FEE_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(10.000000), expectedDate, expectedDate),
                     ExpectedJournalEntryData.expected((long) OVERPAYMENT_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
                             BigDecimal.valueOf(10.000000), repaymentSubmittedOnDate, repaymentSubmittedOnDate));
 
-            updateBusinessDateAndExecuteCOBJob("2020-03-04");
+            updateBusinessDateAndExecuteCOBJob("04 March 2020");
             getAndValidateExternalAssetOwnerTransferByLoan(loanID,
                     ExpectedExternalTransferData.expected(PENDING, saleTransferResponse.getResourceExternalId(), "2020-03-02", "2020-03-02",
                             "2020-03-02", false, new BigDecimal("15767.420000"), new BigDecimal("15000.000000"),
@@ -578,18 +542,18 @@ public class InitiateExternalAssetOwnerTransferTest {
             getAndValidateThereIsJournalEntriesForTransfer(retrieveResponse.getContent().get(2).getTransferId(),
                     ExpectedJournalEntryData.expected((long) OVERPAYMENT_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
                             BigDecimal.valueOf(10.000000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) TRANSFER_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
+                    ExpectedJournalEntryData.expected((long) SUSPENSE_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
                             BigDecimal.valueOf(10.000000), expectedDate, expectedDate),
                     ExpectedJournalEntryData.expected((long) OVERPAYMENT_ACCOUNT.getAccountID(), (long) JournalEntryType.CREDIT.getValue(),
                             BigDecimal.valueOf(10.000000), expectedDate, expectedDate),
-                    ExpectedJournalEntryData.expected((long) TRANSFER_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
+                    ExpectedJournalEntryData.expected((long) SUSPENSE_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
                             BigDecimal.valueOf(10.000000), expectedDate, expectedDate));
             LocalDate previousDayDate = LocalDate.of(2020, 3, 2);
             getAndValidateOwnerJournalEntries(ownerExternalId,
-                    ExpectedJournalEntryData.expected((long) ASSET_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(15757.420000), previousDayDate, previousDayDate),
-                    ExpectedJournalEntryData.expected((long) FEE_PENALTY_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
-                            BigDecimal.valueOf(10.000000), previousDayDate, previousDayDate),
+                    ExpectedJournalEntryData.expected((long) LOANS_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(15757.420000), previousDayDate, previousDayDate),
+                    ExpectedJournalEntryData.expected((long) FEE_RECEIVABLE_ACCOUNT.getAccountID(),
+                            (long) JournalEntryType.DEBIT.getValue(), BigDecimal.valueOf(10.000000), previousDayDate, previousDayDate),
                     ExpectedJournalEntryData.expected((long) OVERPAYMENT_ACCOUNT.getAccountID(), (long) JournalEntryType.DEBIT.getValue(),
                             BigDecimal.valueOf(10.000000), expectedDate, expectedDate));
         } finally {
@@ -625,7 +589,7 @@ public class InitiateExternalAssetOwnerTransferTest {
             Integer clientID = createClient();
             Integer loanID = createLoanForClient(clientID);
 
-            updateBusinessDateAndExecuteCOBJob("2020-03-04");
+            updateBusinessDateAndExecuteCOBJob("04 March 2020");
 
             LOAN_TRANSACTION_HELPER.makeRepayment("04 March 2020", 16000.0f, loanID);
 
@@ -647,7 +611,7 @@ public class InitiateExternalAssetOwnerTransferTest {
             Integer loanID = createLoanForClient(clientID);
 
             PostInitiateTransferResponse saleTransferResponse = createSaleTransfer(loanID, "2020-03-06");
-            updateBusinessDateAndExecuteCOBJob("2020-03-04");
+            updateBusinessDateAndExecuteCOBJob("04 March 2020");
 
             LOAN_TRANSACTION_HELPER.writeOffLoan("04 March 2020", loanID);
 
@@ -671,7 +635,7 @@ public class InitiateExternalAssetOwnerTransferTest {
             Integer loanID = createLoanForClient(clientID);
 
             PostInitiateTransferResponse saleTransferResponse = createSaleTransfer(loanID, "2020-03-04");
-            updateBusinessDateAndExecuteCOBJob("2020-03-05");
+            updateBusinessDateAndExecuteCOBJob("05 March 2020");
             PostInitiateTransferResponse buybackTransferResponse = createBuybackTransfer(loanID, "2020-03-06");
 
             LOAN_TRANSACTION_HELPER.writeOffLoan("04 March 2020", loanID);
@@ -775,7 +739,7 @@ public class InitiateExternalAssetOwnerTransferTest {
             getAndValidateThereIsNoActiveMapping(saleTransferResponse.getResourceExternalId());
             getAndValidateThereIsNoActiveMapping(buybackTransferResponse.getResourceExternalId());
 
-            updateBusinessDateAndExecuteCOBJob("2020-03-03");
+            updateBusinessDateAndExecuteCOBJob("03 March 2020");
 
             getAndValidateExternalAssetOwnerTransferByLoan(loanID,
                     ExpectedExternalTransferData.expected(PENDING, saleTransferResponse.getResourceExternalId(), "2020-03-02", "2020-03-02",
@@ -919,7 +883,7 @@ public class InitiateExternalAssetOwnerTransferTest {
             CallFailedRuntimeException exception6 = assertThrows(CallFailedRuntimeException.class, () -> {
                 Integer loanID2 = createLoanForClient(clientID);
                 createSaleTransfer(loanID2, "2020-03-03");
-                updateBusinessDateAndExecuteCOBJob("2020-03-04");
+                updateBusinessDateAndExecuteCOBJob("04 March 2020");
                 createSaleTransfer(loanID2, "2020-03-05");
             });
             assertTrue(exception6.getMessage().contains("This loan cannot be sold, because it is owned by an external asset owner"));
@@ -934,11 +898,6 @@ public class InitiateExternalAssetOwnerTransferTest {
         } finally {
             cleanUpAndRestoreBusinessDate();
         }
-    }
-
-    private void updateBusinessDateAndExecuteCOBJob(String date) {
-        BusinessDateHelper.updateBusinessDate(REQUEST_SPEC, RESPONSE_SPEC, BUSINESS_DATE, LocalDate.parse(date));
-        SCHEDULER_JOB_HELPER.executeAndAwaitJob("Loan COB");
     }
 
     private PostInitiateTransferResponse createSaleTransfer(Integer loanID, String settlementDate) {
@@ -985,10 +944,6 @@ public class InitiateExternalAssetOwnerTransferTest {
     }
 
     private void cleanUpAndRestoreBusinessDate() {
-        REQUEST_SPEC = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        REQUEST_SPEC.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        REQUEST_SPEC.header("Fineract-Platform-TenantId", "default");
-        RESPONSE_SPEC = new ResponseSpecBuilder().expectStatusCode(200).build();
         BusinessDateHelper.updateBusinessDate(REQUEST_SPEC, RESPONSE_SPEC, BUSINESS_DATE, TODAYS_DATE);
         GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.FALSE);
         GlobalConfigurationHelper.manageConfigurations(REQUEST_SPEC, RESPONSE_SPEC,
@@ -1033,9 +988,10 @@ public class InitiateExternalAssetOwnerTransferTest {
 
         final String loanProductJSON = new LoanProductTestBuilder().withPrincipal("15,000.00").withNumberOfRepayments("4")
                 .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
-                .withAccountingRulePeriodicAccrual(new Account[] { ASSET_ACCOUNT, EXPENSE_ACCOUNT, INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT })
+                .withAccountingRulePeriodicAccrual(new Account[] { LOANS_RECEIVABLE_ACCOUNT, CHARGE_OFF_EXPENSE_ACCOUNT,
+                        INTEREST_INCOME_ACCOUNT, OVERPAYMENT_ACCOUNT })
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
-                .withFeeAndPenaltyAssetAccount(FEE_PENALTY_ACCOUNT).build(chargeId);
+                .withFeeAndPenaltyAssetAccount(FEE_RECEIVABLE_ACCOUNT).build(chargeId);
         return LOAN_TRANSACTION_HELPER.getLoanProductId(loanProductJSON);
     }
 

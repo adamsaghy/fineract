@@ -73,20 +73,20 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
     public void loanRepaymentScheduleWithSimpleDisbursementAndDownPayment() {
         String loanExternalIdStr = UUID.randomUUID().toString();
 
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC);
+        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;
         BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
         Boolean enableAutoRepaymentForDownPayment = false;
 
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+        final Integer clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
 
-        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(loanTransactionHelper, delinquencyBucketId, enableDownPayment,
-                "25", enableAutoRepaymentForDownPayment, false);
+        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(LOAN_TRANSACTION_HELPER, delinquencyBucketId,
+                enableDownPayment, "25", enableAutoRepaymentForDownPayment, false);
 
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = loanTransactionHelper.getLoanProduct(loanProductId);
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
         assertNotNull(getLoanProductsProductResponse);
         assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
         assertEquals(0, getLoanProductsProductResponse.getDisbursedAmountPercentageForDownPayment()
@@ -95,7 +95,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
 
         final Integer loanId = createApproveAndDisburseLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "1", "0");
 
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+        GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanId.longValue());
 
         assertNotNull(loanDetails);
         assertEquals(enableDownPayment, loanDetails.getEnableDownPayment());
@@ -119,20 +119,20 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
     public void loanRepaymentScheduleWithSimpleDisbursementAndAutoRepaymentDownPayment() {
         String loanExternalIdStr = UUID.randomUUID().toString();
 
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC);
+        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;
         BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
         Boolean enableAutoRepaymentForDownPayment = true;
 
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+        final Integer clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
 
-        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(loanTransactionHelper, delinquencyBucketId, enableDownPayment,
-                "25", enableAutoRepaymentForDownPayment, false);
+        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(LOAN_TRANSACTION_HELPER, delinquencyBucketId,
+                enableDownPayment, "25", enableAutoRepaymentForDownPayment, false);
 
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = loanTransactionHelper.getLoanProduct(loanProductId);
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
         assertNotNull(getLoanProductsProductResponse);
         assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
         assertEquals(0, getLoanProductsProductResponse.getDisbursedAmountPercentageForDownPayment()
@@ -141,7 +141,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
 
         final Integer loanId = createApproveAndDisburseLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "1", "0");
 
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+        GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanId.longValue());
         GetLoansLoanIdSummary summary = loanDetails.getSummary();
 
         assertNotNull(loanDetails);
@@ -168,20 +168,20 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
     public void loanRepaymentScheduleWithMultiDisbursementProductOneDisbursementAndDownPayment() {
         String loanExternalIdStr = UUID.randomUUID().toString();
 
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC);
+        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;
         BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
         Boolean enableAutoRepaymentForDownPayment = false;
 
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+        final Integer clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
 
-        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(loanTransactionHelper, delinquencyBucketId, enableDownPayment,
-                "25", enableAutoRepaymentForDownPayment, true);
+        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(LOAN_TRANSACTION_HELPER, delinquencyBucketId,
+                enableDownPayment, "25", enableAutoRepaymentForDownPayment, true);
 
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = loanTransactionHelper.getLoanProduct(loanProductId);
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
         assertNotNull(getLoanProductsProductResponse);
         assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
         assertEquals(0, getLoanProductsProductResponse.getDisbursedAmountPercentageForDownPayment()
@@ -190,7 +190,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
 
         final Integer loanId = createApproveAndDisburseLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "1", "0");
 
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+        GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanId.longValue());
 
         assertNotNull(loanDetails);
         assertEquals(enableDownPayment, loanDetails.getEnableDownPayment());
@@ -214,20 +214,20 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
     public void loanRepaymentScheduleWithMultiDisbursementProductTwoDisbursementAndDownPayment() {
         String loanExternalIdStr = UUID.randomUUID().toString();
 
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC);
+        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;
         BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
         Boolean enableAutoRepaymentForDownPayment = false;
 
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+        final Integer clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
 
-        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(loanTransactionHelper, delinquencyBucketId, enableDownPayment,
-                "25", enableAutoRepaymentForDownPayment, true);
+        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(LOAN_TRANSACTION_HELPER, delinquencyBucketId,
+                enableDownPayment, "25", enableAutoRepaymentForDownPayment, true);
 
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = loanTransactionHelper.getLoanProduct(loanProductId);
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
         assertNotNull(getLoanProductsProductResponse);
         assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
         assertEquals(0, getLoanProductsProductResponse.getDisbursedAmountPercentageForDownPayment()
@@ -236,7 +236,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
 
         final Integer loanId = createApproveAndDisburseTwiceLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "1", "0");
 
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+        GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanId.longValue());
 
         assertNotNull(loanDetails);
         assertEquals(enableDownPayment, loanDetails.getEnableDownPayment());
@@ -265,20 +265,20 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
     public void loanRepaymentScheduleWithMultiDisbursementProductTwoDisbursementAndAutoRepaymentDownPayment() {
         String loanExternalIdStr = UUID.randomUUID().toString();
 
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC);
+        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;
         BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
         Boolean enableAutoRepaymentForDownPayment = true;
 
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+        final Integer clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
 
-        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(loanTransactionHelper, delinquencyBucketId, enableDownPayment,
-                "25", enableAutoRepaymentForDownPayment, true);
+        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(LOAN_TRANSACTION_HELPER, delinquencyBucketId,
+                enableDownPayment, "25", enableAutoRepaymentForDownPayment, true);
 
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = loanTransactionHelper.getLoanProduct(loanProductId);
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
         assertNotNull(getLoanProductsProductResponse);
         assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
         assertEquals(0, getLoanProductsProductResponse.getDisbursedAmountPercentageForDownPayment()
@@ -287,7 +287,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
 
         final Integer loanId = createApproveAndDisburseTwiceLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "1", "0");
 
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+        GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanId.longValue());
         GetLoansLoanIdSummary summary = loanDetails.getSummary();
 
         assertNotNull(loanDetails);
@@ -320,20 +320,20 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
     public void loanRepaymentScheduleWithMultiDisbursementProductOneDisbursementAndThreeRepaymentsAndDownPayment() {
         String loanExternalIdStr = UUID.randomUUID().toString();
 
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC);
+        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;
         BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
         Boolean enableAutoRepaymentForDownPayment = true;
 
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+        final Integer clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
 
-        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(loanTransactionHelper, delinquencyBucketId, enableDownPayment,
-                "25", enableAutoRepaymentForDownPayment, true);
+        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(LOAN_TRANSACTION_HELPER, delinquencyBucketId,
+                enableDownPayment, "25", enableAutoRepaymentForDownPayment, true);
 
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = loanTransactionHelper.getLoanProduct(loanProductId);
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
         assertNotNull(getLoanProductsProductResponse);
         assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
         assertEquals(0, getLoanProductsProductResponse.getDisbursedAmountPercentageForDownPayment()
@@ -342,7 +342,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
 
         final Integer loanId = createApproveAndDisburseLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "3", "0");
 
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+        GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanId.longValue());
         GetLoansLoanIdSummary summary = loanDetails.getSummary();
 
         assertNotNull(loanDetails);
@@ -392,20 +392,20 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
     public void loanRepaymentScheduleWithMultiDisbursementProductTwoDisbursementAndThreeRepaymentsAndDownPayment() {
         String loanExternalIdStr = UUID.randomUUID().toString();
 
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC);
+        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;
         BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
         Boolean enableAutoRepaymentForDownPayment = true;
 
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+        final Integer clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
 
-        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(loanTransactionHelper, delinquencyBucketId, enableDownPayment,
-                "25", enableAutoRepaymentForDownPayment, true);
+        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(LOAN_TRANSACTION_HELPER, delinquencyBucketId,
+                enableDownPayment, "25", enableAutoRepaymentForDownPayment, true);
 
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = loanTransactionHelper.getLoanProduct(loanProductId);
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
         assertNotNull(getLoanProductsProductResponse);
         assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
         assertEquals(0, getLoanProductsProductResponse.getDisbursedAmountPercentageForDownPayment()
@@ -414,7 +414,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
 
         final Integer loanId = createApproveAndDisburseTwiceLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "3", "0");
 
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+        GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanId.longValue());
         GetLoansLoanIdSummary summary = loanDetails.getSummary();
 
         assertNotNull(loanDetails);
@@ -422,7 +422,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         assertEquals(0, loanDetails.getDisbursedAmountPercentageForDownPayment().compareTo(disbursedAmountPercentageForDownPayment));
         assertEquals(enableAutoRepaymentForDownPayment, loanDetails.getEnableAutoRepaymentForDownPayment());
 
-        loanTransactionHelper.printRepaymentSchedule(loanDetails);
+        LOAN_TRANSACTION_HELPER.printRepaymentSchedule(loanDetails);
 
         List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
         Double expectedOutstandingLoanBalanceOnFirstDisbursement = 700.00;
@@ -478,20 +478,20 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
     public void loanRepaymentScheduleWithChargeAndDownPayment() {
         String loanExternalIdStr = UUID.randomUUID().toString();
 
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC);
+        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;
         BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
         Boolean enableAutoRepaymentForDownPayment = false;
 
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+        final Integer clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
 
-        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(loanTransactionHelper, delinquencyBucketId, enableDownPayment,
-                "25", enableAutoRepaymentForDownPayment, false);
+        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(LOAN_TRANSACTION_HELPER, delinquencyBucketId,
+                enableDownPayment, "25", enableAutoRepaymentForDownPayment, false);
 
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = loanTransactionHelper.getLoanProduct(loanProductId);
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
         assertNotNull(getLoanProductsProductResponse);
         assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
         assertEquals(0, getLoanProductsProductResponse.getDisbursedAmountPercentageForDownPayment()
@@ -503,17 +503,17 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         final Double feeAmount = 10.00;
         String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, feeAmount.toString(),
                 false);
-        final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
+        final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(REQUEST_SPEC, RESPONSE_SPEC, payloadJSON);
         assertNotNull(postChargesResponse);
         final Long loanChargeId = postChargesResponse.getResourceId();
 
         payloadJSON = LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(loanChargeId.toString(), "03 September 2022",
                 feeAmount.toString());
-        PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = loanTransactionHelper.addChargeForLoan(loanId, payloadJSON,
-                responseSpec);
+        PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = LOAN_TRANSACTION_HELPER.addChargeForLoan(loanId, payloadJSON,
+                RESPONSE_SPEC);
         assertNotNull(postLoansLoanIdChargesResponse);
 
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+        GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanId.longValue());
 
         assertNotNull(loanDetails);
         assertEquals(enableDownPayment, loanDetails.getEnableDownPayment());
@@ -542,20 +542,20 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
     public void loanRepaymentScheduleWithMultiDisbursementProductTwoDisbursementAndThreeRepaymentsAndDownPaymentAndCharge() {
         String loanExternalIdStr = UUID.randomUUID().toString();
 
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC);
+        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;
         BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
         Boolean enableAutoRepaymentForDownPayment = true;
 
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+        final Integer clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
 
-        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(loanTransactionHelper, delinquencyBucketId, enableDownPayment,
-                "25", enableAutoRepaymentForDownPayment, true);
+        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(LOAN_TRANSACTION_HELPER, delinquencyBucketId,
+                enableDownPayment, "25", enableAutoRepaymentForDownPayment, true);
 
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = loanTransactionHelper.getLoanProduct(loanProductId);
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
         assertNotNull(getLoanProductsProductResponse);
         assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
         assertEquals(0, getLoanProductsProductResponse.getDisbursedAmountPercentageForDownPayment()
@@ -567,17 +567,17 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         final Double feeAmount = 10.00;
         String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, feeAmount.toString(),
                 false);
-        final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
+        final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(REQUEST_SPEC, RESPONSE_SPEC, payloadJSON);
         assertNotNull(postChargesResponse);
         final Long loanChargeId = postChargesResponse.getResourceId();
 
         payloadJSON = LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(loanChargeId.toString(), "04 September 2022",
                 feeAmount.toString());
-        PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = loanTransactionHelper.addChargeForLoan(loanId, payloadJSON,
-                responseSpec);
+        PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = LOAN_TRANSACTION_HELPER.addChargeForLoan(loanId, payloadJSON,
+                RESPONSE_SPEC);
         assertNotNull(postLoansLoanIdChargesResponse);
 
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+        GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanId.longValue());
         GetLoansLoanIdSummary summary = loanDetails.getSummary();
 
         assertNotNull(loanDetails);
@@ -585,7 +585,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         assertEquals(0, loanDetails.getDisbursedAmountPercentageForDownPayment().compareTo(disbursedAmountPercentageForDownPayment));
         assertEquals(enableAutoRepaymentForDownPayment, loanDetails.getEnableAutoRepaymentForDownPayment());
 
-        loanTransactionHelper.printRepaymentSchedule(loanDetails);
+        LOAN_TRANSACTION_HELPER.printRepaymentSchedule(loanDetails);
 
         List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
         Double expectedOutstandingLoanBalanceOnFirstDisbursement = 700.00;
@@ -643,20 +643,20 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
     public void loanRepaymentScheduleWithChargeAndInterestAndDownPayment() {
         String loanExternalIdStr = UUID.randomUUID().toString();
 
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC);
+        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;
         BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
         Boolean enableAutoRepaymentForDownPayment = false;
 
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+        final Integer clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
 
-        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(loanTransactionHelper, delinquencyBucketId, enableDownPayment,
-                "25", enableAutoRepaymentForDownPayment, true);
+        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(LOAN_TRANSACTION_HELPER, delinquencyBucketId,
+                enableDownPayment, "25", enableAutoRepaymentForDownPayment, true);
 
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = loanTransactionHelper.getLoanProduct(loanProductId);
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
         assertNotNull(getLoanProductsProductResponse);
         assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
         assertEquals(0, getLoanProductsProductResponse.getDisbursedAmountPercentageForDownPayment()
@@ -668,17 +668,17 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         final Double feeAmount = 10.00;
         String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, feeAmount.toString(),
                 false);
-        final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
+        final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(REQUEST_SPEC, RESPONSE_SPEC, payloadJSON);
         assertNotNull(postChargesResponse);
         final Long loanChargeId = postChargesResponse.getResourceId();
 
         payloadJSON = LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(loanChargeId.toString(), "03 September 2022",
                 feeAmount.toString());
-        PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = loanTransactionHelper.addChargeForLoan(loanId, payloadJSON,
-                responseSpec);
+        PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = LOAN_TRANSACTION_HELPER.addChargeForLoan(loanId, payloadJSON,
+                RESPONSE_SPEC);
         assertNotNull(postLoansLoanIdChargesResponse);
 
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+        GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanId.longValue());
 
         assertNotNull(loanDetails);
         assertEquals(enableDownPayment, loanDetails.getEnableDownPayment());
@@ -709,20 +709,20 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
     public void loanRepaymentScheduleWithMultiDisbursementProductTwoDisbursementAndThreeRepaymentsAndDownPaymentAndChargeAndInterest() {
         String loanExternalIdStr = UUID.randomUUID().toString();
 
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC);
+        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;
         BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
         Boolean enableAutoRepaymentForDownPayment = true;
 
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+        final Integer clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
 
-        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(loanTransactionHelper, delinquencyBucketId, enableDownPayment,
-                "25", enableAutoRepaymentForDownPayment, true);
+        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(LOAN_TRANSACTION_HELPER, delinquencyBucketId,
+                enableDownPayment, "25", enableAutoRepaymentForDownPayment, true);
 
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = loanTransactionHelper.getLoanProduct(loanProductId);
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
         assertNotNull(getLoanProductsProductResponse);
         assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
         assertEquals(0, getLoanProductsProductResponse.getDisbursedAmountPercentageForDownPayment()
@@ -734,17 +734,17 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         final Double feeAmount = 10.00;
         String payloadJSON = ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, feeAmount.toString(),
                 false);
-        final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(requestSpec, responseSpec, payloadJSON);
+        final PostChargesResponse postChargesResponse = ChargesHelper.createLoanCharge(REQUEST_SPEC, RESPONSE_SPEC, payloadJSON);
         assertNotNull(postChargesResponse);
         final Long loanChargeId = postChargesResponse.getResourceId();
 
         payloadJSON = LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(loanChargeId.toString(), "04 September 2022",
                 feeAmount.toString());
-        PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = loanTransactionHelper.addChargeForLoan(loanId, payloadJSON,
-                responseSpec);
+        PostLoansLoanIdChargesResponse postLoansLoanIdChargesResponse = LOAN_TRANSACTION_HELPER.addChargeForLoan(loanId, payloadJSON,
+                RESPONSE_SPEC);
         assertNotNull(postLoansLoanIdChargesResponse);
 
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+        GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanId.longValue());
         GetLoansLoanIdSummary summary = loanDetails.getSummary();
 
         assertNotNull(loanDetails);
@@ -752,7 +752,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         assertEquals(0, loanDetails.getDisbursedAmountPercentageForDownPayment().compareTo(disbursedAmountPercentageForDownPayment));
         assertEquals(enableAutoRepaymentForDownPayment, loanDetails.getEnableAutoRepaymentForDownPayment());
 
-        loanTransactionHelper.printRepaymentSchedule(loanDetails);
+        LOAN_TRANSACTION_HELPER.printRepaymentSchedule(loanDetails);
 
         List<GetLoansLoanIdRepaymentPeriod> periods = loanDetails.getRepaymentSchedule().getPeriods();
         Double expectedOutstandingLoanBalanceOnFirstDisbursement = 700.00;
@@ -817,25 +817,25 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
     @Test
     public void testDelinquencyRangeOnDownPaymentInstallment() {
         try {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.TRUE);
             LocalDate businessDate = LocalDate.of(2022, 9, 5);
-            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, businessDate);
+            BusinessDateHelper.updateBusinessDate(REQUEST_SPEC, RESPONSE_SPEC, BusinessDateType.BUSINESS_DATE, businessDate);
             String loanExternalIdStr = UUID.randomUUID().toString();
 
-            final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-            final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
-                    delinquencyBucketId);
+            final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC);
+            final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(REQUEST_SPEC,
+                    RESPONSE_SPEC, delinquencyBucketId);
 
             Boolean enableDownPayment = true;
             BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
             Boolean enableAutoRepaymentForDownPayment = false;
 
-            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+            final Integer clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
 
-            Integer loanProductId = createLoanProductWithDownPaymentConfiguration(loanTransactionHelper, delinquencyBucketId,
+            Integer loanProductId = createLoanProductWithDownPaymentConfiguration(LOAN_TRANSACTION_HELPER, delinquencyBucketId,
                     enableDownPayment, "25", enableAutoRepaymentForDownPayment, false);
 
-            final GetLoanProductsProductIdResponse getLoanProductsProductResponse = loanTransactionHelper.getLoanProduct(loanProductId);
+            final GetLoanProductsProductIdResponse getLoanProductsProductResponse = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
             assertNotNull(getLoanProductsProductResponse);
             assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
             assertEquals(0, getLoanProductsProductResponse.getDisbursedAmountPercentageForDownPayment()
@@ -845,10 +845,10 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
             final Integer loanId = createApproveAndDisburseLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "1", "0");
 
             final String jobName = "Loan COB";
-            final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
+            final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(REQUEST_SPEC);
             schedulerJobHelper.executeAndAwaitJob(jobName);
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanId.longValue());
 
             assertNotNull(loanDetails);
             assertEquals(enableDownPayment, loanDetails.getEnableDownPayment());
@@ -870,8 +870,8 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
             assertEquals(2, loanDetails.getDelinquent().getDelinquentDays());
         } finally {
             final LocalDate todaysDate = Utils.getLocalDateOfTenant();
-            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, todaysDate);
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            BusinessDateHelper.updateBusinessDate(REQUEST_SPEC, RESPONSE_SPEC, BusinessDateType.BUSINESS_DATE, todaysDate);
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.FALSE);
         }
     }
 
@@ -881,8 +881,8 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         String loanExternalIdStr = UUID.randomUUID().toString();
 
         // Delinquency Bucket
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC);
+        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC,
                 delinquencyBucketId);
 
         // down-payment configuration
@@ -890,13 +890,13 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
         Boolean enableAutoRepaymentForDownPayment = false;
 
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+        final Integer clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
 
         // Loan Product creation with down-payment configuration
-        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(loanTransactionHelper, delinquencyBucketId, enableDownPayment,
-                "25", enableAutoRepaymentForDownPayment, false);
+        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(LOAN_TRANSACTION_HELPER, delinquencyBucketId,
+                enableDownPayment, "25", enableAutoRepaymentForDownPayment, false);
 
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = loanTransactionHelper.getLoanProduct(loanProductId);
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
         assertNotNull(getLoanProductsProductResponse);
         assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
         assertEquals(0, getLoanProductsProductResponse.getDisbursedAmountPercentageForDownPayment()
@@ -907,7 +907,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
 
         // Retrieve Loan with loanId
 
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+        GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanId.longValue());
 
         // verify down-payment details for Loan
         assertNotNull(loanDetails);
@@ -923,8 +923,8 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         String loanExternalIdStr = UUID.randomUUID().toString();
 
         // Delinquency Bucket
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC);
+        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC,
                 delinquencyBucketId);
 
         // down-payment configuration
@@ -932,13 +932,13 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(12.5);
         Boolean enableAutoRepaymentForDownPayment = false;
 
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+        final Integer clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
 
         // Loan Product creation with down-payment configuration
-        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(loanTransactionHelper, delinquencyBucketId, enableDownPayment,
-                "12.5", enableAutoRepaymentForDownPayment, false);
+        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(LOAN_TRANSACTION_HELPER, delinquencyBucketId,
+                enableDownPayment, "12.5", enableAutoRepaymentForDownPayment, false);
 
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = loanTransactionHelper.getLoanProduct(loanProductId);
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
         assertNotNull(getLoanProductsProductResponse);
         assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
         assertEquals(0, getLoanProductsProductResponse.getDisbursedAmountPercentageForDownPayment()
@@ -949,7 +949,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
 
         // Retrieve Loan with loanId
 
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+        GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanId.longValue());
 
         // verify down-payment details for Loan
         assertNotNull(loanDetails);
@@ -958,23 +958,23 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         assertEquals(enableAutoRepaymentForDownPayment, loanDetails.getEnableAutoRepaymentForDownPayment());
 
         // Modify Loan Product to update enable down payment configuration
-        PutLoanProductsProductIdResponse loanProductModifyResponse = updateLoanProduct(loanTransactionHelper,
+        PutLoanProductsProductIdResponse loanProductModifyResponse = updateLoanProduct(LOAN_TRANSACTION_HELPER,
                 getLoanProductsProductResponse.getId());
         assertNotNull(loanProductModifyResponse);
 
         // verify Loan product configuration change
-        GetLoanProductsProductIdResponse getLoanProductsProductResponse_1 = loanTransactionHelper.getLoanProduct(loanProductId);
+        GetLoanProductsProductIdResponse getLoanProductsProductResponse_1 = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
         assertNotNull(getLoanProductsProductResponse_1);
         assertEquals(enableDownPayment, getLoanProductsProductResponse_1.getEnableDownPayment());
         assertEquals(0, getLoanProductsProductResponse_1.getDisbursedAmountPercentageForDownPayment().compareTo(BigDecimal.valueOf(25.0)));
         assertEquals(enableAutoRepaymentForDownPayment, getLoanProductsProductResponse_1.getEnableAutoRepaymentForDownPayment());
 
         // make repayment for loan
-        final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+        final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanExternalIdStr,
                 new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("5 September 2022").locale("en")
                         .transactionAmount(100.0));
 
-        loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+        loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanId.longValue());
 
         // verify down-payment details for Loan does not change
         assertNotNull(loanDetails);
@@ -991,33 +991,33 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
             // Set business date
             LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
 
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
-            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, disbursementDate);
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.TRUE);
+            BusinessDateHelper.updateBusinessDate(REQUEST_SPEC, RESPONSE_SPEC, BusinessDateType.BUSINESS_DATE, disbursementDate);
 
             // Accounts oof periodic accrual
-            final Account assetAccount = accountHelper.createAssetAccount();
-            final Account incomeAccount = accountHelper.createIncomeAccount();
-            final Account expenseAccount = accountHelper.createExpenseAccount();
-            final Account overpaymentAccount = accountHelper.createLiabilityAccount();
+            final Account assetAccount = ACCOUNT_HELPER.createAssetAccount();
+            final Account incomeAccount = ACCOUNT_HELPER.createIncomeAccount();
+            final Account expenseAccount = ACCOUNT_HELPER.createExpenseAccount();
+            final Account overpaymentAccount = ACCOUNT_HELPER.createLiabilityAccount();
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
             // Delinquency Bucket
-            final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-            final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
-                    delinquencyBucketId);
+            final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC);
+            final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(REQUEST_SPEC,
+                    RESPONSE_SPEC, delinquencyBucketId);
 
             // down-payment configuration
             Boolean enableDownPayment = true;
             BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
             Boolean enableAutoRepaymentForDownPayment = true;
 
-            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+            final Integer clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
 
             // Loan Product creation with down-payment configuration
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithDownPaymentConfigurationAndAccrualAccounting(
-                    loanTransactionHelper, delinquencyBucketId, enableDownPayment, "25", enableAutoRepaymentForDownPayment, assetAccount,
+                    LOAN_TRANSACTION_HELPER, delinquencyBucketId, enableDownPayment, "25", enableAutoRepaymentForDownPayment, assetAccount,
                     incomeAccount, expenseAccount, overpaymentAccount);
 
             assertNotNull(getLoanProductsProductResponse);
@@ -1031,7 +1031,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
 
             // Retrieve Loan with loanId
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanId.longValue());
 
             // verify down-payment details for Loan
             assertNotNull(loanDetails);
@@ -1040,16 +1040,16 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
             assertEquals(enableAutoRepaymentForDownPayment, loanDetails.getEnableAutoRepaymentForDownPayment());
 
             // first disbursement
-            loanTransactionHelper.disburseLoanWithTransactionAmount("03 March 2023", loanId, "1000");
+            LOAN_TRANSACTION_HELPER.disburseLoanWithTransactionAmount("03 March 2023", loanId, "1000");
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanId.longValue());
             // verify down-payment transaction created
             checkDownPaymentTransaction(disbursementDate, 250.0f, 0.0f, 0.0f, 0.0f, loanId);
 
             // verify journal entries for down-payment
-            journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "03 March 2023",
+            JOURNAL_ENTRY_HELPER.checkJournalEntryForAssetAccount(assetAccount, "03 March 2023",
                     new JournalEntry(250, JournalEntry.TransactionType.CREDIT));
-            journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "03 March 2023",
+            JOURNAL_ENTRY_HELPER.checkJournalEntryForAssetAccount(assetAccount, "03 March 2023",
                     new JournalEntry(250, JournalEntry.TransactionType.DEBIT));
 
             // verify installment details
@@ -1067,11 +1067,11 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
             // second disbursement
 
             disbursementDate = LocalDate.of(2023, 3, 5);
-            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, disbursementDate);
-            loanTransactionHelper.disburseLoanWithTransactionAmount("05 March 2023", loanId, "200");
+            BusinessDateHelper.updateBusinessDate(REQUEST_SPEC, RESPONSE_SPEC, BusinessDateType.BUSINESS_DATE, disbursementDate);
+            LOAN_TRANSACTION_HELPER.disburseLoanWithTransactionAmount("05 March 2023", loanId, "200");
             checkDownPaymentTransaction(disbursementDate, 50.0f, 0.0f, 0.0f, 0.0f, loanId);
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanId.longValue());
             // verify installment details
             assertEquals(LocalDate.of(2023, 3, 3), loanDetails.getRepaymentSchedule().getPeriods().get(0).getDueDate());
             assertEquals(1000.0, loanDetails.getRepaymentSchedule().getPeriods().get(0).getPrincipalLoanBalanceOutstanding());
@@ -1092,13 +1092,13 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
             assertEquals(false, loanDetails.getRepaymentSchedule().getPeriods().get(4).getDownPaymentPeriod());
 
             // verify journal entries for down-payment
-            journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "05 March 2023",
+            JOURNAL_ENTRY_HELPER.checkJournalEntryForAssetAccount(assetAccount, "05 March 2023",
                     new JournalEntry(50, JournalEntry.TransactionType.CREDIT));
-            journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, "05 March 2023",
+            JOURNAL_ENTRY_HELPER.checkJournalEntryForAssetAccount(assetAccount, "05 March 2023",
                     new JournalEntry(50, JournalEntry.TransactionType.DEBIT));
 
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.FALSE);
         }
 
     }
@@ -1110,33 +1110,33 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
             // Set business date
             LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
 
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
-            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, disbursementDate);
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.TRUE);
+            BusinessDateHelper.updateBusinessDate(REQUEST_SPEC, RESPONSE_SPEC, BusinessDateType.BUSINESS_DATE, disbursementDate);
 
             // Accounts oof periodic accrual
-            final Account assetAccount = accountHelper.createAssetAccount();
-            final Account incomeAccount = accountHelper.createIncomeAccount();
-            final Account expenseAccount = accountHelper.createExpenseAccount();
-            final Account overpaymentAccount = accountHelper.createLiabilityAccount();
+            final Account assetAccount = ACCOUNT_HELPER.createAssetAccount();
+            final Account incomeAccount = ACCOUNT_HELPER.createIncomeAccount();
+            final Account expenseAccount = ACCOUNT_HELPER.createExpenseAccount();
+            final Account overpaymentAccount = ACCOUNT_HELPER.createLiabilityAccount();
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
             // Delinquency Bucket
-            final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-            final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
-                    delinquencyBucketId);
+            final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC);
+            final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(REQUEST_SPEC,
+                    RESPONSE_SPEC, delinquencyBucketId);
 
             // down-payment configuration
             Boolean enableDownPayment = true;
             BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
             Boolean enableAutoRepaymentForDownPayment = false;
 
-            final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+            final Integer clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
 
             // Loan Product creation with down-payment configuration
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithDownPaymentConfigurationAndAccrualAccounting(
-                    loanTransactionHelper, delinquencyBucketId, enableDownPayment, "25", enableAutoRepaymentForDownPayment, assetAccount,
+                    LOAN_TRANSACTION_HELPER, delinquencyBucketId, enableDownPayment, "25", enableAutoRepaymentForDownPayment, assetAccount,
                     incomeAccount, expenseAccount, overpaymentAccount);
 
             assertNotNull(getLoanProductsProductResponse);
@@ -1150,7 +1150,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
 
             // Retrieve Loan with loanId
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+            GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanId.longValue());
 
             // verify down-payment details for Loan
             assertNotNull(loanDetails);
@@ -1159,13 +1159,13 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
             assertEquals(enableAutoRepaymentForDownPayment, loanDetails.getEnableAutoRepaymentForDownPayment());
 
             // first disbursement
-            loanTransactionHelper.disburseLoanWithTransactionAmount("03 March 2023", loanId, "1000");
+            LOAN_TRANSACTION_HELPER.disburseLoanWithTransactionAmount("03 March 2023", loanId, "1000");
 
             // verify no down-payment transaction created
             checkNoDownPaymentTransaction(loanId);
 
         } finally {
-            GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
+            GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.FALSE);
         }
 
     }
@@ -1180,11 +1180,11 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
         Boolean enableAutoRepaymentForDownPayment = false;
 
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+        final Integer clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
 
         // Loan Product creation with down-payment configuration
         GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProductWithEnableDownPaymentAndMultipleDisbursementsWithDisableRepaymentConfiguration(
-                loanTransactionHelper, enableDownPayment, "25", enableAutoRepaymentForDownPayment);
+                LOAN_TRANSACTION_HELPER, enableDownPayment, "25", enableAutoRepaymentForDownPayment);
         assertNotNull(getLoanProductsProductResponse);
         assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
         assertEquals(0, getLoanProductsProductResponse.getDisbursedAmountPercentageForDownPayment()
@@ -1196,7 +1196,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
 
         // Retrieve Loan with loanId
 
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+        GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanId.longValue());
 
         // verify down-payment details for Loan
         assertNotNull(loanDetails);
@@ -1210,34 +1210,34 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         runAt("03 March 2023", () -> {
             LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
 
-            PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+            PostClientsResponse client = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest());
 
             final PostLoanProductsRequest loanProductsRequest = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .installmentAmountInMultiplesOf(null).enableDownPayment(true).enableAutoRepaymentForDownPayment(true)
                     .disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25));
 
-            PostLoanProductsResponse loanProductsResponse = loanTransactionHelper.createLoanProduct(loanProductsRequest);
+            PostLoanProductsResponse loanProductsResponse = LOAN_TRANSACTION_HELPER.createLoanProduct(loanProductsRequest);
 
-            String disbursementDateStr = DateUtils.format(disbursementDate, DATETIME_PATTERN);
-            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(new PostLoansRequest().clientId(client.getResourceId())
-                    .productId(loanProductsResponse.getResourceId()).loanType("individual").locale("en").dateFormat(DATETIME_PATTERN)
+            String disbursementDateStr = DateUtils.format(disbursementDate, DATE_PATTERN);
+            PostLoansResponse loanResponse = LOAN_TRANSACTION_HELPER.applyLoan(new PostLoansRequest().clientId(client.getResourceId())
+                    .productId(loanProductsResponse.getResourceId()).loanType("individual").locale("en").dateFormat(DATE_PATTERN)
                     .amortizationType(1).interestRatePerPeriod(BigDecimal.ZERO).interestCalculationPeriodType(1).interestType(0)
                     .maxOutstandingLoanBalance(BigDecimal.valueOf(35000))
                     .transactionProcessingStrategyCode(AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
                     .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.name()).expectedDisbursementDate(disbursementDateStr)
-                    .dateFormat(DATETIME_PATTERN).submittedOnDate(disbursementDateStr).repaymentFrequencyType(0).repaymentEvery(30)
+                    .dateFormat(DATE_PATTERN).submittedOnDate(disbursementDateStr).repaymentFrequencyType(0).repaymentEvery(30)
                     .numberOfRepayments(1).loanTermFrequency(30).loanTermFrequencyType(0).principal(BigDecimal.valueOf(1000))
                     .loanType("individual").maxOutstandingLoanBalance(BigDecimal.valueOf(35000)));
 
-            loanTransactionHelper.approveLoan(loanResponse.getResourceId(),
-                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN)
+            LOAN_TRANSACTION_HELPER.approveLoan(loanResponse.getResourceId(),
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATE_PATTERN)
                             .approvedOnDate(disbursementDateStr).locale("en"));
 
-            loanTransactionHelper.disburseLoan(loanResponse.getResourceId(),
-                    new PostLoansLoanIdRequest().actualDisbursementDate(disbursementDateStr).dateFormat(DATETIME_PATTERN)
+            LOAN_TRANSACTION_HELPER.disburseLoan(loanResponse.getResourceId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate(disbursementDateStr).dateFormat(DATE_PATTERN)
                             .transactionAmount(BigDecimal.valueOf(1000)).locale("en"));
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getResourceId());
+            GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getResourceId());
 
             assertTrue(loanDetails.getStatus().getActive());
 
@@ -1253,16 +1253,16 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
                     transaction(250.0, "Down Payment", "03 March 2023", 750.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
             );
             verifyJournalEntries(loanResponse.getResourceId(), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT") //
+                    journalEntry(1000.0, LOANS_RECEIVABLE_ACCOUNT, "DEBIT"), //
+                    journalEntry(1000.0, FUND_SOURCE, "CREDIT"), //
+                    journalEntry(250.0, LOANS_RECEIVABLE_ACCOUNT, "CREDIT"), //
+                    journalEntry(250.0, FUND_SOURCE, "DEBIT") //
             );
 
-            loanTransactionHelper.makeLoanRepayment(loanResponse.getResourceId(), new PostLoansLoanIdTransactionsRequest()
+            LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanResponse.getResourceId(), new PostLoansLoanIdTransactionsRequest()
                     .dateFormat("dd MMMM yyyy").transactionDate("03 March 2023").locale("en").transactionAmount(800.0));
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getResourceId());
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getResourceId());
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanResponse.getResourceId(), //
                     installment(1000.0, null, "03 March 2023"), //
@@ -1280,13 +1280,13 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
 
             // second disbursement
             disbursementDate = LocalDate.of(2023, 3, 5);
-            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, disbursementDate);
+            BusinessDateHelper.updateBusinessDate(REQUEST_SPEC, RESPONSE_SPEC, BusinessDateType.BUSINESS_DATE, disbursementDate);
 
-            loanTransactionHelper.disburseLoan(loanResponse.getResourceId(),
-                    new PostLoansLoanIdRequest().actualDisbursementDate("05 March 2023").dateFormat(DATETIME_PATTERN)
+            LOAN_TRANSACTION_HELPER.disburseLoan(loanResponse.getResourceId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("05 March 2023").dateFormat(DATE_PATTERN)
                             .transactionAmount(BigDecimal.valueOf(20.00)).locale("en"));
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getResourceId());
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getResourceId());
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanResponse.getResourceId(), //
                     installment(1000.0, null, "03 March 2023"), //
@@ -1305,10 +1305,10 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
             assertTrue(loanDetails.getStatus().getOverpaid());
             assertEquals(30.0, loanDetails.getTotalOverpaid());
 
-            loanTransactionHelper.disburseLoan(loanResponse.getResourceId(),
-                    new PostLoansLoanIdRequest().actualDisbursementDate("05 March 2023").dateFormat(DATETIME_PATTERN)
+            LOAN_TRANSACTION_HELPER.disburseLoan(loanResponse.getResourceId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("05 March 2023").dateFormat(DATE_PATTERN)
                             .transactionAmount(BigDecimal.valueOf(30.00)).locale("en"));
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getResourceId());
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getResourceId());
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanResponse.getResourceId(), //
@@ -1333,11 +1333,11 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
             assertEquals(0.0, loanDetails.getSummary().getTotalOutstanding());
             assertEquals(null, loanDetails.getTotalOverpaid());
 
-            PostLoansLoanIdTransactionsResponse repayment = loanTransactionHelper.makeLoanRepayment(loanResponse.getResourceId(),
+            PostLoansLoanIdTransactionsResponse repayment = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanResponse.getResourceId(),
                     new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("05 March 2023").locale("en")
                             .transactionAmount(1.0));
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getResourceId());
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getResourceId());
             // verify transactions
             verifyTransactions(loanResponse.getResourceId(), //
                     transaction(1000.0, "Disbursement", "03 March 2023", 1000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
@@ -1350,10 +1350,10 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
             assertTrue(loanDetails.getStatus().getOverpaid());
             assertEquals(1.0, loanDetails.getTotalOverpaid());
 
-            loanTransactionHelper.disburseLoan(loanResponse.getResourceId(),
-                    new PostLoansLoanIdRequest().actualDisbursementDate("05 March 2023").dateFormat(DATETIME_PATTERN)
+            LOAN_TRANSACTION_HELPER.disburseLoan(loanResponse.getResourceId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("05 March 2023").dateFormat(DATE_PATTERN)
                             .transactionAmount(BigDecimal.valueOf(40.00)).locale("en"));
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getResourceId());
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getResourceId());
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanResponse.getResourceId(), //
                     installment(1000.0, null, "03 March 2023"), //
@@ -1381,11 +1381,11 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
             assertTrue(loanDetails.getStatus().getActive());
             assertEquals(30.0, loanDetails.getSummary().getTotalOutstanding());
 
-            loanTransactionHelper.reverseLoanTransaction(repayment.getLoanId(), repayment.getResourceId(),
-                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN).transactionDate("05 March 2023")
+            LOAN_TRANSACTION_HELPER.reverseLoanTransaction(repayment.getLoanId(), repayment.getResourceId(),
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATE_PATTERN).transactionDate("05 March 2023")
                             .transactionAmount(0.0).locale("en"));
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getResourceId());
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getResourceId());
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanResponse.getResourceId(), //
                     installment(1000.0, null, "03 March 2023"), //
@@ -1420,7 +1420,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         runAt("03 March 2023", () -> {
             LocalDate disbursementDate = LocalDate.of(2023, 3, 3);
 
-            PostClientsResponse client = clientHelper.createClient(ClientHelper.defaultClientCreationRequest());
+            PostClientsResponse client = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest());
 
             final PostLoanProductsRequest loanProductsRequest = createOnePeriod30DaysLongNoInterestPeriodicAccrualProductWithAdvancedPaymentAllocation()
                     .installmentAmountInMultiplesOf(null).enableDownPayment(true).enableAutoRepaymentForDownPayment(true)
@@ -1429,28 +1429,28 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
                             DuePenFeeIntPriInAdvancePriPenFeeIntLoanRepaymentScheduleTransactionProcessor.STRATEGY_CODE)
                     .disbursedAmountPercentageForDownPayment(BigDecimal.valueOf(25));
 
-            PostLoanProductsResponse loanProductsResponse = loanTransactionHelper.createLoanProduct(loanProductsRequest);
+            PostLoanProductsResponse loanProductsResponse = LOAN_TRANSACTION_HELPER.createLoanProduct(loanProductsRequest);
 
-            String disbursementDateStr = DateUtils.format(disbursementDate, DATETIME_PATTERN);
-            PostLoansResponse loanResponse = loanTransactionHelper.applyLoan(new PostLoansRequest().clientId(client.getResourceId())
-                    .productId(loanProductsResponse.getResourceId()).loanType("individual").locale("en").dateFormat(DATETIME_PATTERN)
+            String disbursementDateStr = DateUtils.format(disbursementDate, DATE_PATTERN);
+            PostLoansResponse loanResponse = LOAN_TRANSACTION_HELPER.applyLoan(new PostLoansRequest().clientId(client.getResourceId())
+                    .productId(loanProductsResponse.getResourceId()).loanType("individual").locale("en").dateFormat(DATE_PATTERN)
                     .amortizationType(1).interestRatePerPeriod(BigDecimal.ZERO).interestCalculationPeriodType(1).interestType(0)
                     .maxOutstandingLoanBalance(BigDecimal.valueOf(35000))
                     .transactionProcessingStrategyCode(
                             DuePenFeeIntPriInAdvancePriPenFeeIntLoanRepaymentScheduleTransactionProcessor.STRATEGY_CODE)
-                    .expectedDisbursementDate(disbursementDateStr).dateFormat(DATETIME_PATTERN).submittedOnDate(disbursementDateStr)
+                    .expectedDisbursementDate(disbursementDateStr).dateFormat(DATE_PATTERN).submittedOnDate(disbursementDateStr)
                     .repaymentFrequencyType(0).repaymentEvery(30).numberOfRepayments(1).loanTermFrequency(30).loanTermFrequencyType(0)
                     .principal(BigDecimal.valueOf(1000)).loanType("individual").maxOutstandingLoanBalance(BigDecimal.valueOf(35000)));
 
-            loanTransactionHelper.approveLoan(loanResponse.getResourceId(),
-                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN)
+            LOAN_TRANSACTION_HELPER.approveLoan(loanResponse.getResourceId(),
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATE_PATTERN)
                             .approvedOnDate(disbursementDateStr).locale("en"));
 
-            loanTransactionHelper.disburseLoan(loanResponse.getResourceId(),
-                    new PostLoansLoanIdRequest().actualDisbursementDate(disbursementDateStr).dateFormat(DATETIME_PATTERN)
+            LOAN_TRANSACTION_HELPER.disburseLoan(loanResponse.getResourceId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate(disbursementDateStr).dateFormat(DATE_PATTERN)
                             .transactionAmount(BigDecimal.valueOf(1000)).locale("en"));
 
-            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getResourceId());
+            GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getResourceId());
 
             assertTrue(loanDetails.getStatus().getActive());
 
@@ -1466,18 +1466,18 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
                     transaction(250.0, "Down Payment", "03 March 2023", 750.0, 250.0, 0.0, 0.0, 0.0, 0.0, 0.0) //
             );
             verifyJournalEntries(loanResponse.getResourceId(), //
-                    journalEntry(1000.0, loansReceivableAccount, "DEBIT"), //
-                    journalEntry(1000.0, fundSource, "CREDIT"), //
-                    journalEntry(250.0, loansReceivableAccount, "CREDIT"), //
-                    journalEntry(250.0, fundSource, "DEBIT") //
+                    journalEntry(1000.0, LOANS_RECEIVABLE_ACCOUNT, "DEBIT"), //
+                    journalEntry(1000.0, FUND_SOURCE, "CREDIT"), //
+                    journalEntry(250.0, LOANS_RECEIVABLE_ACCOUNT, "CREDIT"), //
+                    journalEntry(250.0, FUND_SOURCE, "DEBIT") //
             );
 
             String externalId = UUID.randomUUID().toString();
-            loanTransactionHelper.makeLoanRepayment(loanResponse.getResourceId(),
+            LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanResponse.getResourceId(),
                     new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("03 March 2023").locale("en")
                             .transactionAmount(800.0).externalId(externalId));
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getResourceId());
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getResourceId());
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanResponse.getResourceId(), //
                     installment(1000.0, null, "03 March 2023"), //
@@ -1495,13 +1495,13 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
 
             // second disbursement
             disbursementDate = LocalDate.of(2023, 3, 5);
-            BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, disbursementDate);
+            BusinessDateHelper.updateBusinessDate(REQUEST_SPEC, RESPONSE_SPEC, BusinessDateType.BUSINESS_DATE, disbursementDate);
 
-            loanTransactionHelper.disburseLoan(loanResponse.getResourceId(),
-                    new PostLoansLoanIdRequest().actualDisbursementDate("05 March 2023").dateFormat(DATETIME_PATTERN)
+            LOAN_TRANSACTION_HELPER.disburseLoan(loanResponse.getResourceId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("05 March 2023").dateFormat(DATE_PATTERN)
                             .transactionAmount(BigDecimal.valueOf(20.00)).locale("en"));
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getResourceId());
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getResourceId());
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanResponse.getResourceId(), //
                     installment(1000.0, null, "03 March 2023"), //
@@ -1520,10 +1520,10 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
             assertTrue(loanDetails.getStatus().getOverpaid());
             assertEquals(30.0, loanDetails.getTotalOverpaid());
 
-            loanTransactionHelper.disburseLoan(loanResponse.getResourceId(),
-                    new PostLoansLoanIdRequest().actualDisbursementDate("05 March 2023").dateFormat(DATETIME_PATTERN)
+            LOAN_TRANSACTION_HELPER.disburseLoan(loanResponse.getResourceId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("05 March 2023").dateFormat(DATE_PATTERN)
                             .transactionAmount(BigDecimal.valueOf(30.00)).locale("en"));
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getResourceId());
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getResourceId());
 
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanResponse.getResourceId(), //
@@ -1548,10 +1548,10 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
             assertEquals(0.0, loanDetails.getSummary().getTotalOutstanding());
             assertEquals(null, loanDetails.getTotalOverpaid());
 
-            loanTransactionHelper.disburseLoan(loanResponse.getResourceId(),
-                    new PostLoansLoanIdRequest().actualDisbursementDate("05 March 2023").dateFormat(DATETIME_PATTERN)
+            LOAN_TRANSACTION_HELPER.disburseLoan(loanResponse.getResourceId(),
+                    new PostLoansLoanIdRequest().actualDisbursementDate("05 March 2023").dateFormat(DATE_PATTERN)
                             .transactionAmount(BigDecimal.valueOf(40.00)).locale("en"));
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getResourceId());
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getResourceId());
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanResponse.getResourceId(), //
                     installment(1000.0, null, "03 March 2023"), //
@@ -1578,11 +1578,11 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
             assertTrue(loanDetails.getStatus().getActive());
             assertEquals(30.0, loanDetails.getSummary().getTotalOutstanding());
 
-            loanTransactionHelper.reverseLoanTransaction(loanResponse.getLoanId(), externalId,
-                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN).transactionDate("05 March 2023")
+            LOAN_TRANSACTION_HELPER.reverseLoanTransaction(loanResponse.getLoanId(), externalId,
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATE_PATTERN).transactionDate("05 March 2023")
                             .transactionAmount(0.0).locale("en"));
 
-            loanDetails = loanTransactionHelper.getLoanDetails(loanResponse.getResourceId());
+            loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanResponse.getResourceId());
             // Verify Repayment Schedule
             verifyRepaymentSchedule(loanResponse.getResourceId(), //
                     installment(1000.0, null, "03 March 2023"), //
@@ -1615,20 +1615,20 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
     public void loanRepaymentScheduleWithSimpleDisbursementAndWithoutAutoPayment() {
         String loanExternalIdStr = UUID.randomUUID().toString();
 
-        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(requestSpec, responseSpec);
-        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(requestSpec, responseSpec,
+        final Integer delinquencyBucketId = DelinquencyBucketsHelper.createDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC);
+        final GetDelinquencyBucketsResponse delinquencyBucket = DelinquencyBucketsHelper.getDelinquencyBucket(REQUEST_SPEC, RESPONSE_SPEC,
                 delinquencyBucketId);
 
         Boolean enableDownPayment = true;
         BigDecimal disbursedAmountPercentageForDownPayment = BigDecimal.valueOf(25);
         Boolean enableAutoRepaymentForDownPayment = true;
 
-        final Integer clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
+        final Integer clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId().intValue();
 
-        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(loanTransactionHelper, delinquencyBucketId, enableDownPayment,
-                "25", enableAutoRepaymentForDownPayment, false);
+        Integer loanProductId = createLoanProductWithDownPaymentConfiguration(LOAN_TRANSACTION_HELPER, delinquencyBucketId,
+                enableDownPayment, "25", enableAutoRepaymentForDownPayment, false);
 
-        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = loanTransactionHelper.getLoanProduct(loanProductId);
+        final GetLoanProductsProductIdResponse getLoanProductsProductResponse = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
         assertNotNull(getLoanProductsProductResponse);
         assertEquals(enableDownPayment, getLoanProductsProductResponse.getEnableDownPayment());
         assertEquals(0, getLoanProductsProductResponse.getDisbursedAmountPercentageForDownPayment()
@@ -1636,9 +1636,9 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
         assertEquals(enableAutoRepaymentForDownPayment, getLoanProductsProductResponse.getEnableAutoRepaymentForDownPayment());
 
         final Integer loanId = createAndApproveLoanAccount(clientId, loanProductId.longValue(), loanExternalIdStr, "1", "0");
-        loanTransactionHelper.disburseLoanWithTransactionAmountAndWithoutAutoPayment("03 September 2022", loanId, "1000");
+        LOAN_TRANSACTION_HELPER.disburseLoanWithTransactionAmountAndWithoutAutoPayment("03 September 2022", loanId, "1000");
 
-        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
+        GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails(loanId.longValue());
         GetLoansLoanIdSummary summary = loanDetails.getSummary();
 
         assertNotNull(loanDetails);
@@ -1664,7 +1664,8 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
     }
 
     private void checkNoDownPaymentTransaction(final Integer loanID) {
-        ArrayList<HashMap> transactions = (ArrayList<HashMap>) loanTransactionHelper.getLoanTransactions(requestSpec, responseSpec, loanID);
+        ArrayList<HashMap> transactions = (ArrayList<HashMap>) LOAN_TRANSACTION_HELPER.getLoanTransactions(REQUEST_SPEC, RESPONSE_SPEC,
+                loanID);
         boolean isTransactionFound = false;
         for (int i = 0; i < transactions.size(); i++) {
             HashMap transactionType = (HashMap) transactions.get(i).get("type");
@@ -1680,7 +1681,8 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
 
     private void checkDownPaymentTransaction(final LocalDate transactionDate, final Float principalPortion, final Float interestPortion,
             final Float feePortion, final Float penaltyPortion, final Integer loanID) {
-        ArrayList<HashMap> transactions = (ArrayList<HashMap>) loanTransactionHelper.getLoanTransactions(requestSpec, responseSpec, loanID);
+        ArrayList<HashMap> transactions = (ArrayList<HashMap>) LOAN_TRANSACTION_HELPER.getLoanTransactions(REQUEST_SPEC, RESPONSE_SPEC,
+                loanID);
         boolean isTransactionFound = false;
         for (int i = 0; i < transactions.size(); i++) {
             HashMap transactionType = (HashMap) transactions.get(i).get("type");
@@ -1718,8 +1720,8 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
                 .withSubmittedOnDate("03 March 2023").withLoanType("individual").withExternalId(externalId)
                 .build(clientID.toString(), loanProductID.toString(), null);
 
-        final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
-        loanTransactionHelper.approveLoan("03 March 2023", "1000", loanId, null);
+        final Integer loanId = LOAN_TRANSACTION_HELPER.getLoanId(loanApplicationJSON);
+        LOAN_TRANSACTION_HELPER.approveLoan("03 March 2023", "1000", loanId, null);
         return loanId;
     }
 
@@ -1746,9 +1748,9 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
                 .withExpectedDisbursementDate("03 September 2022").withSubmittedOnDate("01 September 2022").withLoanType("individual")
                 .withExternalId(externalId).build(clientID.toString(), loanProductID.toString(), null);
 
-        final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
-        loanTransactionHelper.approveLoan("02 September 2022", "1000", loanId, null);
-        loanTransactionHelper.disburseLoanWithNetDisbursalAmount("03 September 2022", loanId, "1000");
+        final Integer loanId = LOAN_TRANSACTION_HELPER.getLoanId(loanApplicationJSON);
+        LOAN_TRANSACTION_HELPER.approveLoan("02 September 2022", "1000", loanId, null);
+        LOAN_TRANSACTION_HELPER.disburseLoanWithNetDisbursalAmount("03 September 2022", loanId, "1000");
         return loanId;
     }
 
@@ -1797,8 +1799,8 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
                 .withExpectedDisbursementDate("03 September 2022").withSubmittedOnDate("01 September 2022").withLoanType("individual")
                 .withExternalId(externalId).build(clientID.toString(), loanProductID.toString(), null);
 
-        final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
-        loanTransactionHelper.approveLoan("02 September 2022", "1000", loanId, null);
+        final Integer loanId = LOAN_TRANSACTION_HELPER.getLoanId(loanApplicationJSON);
+        LOAN_TRANSACTION_HELPER.approveLoan("02 September 2022", "1000", loanId, null);
         return loanId;
     }
 
@@ -1806,7 +1808,7 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
             final String numberOfRepayments, final String interestRate) {
 
         Integer loanId = createAndApproveLoanAccount(clientID, loanProductID, externalId, numberOfRepayments, interestRate);
-        loanTransactionHelper.disburseLoanWithTransactionAmount("03 September 2022", loanId, "1000");
+        LOAN_TRANSACTION_HELPER.disburseLoanWithTransactionAmount("03 September 2022", loanId, "1000");
         return loanId;
     }
 
@@ -1820,10 +1822,10 @@ public class LoanRepaymentScheduleWithDownPaymentTest extends BaseLoanIntegratio
                 .withExpectedDisbursementDate("04 September 2022").withSubmittedOnDate("01 September 2022").withLoanType("individual")
                 .withExternalId(externalId).build(clientID.toString(), loanProductID.toString(), null);
 
-        final Integer loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
-        loanTransactionHelper.approveLoan("02 September 2022", "1000", loanId, null);
-        loanTransactionHelper.disburseLoanWithTransactionAmount("03 September 2022", loanId, "700");
-        loanTransactionHelper.disburseLoanWithTransactionAmount("04 September 2022", loanId, "300");
+        final Integer loanId = LOAN_TRANSACTION_HELPER.getLoanId(loanApplicationJSON);
+        LOAN_TRANSACTION_HELPER.approveLoan("02 September 2022", "1000", loanId, null);
+        LOAN_TRANSACTION_HELPER.disburseLoanWithTransactionAmount("03 September 2022", loanId, "700");
+        LOAN_TRANSACTION_HELPER.disburseLoanWithTransactionAmount("04 September 2022", loanId, "300");
         return loanId;
     }
 

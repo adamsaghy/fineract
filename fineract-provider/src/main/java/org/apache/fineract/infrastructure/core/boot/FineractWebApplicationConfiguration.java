@@ -21,6 +21,7 @@ package org.apache.fineract.infrastructure.core.boot;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.infrastructure.core.condition.FineractWebApplicationCondition;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.config.Resilience4JProperties;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.gson.GsonAutoConfiguration;
@@ -48,7 +49,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
         LiquibaseAutoConfiguration.class })
 @EnableTransactionManagement
 @EnableWebSecurity
-@EnableConfigurationProperties({ FineractProperties.class, LiquibaseProperties.class })
+@EnableConfigurationProperties({ Resilience4JProperties.class, FineractProperties.class, LiquibaseProperties.class })
 @ComponentScan(basePackages = "org.apache.fineract.**")
 @IntegrationComponentScan(basePackages = "org.apache.fineract.**")
 @Conditional(FineractWebApplicationCondition.class)

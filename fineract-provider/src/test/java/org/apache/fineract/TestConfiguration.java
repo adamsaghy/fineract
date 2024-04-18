@@ -28,6 +28,7 @@ import javax.sql.DataSource;
 import liquibase.change.custom.CustomTaskChange;
 import okhttp3.OkHttpClient;
 import org.apache.fineract.infrastructure.core.config.FineractProperties;
+import org.apache.fineract.infrastructure.core.config.Resilience4JProperties;
 import org.apache.fineract.infrastructure.core.domain.FineractPlatformTenant;
 import org.apache.fineract.infrastructure.core.service.database.DatabaseIndependentQueryService;
 import org.apache.fineract.infrastructure.core.service.database.DatabasePasswordEncryptor;
@@ -81,7 +82,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
         LiquibaseAutoConfiguration.class, BatchAutoConfiguration.class })
 @EnableTransactionManagement
 @EnableWebSecurity
-@EnableConfigurationProperties({ FineractProperties.class, LiquibaseProperties.class })
+@EnableConfigurationProperties({ Resilience4JProperties.class, FineractProperties.class, LiquibaseProperties.class })
 @ComponentScan(basePackages = "org.apache.fineract", excludeFilters = {
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = ScheduledJobRunnerConfig.class) })
 @ExtendWith(MockitoExtension.class)

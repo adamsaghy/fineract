@@ -235,8 +235,8 @@ public class ClientHelper extends IntegrationTest {
 
     public Object createClientPendingWithError(final String jsonAttributeToGetBack) {
         log.info("---------------------------------CREATING A CLIENT IN PENDING WITH ERROR---------------------------------------------");
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_CLIENT_URL,
-                getTestClientAsJSONPending("04 March 2014", "1"), jsonAttributeToGetBack);
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestClientAsJSONPending("04 March 2014", "1"),
+                jsonAttributeToGetBack);
     }
 
     public static Integer createClientPendingWithDatatable(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -514,11 +514,11 @@ public class ClientHelper extends IntegrationTest {
 
         /* Retrieve Code id for the Code "ClientClosureReason" */
         String codeName = "ClientClosureReason";
-        HashMap<String, Object> code = CodeHelper.getCodeByName(this.requestSpec, this.responseSpec, codeName);
+        HashMap<String, Object> code = CodeHelper.getCodeByName(requestSpec, responseSpec, codeName);
         Integer clientClosureCodeId = (Integer) code.get("id");
 
         /* Retrieve/Create Code Values for the Code "ClientClosureReason" */
-        HashMap<String, Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(clientClosureCodeId, this.requestSpec, this.responseSpec);
+        HashMap<String, Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(clientClosureCodeId, requestSpec, responseSpec);
         Integer closureReasonId = (Integer) codeValue.get("id");
 
         map.put("closureReasonId", closureReasonId.toString());
@@ -567,12 +567,11 @@ public class ClientHelper extends IntegrationTest {
         final HashMap<String, String> map = new HashMap<>();
         /* Retrieve Code id for the Code "ClientRejectReason" */
         String codeName = "ClientRejectReason";
-        HashMap<String, Object> code = CodeHelper.getCodeByName(this.requestSpec, this.responseSpec, codeName);
+        HashMap<String, Object> code = CodeHelper.getCodeByName(requestSpec, responseSpec, codeName);
         Integer clientRejectionReasonCodeId = (Integer) code.get("id");
 
         /* Retrieve/Create Code Values for the Code "ClientRejectReason" */
-        HashMap<String, Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(clientRejectionReasonCodeId, this.requestSpec,
-                this.responseSpec);
+        HashMap<String, Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(clientRejectionReasonCodeId, requestSpec, responseSpec);
         Integer rejectionReasonId = (Integer) codeValue.get("id");
 
         map.put("locale", CommonConstants.LOCALE);
@@ -599,12 +598,11 @@ public class ClientHelper extends IntegrationTest {
         final HashMap<String, String> map = new HashMap<>();
         /* Retrieve Code id for the Code "ClientWithdrawReason" */
         String codeName = "ClientWithdrawReason";
-        HashMap<String, Object> code = CodeHelper.getCodeByName(this.requestSpec, this.responseSpec, codeName);
+        HashMap<String, Object> code = CodeHelper.getCodeByName(requestSpec, responseSpec, codeName);
         Integer clientWithdrawReasonCodeId = (Integer) code.get("id");
 
         /* Retrieve/Create Code Values for the Code "ClientWithdrawReason" */
-        HashMap<String, Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(clientWithdrawReasonCodeId, this.requestSpec,
-                this.responseSpec);
+        HashMap<String, Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(clientWithdrawReasonCodeId, requestSpec, responseSpec);
         Integer withdrawalReasonId = (Integer) codeValue.get("id");
 
         map.put("locale", CommonConstants.LOCALE);
@@ -730,11 +728,11 @@ public class ClientHelper extends IntegrationTest {
 
     private ArrayList<HashMap<String, Object>> performClientActionsWithValidationErrors(final String postURLForClient,
             final String jsonToBeSent, final String jsonAttributeToGetBack) {
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForClient, jsonToBeSent, jsonAttributeToGetBack);
+        return Utils.performServerPost(requestSpec, responseSpec, postURLForClient, jsonToBeSent, jsonAttributeToGetBack);
     }
 
     private HashMap<String, Object> performClientActions(final String postURLForClient, final String jsonToBeSent, final Integer clientId) {
-        Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForClient, jsonToBeSent, CommonConstants.RESPONSE_STATUS);
+        Utils.performServerPost(requestSpec, responseSpec, postURLForClient, jsonToBeSent, CommonConstants.RESPONSE_STATUS);
         HashMap<String, Object> response = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
 
         return response;
@@ -851,7 +849,7 @@ public class ClientHelper extends IntegrationTest {
 
     public String importClientEntityTemplate(File file) {
         String locale = "en";
-        String dateFormat = "dd MMMM yyyy";
+        String dateFormat = CommonConstants.DATE_FORMAT;
         String legalFormType = GlobalEntityType.CLIENTS_ENTITY.toString();
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA);
         return Utils.performServerTemplatePost(requestSpec, responseSpec, CLIENT_URL + "/uploadtemplate" + "?" + Utils.TENANT_IDENTIFIER,

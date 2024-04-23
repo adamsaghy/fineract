@@ -53,10 +53,10 @@ public class LoanApplicationScheduleMonthlyTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -69,8 +69,8 @@ public class LoanApplicationScheduleMonthlyTest {
 
         Integer loanId = applyForLoanApplication(clientId, loanProductId, firstRepaymentDate);
 
-        final ArrayList<HashMap> repaymentPeriods = (ArrayList<HashMap>) this.loanTransactionHelper
-                .getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanId);
+        final ArrayList<HashMap> repaymentPeriods = (ArrayList<HashMap>) loanTransactionHelper.getLoanRepaymentSchedule(requestSpec,
+                responseSpec, loanId);
 
         assertEquals(new ArrayList<>(Arrays.asList(2023, 1, 31)), repaymentPeriods.get(1).get(DUE_DATE),
                 "Checking for Due Date for 1st Month");
@@ -116,7 +116,7 @@ public class LoanApplicationScheduleMonthlyTest {
     }
 
     private Integer createClient(String activationDate) {
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, activationDate);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, activationDate);
         return clientId;
     }
 
@@ -130,8 +130,8 @@ public class LoanApplicationScheduleMonthlyTest {
 
         Integer loanId = applyForLoanApplication(clientId, loanProductId, firstRepaymentDate);
 
-        final ArrayList<HashMap> repaymentPeriods = (ArrayList<HashMap>) this.loanTransactionHelper
-                .getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanId);
+        final ArrayList<HashMap> repaymentPeriods = (ArrayList<HashMap>) loanTransactionHelper.getLoanRepaymentSchedule(requestSpec,
+                responseSpec, loanId);
 
         assertEquals(new ArrayList<>(Arrays.asList(2023, 1, 30)), repaymentPeriods.get(1).get(DUE_DATE),
                 "Checking for Due Date for 1st Month");
@@ -186,8 +186,8 @@ public class LoanApplicationScheduleMonthlyTest {
 
         Integer loanId = applyForLoanApplication(clientId, loanProductId, firstRepaymentDate);
 
-        final ArrayList<HashMap> repaymentPeriods = (ArrayList<HashMap>) this.loanTransactionHelper
-                .getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanId);
+        final ArrayList<HashMap> repaymentPeriods = (ArrayList<HashMap>) loanTransactionHelper.getLoanRepaymentSchedule(requestSpec,
+                responseSpec, loanId);
 
         assertEquals(new ArrayList<>(Arrays.asList(2023, 1, 28)), repaymentPeriods.get(1).get(DUE_DATE),
                 "Checking for Due Date for 1st Month");
@@ -242,8 +242,8 @@ public class LoanApplicationScheduleMonthlyTest {
 
         Integer loanId = applyForLoanApplication(clientId, loanProductId, firstRepaymentDate);
 
-        final ArrayList<HashMap> repaymentPeriods = (ArrayList<HashMap>) this.loanTransactionHelper
-                .getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanId);
+        final ArrayList<HashMap> repaymentPeriods = (ArrayList<HashMap>) loanTransactionHelper.getLoanRepaymentSchedule(requestSpec,
+                responseSpec, loanId);
 
         assertEquals(new ArrayList<>(Arrays.asList(2023, 1, 25)), repaymentPeriods.get(1).get(DUE_DATE),
                 "Checking for Due Date for 1st Month");
@@ -296,7 +296,7 @@ public class LoanApplicationScheduleMonthlyTest {
                 .withNumberOfRepayments(NUMBER_OF_REPAYMENTS).withRepaymentTypeAsMonth().withInterestRateFrequencyTypeAsMonths()
                 .build(null);
 
-        Integer loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        Integer loanProductId = loanTransactionHelper.getLoanProductId(loanProductJSON);
         return loanProductId;
     }
 
@@ -309,6 +309,6 @@ public class LoanApplicationScheduleMonthlyTest {
                 .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("2").withExpectedDisbursementDate(DISBURSEMENT_DATE)
                 .withSubmittedOnDate(DISBURSEMENT_DATE).withFirstRepaymentDate(firstRepaymentDate)
                 .build(clientID.toString(), loanProductID.toString(), null);
-        return this.loanTransactionHelper.getLoanId(loanApplication);
+        return loanTransactionHelper.getLoanId(loanApplication);
     }
 }

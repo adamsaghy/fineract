@@ -39,7 +39,7 @@ import org.junit.jupiter.api.Test;
 public class ClientUndoRejectAndWithdrawalIntegrationTest {
 
     private static final String CREATE_CLIENT_URL = "/fineract-provider/api/v1/clients?" + Utils.TENANT_IDENTIFIER;
-    public static final String DATE_FORMAT = "dd MMMM yyyy";
+
     private final String submittedOnDate = "submittedOnDate";
     private final String officeId = "officeId";
     private ResponseSpecification responseSpec;
@@ -49,21 +49,21 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.requestSpec.header("Fineract-Platform-TenantId", "default");
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        requestSpec.header("Fineract-Platform-TenantId", "default");
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
 
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
     }
 
     @Test
     public void clientUndoRejectIntegrationTest() {
 
         // CREATE CLIENT
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-        final Integer clientId = ClientHelper.createClientPending(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
+        final Integer clientId = ClientHelper.createClientPending(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
         // Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
@@ -82,11 +82,11 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
     @Test
     public void testClientUndoRejectWithDateBeforeRejectDate() {
         final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
-        final ClientHelper validationErrorHelper = new ClientHelper(this.requestSpec, errorResponse);
+        final ClientHelper validationErrorHelper = new ClientHelper(requestSpec, errorResponse);
 
         // CREATE CLIENT
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-        final Integer clientId = ClientHelper.createClientPending(this.requestSpec, this.responseSpec);
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
+        final Integer clientId = ClientHelper.createClientPending(requestSpec, responseSpec);
         Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
@@ -110,11 +110,11 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
     @Test
     public void testClientUndoRejectWithoutReject() {
         final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
-        final ClientHelper validationErrorHelper = new ClientHelper(this.requestSpec, errorResponse);
+        final ClientHelper validationErrorHelper = new ClientHelper(requestSpec, errorResponse);
 
         // CREATE CLIENT
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-        final Integer clientId = ClientHelper.createClientPending(this.requestSpec, this.responseSpec);
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
+        final Integer clientId = ClientHelper.createClientPending(requestSpec, responseSpec);
         Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
@@ -138,11 +138,11 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
     public void testClientUndoRejectWithFutureDate() {
 
         final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(400).build();
-        final ClientHelper validationErrorHelper = new ClientHelper(this.requestSpec, errorResponse);
+        final ClientHelper validationErrorHelper = new ClientHelper(requestSpec, errorResponse);
 
         // CREATE CLIENT
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-        final Integer clientId = ClientHelper.createClientPending(this.requestSpec, this.responseSpec);
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
+        final Integer clientId = ClientHelper.createClientPending(requestSpec, responseSpec);
         Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
@@ -168,8 +168,8 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
     public void clientUndoWithDrawnIntegrationTest() {
 
         // CREATE CLIENT
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-        final Integer clientId = ClientHelper.createClientPending(this.requestSpec, this.responseSpec);
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
+        final Integer clientId = ClientHelper.createClientPending(requestSpec, responseSpec);
         Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
@@ -189,11 +189,11 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
     public void testClientUndoWithDrawnWithDateBeforeWithdrawal() {
 
         final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
-        final ClientHelper validationErrorHelper = new ClientHelper(this.requestSpec, errorResponse);
+        final ClientHelper validationErrorHelper = new ClientHelper(requestSpec, errorResponse);
 
         // CREATE CLIENT
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-        final Integer clientId = ClientHelper.createClientPending(this.requestSpec, this.responseSpec);
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
+        final Integer clientId = ClientHelper.createClientPending(requestSpec, responseSpec);
         Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
@@ -218,10 +218,10 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
     @Test
     public void testClientUndoWithDrawnWithoutWithdrawal() {
         final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
-        final ClientHelper validationErrorHelper = new ClientHelper(this.requestSpec, errorResponse);
+        final ClientHelper validationErrorHelper = new ClientHelper(requestSpec, errorResponse);
         // CREATE CLIENT
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-        final Integer clientId = ClientHelper.createClientPending(this.requestSpec, this.responseSpec);
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
+        final Integer clientId = ClientHelper.createClientPending(requestSpec, responseSpec);
         Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
@@ -244,11 +244,11 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
     public void testClientUndoWithDrawnWithFutureDate() {
 
         final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(400).build();
-        final ClientHelper validationErrorHelper = new ClientHelper(this.requestSpec, errorResponse);
+        final ClientHelper validationErrorHelper = new ClientHelper(requestSpec, errorResponse);
 
         // CREATE CLIENT
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-        final Integer clientId = ClientHelper.createClientPending(this.requestSpec, this.responseSpec);
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
+        final Integer clientId = ClientHelper.createClientPending(requestSpec, responseSpec);
         Assertions.assertNotNull(clientId);
 
         // GET CLIENT STATUS
@@ -273,11 +273,11 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
     @Test
     public void testValidateReopenedDate() {
         final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(400).build();
-        final ClientHelper validationErrorHelper = new ClientHelper(this.requestSpec, errorResponse);
+        final ClientHelper validationErrorHelper = new ClientHelper(requestSpec, errorResponse);
 
         // CREATE CLIENT
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-        final Integer clientId = ClientHelper.createClientPending(this.requestSpec, this.responseSpec);
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
+        final Integer clientId = ClientHelper.createClientPending(requestSpec, responseSpec);
         Assertions.assertNotNull(clientId);
         // GET CLIENT STATUS
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));
@@ -297,11 +297,11 @@ public class ClientUndoRejectAndWithdrawalIntegrationTest {
     public void testReopenedDate() {
         final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(400).build();
         // final ClientHelper validationErrorHelper = new
-        // ClientHelper(this.requestSpec, errorResponse);
+        // ClientHelper(requestSpec, errorResponse);
 
         // CREATE CLIENT
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-        final Integer clientId = ClientHelper.createClientPending(this.requestSpec, this.responseSpec);
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
+        final Integer clientId = ClientHelper.createClientPending(requestSpec, responseSpec);
         Assertions.assertNotNull(clientId);
         // GET CLIENT STATUS
         HashMap<String, Object> status = ClientHelper.getClientStatus(requestSpec, responseSpec, String.valueOf(clientId));

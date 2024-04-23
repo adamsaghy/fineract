@@ -42,7 +42,7 @@ public class BatchLoanIntegrationTest extends BaseLoanIntegrationTest {
 
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
             int numberOfRepayments = 24;
             int repaymentEvery = 1;
@@ -53,7 +53,7 @@ public class BatchLoanIntegrationTest extends BaseLoanIntegrationTest {
                     .repaymentEvery(repaymentEvery) //
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue()); //
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(product);
             Long loanProductId = loanProductResponse.getResourceId();
 
             // Apply and Approve Loan
@@ -65,9 +65,9 @@ public class BatchLoanIntegrationTest extends BaseLoanIntegrationTest {
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
                     .loanTermFrequencyType(RepaymentFrequencyType.MONTHS);
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansResponse postLoansResponse = LOAN_TRANSACTION_HELPER.applyLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+            PostLoansLoanIdResponse approvedLoanResult = LOAN_TRANSACTION_HELPER.approveLoan(postLoansResponse.getResourceId(),
                     approveLoanRequest(amount, "01 January 2023"));
 
             Long loanId = approvedLoanResult.getLoanId();
@@ -107,7 +107,7 @@ public class BatchLoanIntegrationTest extends BaseLoanIntegrationTest {
 
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
             int numberOfRepayments = 24;
             int repaymentEvery = 1;
@@ -118,7 +118,7 @@ public class BatchLoanIntegrationTest extends BaseLoanIntegrationTest {
                     .repaymentEvery(repaymentEvery) //
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue()); //
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(product);
             Long loanProductId = loanProductResponse.getResourceId();
 
             // Apply and Approve Loan
@@ -130,9 +130,9 @@ public class BatchLoanIntegrationTest extends BaseLoanIntegrationTest {
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
                     .loanTermFrequencyType(RepaymentFrequencyType.MONTHS);
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansResponse postLoansResponse = LOAN_TRANSACTION_HELPER.applyLoan(applicationRequest);
 
-            PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+            PostLoansLoanIdResponse approvedLoanResult = LOAN_TRANSACTION_HELPER.approveLoan(postLoansResponse.getResourceId(),
                     approveLoanRequest(amount, "01 January 2023"));
 
             Long loanId = approvedLoanResult.getLoanId();

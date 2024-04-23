@@ -37,7 +37,7 @@ public class ProvisioningTransactionHelper {
 
     public ProvisioningTransactionHelper(RequestSpecification requestSpec, ResponseSpecification responeSpec) {
         this.requestSpec = requestSpec;
-        this.responseSpec = responeSpec;
+        responseSpec = responeSpec;
     }
 
     public ArrayList retrieveAllProvisioningCategories() {
@@ -45,8 +45,7 @@ public class ProvisioningTransactionHelper {
     }
 
     public Integer createProvisioningCriteria(final String provsioningCriteriaJson) {
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_PROVISIONING_CRITERIA_URL, provsioningCriteriaJson,
-                "resourceId");
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_PROVISIONING_CRITERIA_URL, provsioningCriteriaJson, "resourceId");
     }
 
     public Map retrieveProvisioningCriteria(final Integer criteriaId) {
@@ -56,17 +55,16 @@ public class ProvisioningTransactionHelper {
 
     public Integer updateProvisioningCriteria(final Integer criteriaId, final String provsioningCriteriaJson) {
         String url = "/fineract-provider/api/v1/provisioningcriteria/" + criteriaId + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPut(this.requestSpec, this.responseSpec, url, provsioningCriteriaJson, "resourceId");
+        return Utils.performServerPut(requestSpec, responseSpec, url, provsioningCriteriaJson, "resourceId");
     }
 
     public Integer deleteProvisioningCriteria(final Integer criteriaId) {
         String url = "/fineract-provider/api/v1/provisioningcriteria/" + criteriaId + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerDelete(this.requestSpec, this.responseSpec, url, "resourceId");
+        return Utils.performServerDelete(requestSpec, responseSpec, url, "resourceId");
     }
 
     public Integer createProvisioningEntries(final String provsioningCriteriaJson) {
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_PROVISIONING_ENTRY_URL, provsioningCriteriaJson,
-                "resourceId");
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_PROVISIONING_ENTRY_URL, provsioningCriteriaJson, "resourceId");
     }
 
     public Integer updateProvisioningEntry(final String command, final Integer entryId, String jsonBody) {

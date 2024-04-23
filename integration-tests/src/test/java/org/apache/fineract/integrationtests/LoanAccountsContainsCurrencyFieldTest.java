@@ -32,6 +32,7 @@ import org.apache.fineract.client.models.GetClientsClientIdAccountsResponse;
 import org.apache.fineract.client.models.GetClientsLoanAccounts;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -60,7 +61,7 @@ public class LoanAccountsContainsCurrencyFieldTest {
         requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
 
-        loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
     }
 
     @Test
@@ -70,7 +71,7 @@ public class LoanAccountsContainsCurrencyFieldTest {
         LocalDate today = LocalDate.now(ZoneId.systemDefault());
 
         // Define a custom date formatter
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(CommonConstants.DATE_FORMAT);
 
         // Format today's date using the custom formatter
         String formattedDate = today.format(formatter);

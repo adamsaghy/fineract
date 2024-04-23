@@ -71,10 +71,10 @@ public class SavingsInterestPostingJobIntegrationTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
         this.savingsProductHelper = new SavingsProductHelper();
         this.scheduleJobHelper = new SchedulerJobHelper(requestSpec);
     }
@@ -84,7 +84,7 @@ public class SavingsInterestPostingJobIntegrationTest {
         // client activation, savings activation and 1st transaction date
         final String startDate = "10 April 2022";
         final String jobName = "Post Interest For Savings";
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, startDate);
         Assertions.assertNotNull(clientID);
 
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
@@ -109,7 +109,7 @@ public class SavingsInterestPostingJobIntegrationTest {
     public void testSavingsDailyInterestPostingJobWithAccountingNone() {
         final String startDate = "10 April 2022";
         final String jobName = "Post Interest For Savings";
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         this.accountHelper = new AccountHelper(requestSpec, responseSpec);
         this.journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
@@ -127,7 +127,7 @@ public class SavingsInterestPostingJobIntegrationTest {
         // client activation, savings activation and 1st transaction date
         final String startDate = "01 July 2022";
         final String jobName = "Post Interest For Savings";
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, startDate);
         Assertions.assertNotNull(clientID);
 
         final Integer savingsId = createSavingsAccountDailyPostingOverdraft(clientID, startDate);
@@ -156,7 +156,7 @@ public class SavingsInterestPostingJobIntegrationTest {
             // client activation, savings activation and 1st transaction date
             final String startDate = "10 April 2022";
             final String jobName = "Post Interest For Savings";
-            final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+            final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, startDate);
             Assertions.assertNotNull(clientID);
 
             final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
@@ -191,7 +191,7 @@ public class SavingsInterestPostingJobIntegrationTest {
         // client activation, savings activation and 1st transaction date
         final String startDate = "10 April 2022";
         final String jobName = "Post Interest For Savings";
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, startDate);
         Assertions.assertNotNull(clientID);
 
         final Integer savingsId = createSavingsAccountDailyPostingOverdraft(clientID, startDate);
@@ -216,7 +216,7 @@ public class SavingsInterestPostingJobIntegrationTest {
     public void testAccountBalanceWithWithdrawalFeeAfterInterestPostingJob() {
         final String startDate = "21 June 2022";
         final String jobName = "Post Interest For Savings";
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, startDate);
         Assertions.assertNotNull(clientID);
 
         final Integer savingsId = createSavingsAccountDailyPostingWithCharge(clientID, startDate);
@@ -270,7 +270,7 @@ public class SavingsInterestPostingJobIntegrationTest {
                 ACCOUNT_TYPE_INDIVIDUAL, startDate);
         Assertions.assertNotNull(savingsId);
 
-        final Integer withdrawalChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
+        final Integer withdrawalChargeId = ChargesHelper.createCharges(requestSpec, responseSpec,
                 ChargesHelper.getSavingsWithdrawalFeeJSON());
         Assertions.assertNotNull(withdrawalChargeId);
 
@@ -323,8 +323,8 @@ public class SavingsInterestPostingJobIntegrationTest {
     // Reset configuration fields
     @AfterEach
     public void tearDown() {
-        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
-        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(requestSpec, responseSpec);
+        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(requestSpec, responseSpec);
     }
 
 }

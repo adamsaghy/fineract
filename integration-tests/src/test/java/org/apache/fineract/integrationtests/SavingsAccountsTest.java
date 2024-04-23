@@ -24,6 +24,7 @@ import org.apache.fineract.client.models.PostSavingsAccountsAccountIdResponse;
 import org.apache.fineract.client.models.PostSavingsAccountsRequest;
 import org.apache.fineract.client.models.PostSavingsAccountsResponse;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -40,9 +41,8 @@ import retrofit2.Response;
 public class SavingsAccountsTest extends IntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountsTest.class);
-    private final String dateFormat = "dd MMMM yyyy";
     private final String locale = "en";
-    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(dateFormat);
+    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(CommonConstants.DATE_FORMAT);
     private final String formattedDate = dateFormatter.format(Utils.getLocalDateOfTenant());
     private int savingId = 1;
 
@@ -54,7 +54,7 @@ public class SavingsAccountsTest extends IntegrationTest {
         request.setClientId(1);
         request.setProductId(1);
         request.setLocale(locale);
-        request.setDateFormat(dateFormat);
+        request.setDateFormat(CommonConstants.DATE_FORMAT);
         request.submittedOnDate(formattedDate);
 
         Response<PostSavingsAccountsResponse> response = okR(fineract().savingsAccounts.submitApplication2(request));
@@ -69,7 +69,7 @@ public class SavingsAccountsTest extends IntegrationTest {
     void approveSavingsAccount() {
         LOG.info("------------------------------ APPROVING SAVINGS ACCOUNT ---------------------------------------");
         PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
-        request.dateFormat(dateFormat);
+        request.dateFormat(CommonConstants.DATE_FORMAT);
         request.setLocale(locale);
         request.setApprovedOnDate(formattedDate);
         Response<PostSavingsAccountsAccountIdResponse> response = okR(
@@ -84,7 +84,7 @@ public class SavingsAccountsTest extends IntegrationTest {
     void activateSavingsAccount() {
         LOG.info("------------------------------ ACTIVATING SAVINGS ACCOUNT ---------------------------------------");
         PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
-        request.dateFormat(dateFormat);
+        request.dateFormat(CommonConstants.DATE_FORMAT);
         request.setLocale(locale);
         request.setActivatedOnDate(formattedDate);
         Response<PostSavingsAccountsAccountIdResponse> response = okR(

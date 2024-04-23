@@ -67,11 +67,11 @@ public class SavingsAccountTransactionDatatableIntegrationTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.datatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.datatableHelper = new DatatableHelper(requestSpec, responseSpec);
+        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
         this.savingsProductHelper = new SavingsProductHelper();
     }
 
@@ -144,7 +144,7 @@ public class SavingsAccountTransactionDatatableIntegrationTest {
     @Test
     public void testDatatableCreateReadUpdateDeleteEntryForSavingsAccountTransaction() {
         // Create Client
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         // Create savings product and account
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
@@ -244,7 +244,7 @@ public class SavingsAccountTransactionDatatableIntegrationTest {
     // Reset configuration fields
     @AfterEach
     public void tearDown() {
-        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
-        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(requestSpec, responseSpec);
+        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(requestSpec, responseSpec);
     }
 }

@@ -33,6 +33,7 @@ import java.util.Date;
 import java.util.Locale;
 import org.apache.fineract.infrastructure.bulkimport.constants.OfficeConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -55,15 +56,15 @@ public class OfficeImportHandlerTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        requestSpec = new RequestSpecBuilder().build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     @Test
     public void testOfficeImport() throws IOException, InterruptedException, NoSuchFieldException, ParseException {
         OfficeHelper officeHelper = new OfficeHelper(requestSpec, responseSpec);
-        Workbook workbook = officeHelper.getOfficeWorkBook("dd MMMM yyyy");
+        Workbook workbook = officeHelper.getOfficeWorkBook(CommonConstants.DATE_FORMAT);
 
         // insert dummy data into excel
         Sheet sheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
@@ -73,7 +74,7 @@ public class OfficeImportHandlerTest {
                 .setCellValue(firstOfficeRow.getCell(OfficeConstants.LOOKUP_OFFICE_COL).getStringCellValue());
         firstOfficeRow.createCell(OfficeConstants.PARENT_OFFICE_ID_COL)
                 .setCellValue(firstOfficeRow.getCell(OfficeConstants.LOOKUP_OFFICE_ID_COL).getNumericCellValue());
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         Date date = simpleDateFormat.parse("14 May 2001");
         firstOfficeRow.createCell(OfficeConstants.OPENED_ON_COL).setCellValue(date);
 

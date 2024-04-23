@@ -43,6 +43,7 @@ import org.apache.fineract.integrationtests.common.CenterDomain;
 import org.apache.fineract.integrationtests.common.CenterHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.GroupHelper;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
@@ -74,15 +75,15 @@ public class LoanReschedulingWithinCenterTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.requestSpec.header("Fineract-Platform-TenantId", "default");
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        requestSpec.header("Fineract-Platform-TenantId", "default");
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
         this.loanApplicationApprovalTest = new LoanApplicationApprovalTest();
         this.generalResponseSpec = new ResponseSpecBuilder().build();
 
-        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(requestSpec, responseSpec);
     }
 
     @SuppressWarnings("rawtypes")
@@ -109,7 +110,7 @@ public class LoanReschedulingWithinCenterTest {
 
         associateClientsToGroup(groupId, clientId);
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
         Calendar today = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         today.add(Calendar.DAY_OF_MONTH, -14);
@@ -120,9 +121,9 @@ public class LoanReschedulingWithinCenterTest {
 
         List<HashMap> collaterals = new ArrayList<>();
 
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec,
                 String.valueOf(clientId), collateralId);
         Assertions.assertNotNull(clientCollateralId);
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
@@ -141,18 +142,18 @@ public class LoanReschedulingWithinCenterTest {
 
         // Test for loan account is created
         Assertions.assertNotNull(loanId);
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanId);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanId);
 
         // Test for loan account is created, can be approved
-        this.loanTransactionHelper.approveLoan(disbursalDate, loanId);
-        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanId);
+        loanTransactionHelper.approveLoan(disbursalDate, loanId);
+        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanId);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
 
         // Test for loan account approved can be disbursed
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanId);
-        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(disbursalDate, loanId,
+        String loanDetails = loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanId);
+        loanTransactionHelper.disburseLoanWithNetDisbursalAmount(disbursalDate, loanId,
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanId);
+        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanId);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         LOG.info("---------------------------------CHANGING GROUP MEETING DATE ------------------------------------------");
@@ -161,10 +162,10 @@ public class LoanReschedulingWithinCenterTest {
         String oldMeetingDate = dateFormat.format(todaysdate.getTime());
         todaysdate.add(Calendar.DAY_OF_MONTH, 1);
         final String centerMeetingNewStartDate = dateFormat.format(todaysdate.getTime());
-        CalendarHelper.updateMeetingCalendarForCenter(this.requestSpec, this.responseSpec, centerId, calendarId.toString(), oldMeetingDate,
+        CalendarHelper.updateMeetingCalendarForCenter(requestSpec, responseSpec, centerId, calendarId.toString(), oldMeetingDate,
                 centerMeetingNewStartDate);
 
-        ArrayList loanRepaymnetSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, generalResponseSpec, loanId);
+        ArrayList loanRepaymnetSchedule = loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, generalResponseSpec, loanId);
         // VERIFY RESCHEDULED DATE
         ArrayList dueDateLoanSchedule = (ArrayList) ((HashMap) loanRepaymnetSchedule.get(2)).get("dueDate");
         assertEquals(getDateAsArray(todaysdate, 0), dueDateLoanSchedule);
@@ -187,20 +188,20 @@ public class LoanReschedulingWithinCenterTest {
 
     private void associateClientsToGroup(Integer groupId, Integer clientId) {
         // Associate client to the group
-        GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupId.toString(), clientId.toString());
-        GroupHelper.verifyGroupMembers(this.requestSpec, this.responseSpec, groupId, clientId);
+        GroupHelper.associateClient(requestSpec, responseSpec, groupId.toString(), clientId.toString());
+        GroupHelper.verifyGroupMembers(requestSpec, responseSpec, groupId, clientId);
     }
 
     private Integer createClient(Integer officeId) {
         // CREATE CLIENT
         final String clientActivationDate = "01 July 2014";
-        Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, clientActivationDate, officeId.toString());
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, clientActivationDate, officeId.toString());
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
         return clientId;
     }
 
     private Integer createCalendarMeeting(Integer centerId) {
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
         Calendar today = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         final String startDate = dateFormat.format(today.getTime());
@@ -212,8 +213,8 @@ public class LoanReschedulingWithinCenterTest {
             repeatsOnDay = 7;
         }
 
-        Integer calendarId = CalendarHelper.createMeetingForGroup(this.requestSpec, this.responseSpec, centerId, startDate, frequency,
-                interval, repeatsOnDay.toString());
+        Integer calendarId = CalendarHelper.createMeetingForGroup(requestSpec, responseSpec, centerId, startDate, frequency, interval,
+                repeatsOnDay.toString());
         LOG.info("calendarId {}", calendarId);
         return calendarId;
     }
@@ -243,7 +244,7 @@ public class LoanReschedulingWithinCenterTest {
         associateClientsToGroup(groupId, clientId);
 
         // CREATE A LOAN PRODUCT
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
         Calendar today = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         today.add(Calendar.DAY_OF_MONTH, -14);
@@ -278,9 +279,9 @@ public class LoanReschedulingWithinCenterTest {
 
         List<HashMap> collaterals = new ArrayList<>();
 
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec,
                 String.valueOf(clientId), collateralId);
         Assertions.assertNotNull(clientCollateralId);
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
@@ -289,13 +290,13 @@ public class LoanReschedulingWithinCenterTest {
         final Integer loanID = applyForLoanApplicationForInterestRecalculation(clientId, groupId, calendarId, loanProductID,
                 disbursementDate, recalculationRestFrequencyDate, LoanApplicationTestBuilder.RBI_INDIA_STRATEGY, new ArrayList<HashMap>(0),
                 createTranches, collaterals);
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
 
         // VALIDATE THE LOAN STATUS
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
-        loanStatusHashMap = this.loanTransactionHelper.approveLoanWithApproveAmount(approveDate, expectedDisbursementDate, approvalAmount,
+        loanStatusHashMap = loanTransactionHelper.approveLoanWithApproveAmount(approveDate, expectedDisbursementDate, approvalAmount,
                 loanID, approveTranches);
 
         // VALIDATE THE LOAN IS APPROVED
@@ -303,7 +304,7 @@ public class LoanReschedulingWithinCenterTest {
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         // DISBURSE THE FIRST TRANCHE
-        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(disbursementDate, loanID, "5000");
+        loanTransactionHelper.disburseLoanWithNetDisbursalAmount(disbursementDate, loanID, "5000");
 
         LOG.info("---------------------------------CHANGING GROUP MEETING DATE ------------------------------------------");
         Calendar todaysdate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -311,10 +312,10 @@ public class LoanReschedulingWithinCenterTest {
         String oldMeetingDate = dateFormat.format(todaysdate.getTime());
         todaysdate.add(Calendar.DAY_OF_MONTH, 1);
         final String centerMeetingNewStartDate = dateFormat.format(todaysdate.getTime());
-        CalendarHelper.updateMeetingCalendarForCenter(this.requestSpec, this.responseSpec, centerId, calendarId.toString(), oldMeetingDate,
+        CalendarHelper.updateMeetingCalendarForCenter(requestSpec, responseSpec, centerId, calendarId.toString(), oldMeetingDate,
                 centerMeetingNewStartDate);
 
-        ArrayList loanRepaymnetSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, generalResponseSpec, loanID);
+        ArrayList loanRepaymnetSchedule = loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, generalResponseSpec, loanID);
         // VERIFY RESCHEDULED DATE
         ArrayList dueDateLoanSchedule = (ArrayList) ((HashMap) loanRepaymnetSchedule.get(2)).get("dueDate");
         assertEquals(getDateAsArray(todaysdate, 0), dueDateLoanSchedule);
@@ -324,7 +325,7 @@ public class LoanReschedulingWithinCenterTest {
         assertEquals("41.05", String.valueOf(interestDue));
 
         // DISBURSE THE SECOND TRANCHE (for let the loan test lifecycle callback to close the loan
-        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(secondDisbursement, loanID, "5000");
+        loanTransactionHelper.disburseLoanWithNetDisbursalAmount(secondDisbursement, loanID, "5000");
     }
 
     private Integer createLoanProductWithInterestRecalculation(final String repaymentStrategy,
@@ -377,7 +378,7 @@ public class LoanReschedulingWithinCenterTest {
         }
 
         final String loanProductJSON = builder.build(chargeId);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        return loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
     @SuppressWarnings("rawtypes")
@@ -416,7 +417,7 @@ public class LoanReschedulingWithinCenterTest {
                 .withRepaymentStrategy(repaymentStrategy) //
                 .withCollaterals(collaterals).withCharges(charges)//
                 .build(clientID.toString(), groupId.toString(), loanProductID.toString(), null);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        return loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
     private int[] generateGroupMembers(int size, int officeId) {
@@ -426,7 +427,7 @@ public class LoanReschedulingWithinCenterTest {
             map.put("officeId", "" + officeId);
             map.put("name", Utils.uniqueRandomStringGenerator("Group_Name_", 5));
             map.put("externalId", UUID.randomUUID().toString());
-            map.put("dateFormat", "dd MMMM yyyy");
+            map.put("dateFormat", CommonConstants.DATE_FORMAT);
             map.put("locale", "en");
             map.put("active", "true");
             map.put("activationDate", "04 March 2011");

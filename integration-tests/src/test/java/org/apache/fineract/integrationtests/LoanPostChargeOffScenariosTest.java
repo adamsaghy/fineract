@@ -50,6 +50,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostPaymentTypesRequest;
 import org.apache.fineract.client.models.PostPaymentTypesResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -74,7 +75,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(LoanTestLifecycleExtension.class)
 public class LoanPostChargeOffScenariosTest {
 
-    private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
+    private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern(CommonConstants.DATE_FORMAT)
+            .toFormatter();
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private ClientHelper clientHelper;
@@ -106,11 +108,11 @@ public class LoanPostChargeOffScenariosTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
         this.loanProductHelper = new LoanProductHelper();
         this.paymentTypeHelper = new PaymentTypeHelper();
 
@@ -137,8 +139,8 @@ public class LoanPostChargeOffScenariosTest {
         this.writtenOff = this.accountHelper.createExpenseAccount();
         this.goodwillExpenseAccount = this.accountHelper.createExpenseAccount();
 
-        this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+        this.journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
     }
 
     @Test
@@ -162,8 +164,9 @@ public class LoanPostChargeOffScenariosTest {
         Integer chargeOffReasonId = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText, 1);
         String transactionExternalId = UUID.randomUUID().toString();
         PostLoansLoanIdTransactionsResponse chargeOffTransaction = loanTransactionHelper.chargeOffLoan((long) loanId,
-                new PostLoansLoanIdTransactionsRequest().transactionDate("14 September 2022").locale("en").dateFormat("dd MMMM yyyy")
-                        .externalId(transactionExternalId).chargeOffReasonId((long) chargeOffReasonId));
+                new PostLoansLoanIdTransactionsRequest().transactionDate("14 September 2022").locale("en")
+                        .dateFormat(CommonConstants.DATE_FORMAT).externalId(transactionExternalId)
+                        .chargeOffReasonId((long) chargeOffReasonId));
 
         GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getActive());
@@ -199,8 +202,8 @@ public class LoanPostChargeOffScenariosTest {
 
         // make Repayment before chargeoff date
         final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 September 2022").locale("en")
-                        .transactionAmount(100.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("7 September 2022")
+                        .locale("en").transactionAmount(100.0));
 
         loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getActive());
@@ -232,8 +235,8 @@ public class LoanPostChargeOffScenariosTest {
 
         // Goodwill Credit before chargeoff date
         final PostLoansLoanIdTransactionsResponse goodwillCredit = loanTransactionHelper.makeGoodwillCredit((long) loanId,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("10 September 2022").locale("en")
-                        .transactionAmount(100.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("10 September 2022")
+                        .locale("en").transactionAmount(100.0));
 
         loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getActive());
@@ -259,8 +262,8 @@ public class LoanPostChargeOffScenariosTest {
 
         // make Repayment after chargeoff date
         final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("15 September 2022").locale("en")
-                        .transactionAmount(100.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("15 September 2022")
+                        .locale("en").transactionAmount(100.0));
 
         loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getActive());
@@ -286,8 +289,8 @@ public class LoanPostChargeOffScenariosTest {
 
         // Goodwill Credit after chargeoff date
         final PostLoansLoanIdTransactionsResponse goodwillCredit_1 = loanTransactionHelper.makeGoodwillCredit((long) loanId,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("16 September 2022").locale("en")
-                        .transactionAmount(100.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("16 September 2022")
+                        .locale("en").transactionAmount(100.0));
 
         loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getActive());
@@ -329,8 +332,8 @@ public class LoanPostChargeOffScenariosTest {
 
         // make Repayment
         final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 September 2022").locale("en")
-                        .transactionAmount(100.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("7 September 2022")
+                        .locale("en").transactionAmount(100.0));
 
         GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getActive());
@@ -364,8 +367,9 @@ public class LoanPostChargeOffScenariosTest {
         Integer chargeOffReasonId = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText, 1);
         String transactionExternalId = UUID.randomUUID().toString();
         PostLoansLoanIdTransactionsResponse chargeOffTransaction = loanTransactionHelper.chargeOffLoan((long) loanId,
-                new PostLoansLoanIdTransactionsRequest().transactionDate("14 September 2022").locale("en").dateFormat("dd MMMM yyyy")
-                        .externalId(transactionExternalId).chargeOffReasonId((long) chargeOffReasonId));
+                new PostLoansLoanIdTransactionsRequest().transactionDate("14 September 2022").locale("en")
+                        .dateFormat(CommonConstants.DATE_FORMAT).externalId(transactionExternalId)
+                        .chargeOffReasonId((long) chargeOffReasonId));
 
         loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getActive());
@@ -456,8 +460,8 @@ public class LoanPostChargeOffScenariosTest {
 
         // make Repayment
         final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 September 2022").locale("en")
-                        .transactionAmount(11.0).externalId(loanTransactionExternalIdStr));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("7 September 2022")
+                        .locale("en").transactionAmount(11.0).externalId(loanTransactionExternalIdStr));
 
         GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getActive());
@@ -491,8 +495,9 @@ public class LoanPostChargeOffScenariosTest {
         Integer chargeOffReasonId = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText, 1);
         String transactionExternalId = UUID.randomUUID().toString();
         PostLoansLoanIdTransactionsResponse chargeOffTransaction = loanTransactionHelper.chargeOffLoan((long) loanId,
-                new PostLoansLoanIdTransactionsRequest().transactionDate("14 September 2022").locale("en").dateFormat("dd MMMM yyyy")
-                        .externalId(transactionExternalId).chargeOffReasonId((long) chargeOffReasonId));
+                new PostLoansLoanIdTransactionsRequest().transactionDate("14 September 2022").locale("en")
+                        .dateFormat(CommonConstants.DATE_FORMAT).externalId(transactionExternalId)
+                        .chargeOffReasonId((long) chargeOffReasonId));
 
         loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getActive());
@@ -518,8 +523,8 @@ public class LoanPostChargeOffScenariosTest {
 
         // make Repayment backdated for reverse replay
         final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("5 September 2022").locale("en")
-                        .transactionAmount(5.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("5 September 2022")
+                        .locale("en").transactionAmount(5.0));
 
         loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getActive());
@@ -602,8 +607,8 @@ public class LoanPostChargeOffScenariosTest {
 
         // make Repayment on Chargeoff date before charge off
         final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 September 2022").locale("en")
-                        .transactionAmount(11.0).externalId(loanTransactionExternalIdStr));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("7 September 2022")
+                        .locale("en").transactionAmount(11.0).externalId(loanTransactionExternalIdStr));
 
         GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getActive());
@@ -635,8 +640,9 @@ public class LoanPostChargeOffScenariosTest {
         Integer chargeOffReasonId = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText, 1);
         String transactionExternalId = UUID.randomUUID().toString();
         PostLoansLoanIdTransactionsResponse chargeOffTransaction = loanTransactionHelper.chargeOffLoan((long) loanId,
-                new PostLoansLoanIdTransactionsRequest().transactionDate("7 September 2022").locale("en").dateFormat("dd MMMM yyyy")
-                        .externalId(transactionExternalId).chargeOffReasonId((long) chargeOffReasonId));
+                new PostLoansLoanIdTransactionsRequest().transactionDate("7 September 2022").locale("en")
+                        .dateFormat(CommonConstants.DATE_FORMAT).externalId(transactionExternalId)
+                        .chargeOffReasonId((long) chargeOffReasonId));
 
         loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getActive());
@@ -662,8 +668,8 @@ public class LoanPostChargeOffScenariosTest {
 
         // make Repayment backdated for reverse replay
         final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("5 September 2022").locale("en")
-                        .transactionAmount(5.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("5 September 2022")
+                        .locale("en").transactionAmount(5.0));
 
         loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getActive());
@@ -747,8 +753,9 @@ public class LoanPostChargeOffScenariosTest {
         Integer chargeOffReasonId = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText, 1);
         String transactionExternalId = UUID.randomUUID().toString();
         PostLoansLoanIdTransactionsResponse chargeOffTransaction = loanTransactionHelper.chargeOffLoan((long) loanId,
-                new PostLoansLoanIdTransactionsRequest().transactionDate("7 September 2022").locale("en").dateFormat("dd MMMM yyyy")
-                        .externalId(transactionExternalId).chargeOffReasonId((long) chargeOffReasonId));
+                new PostLoansLoanIdTransactionsRequest().transactionDate("7 September 2022").locale("en")
+                        .dateFormat(CommonConstants.DATE_FORMAT).externalId(transactionExternalId)
+                        .chargeOffReasonId((long) chargeOffReasonId));
 
         GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getActive());
@@ -787,8 +794,8 @@ public class LoanPostChargeOffScenariosTest {
 
         // make Repayment after charge-off on charge off date
         final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 September 2022").locale("en")
-                        .transactionAmount(11.0).externalId(loanTransactionExternalIdStr));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("7 September 2022")
+                        .locale("en").transactionAmount(11.0).externalId(loanTransactionExternalIdStr));
 
         loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getActive());
@@ -815,8 +822,8 @@ public class LoanPostChargeOffScenariosTest {
 
         // make Repayment backdated for reverse replay
         final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("5 September 2022").locale("en")
-                        .transactionAmount(5.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("5 September 2022")
+                        .locale("en").transactionAmount(5.0));
 
         loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getActive());
@@ -888,8 +895,8 @@ public class LoanPostChargeOffScenariosTest {
 
         // make Repayment before charge-off on charge off date
         final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 September 2022").locale("en")
-                        .transactionAmount(100.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("7 September 2022")
+                        .locale("en").transactionAmount(100.0));
 
         GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getActive());
@@ -923,8 +930,9 @@ public class LoanPostChargeOffScenariosTest {
         Integer chargeOffReasonId = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText, 1);
         String transactionExternalId = UUID.randomUUID().toString();
         PostLoansLoanIdTransactionsResponse chargeOffTransaction = loanTransactionHelper.chargeOffLoan((long) loanId,
-                new PostLoansLoanIdTransactionsRequest().transactionDate("7 September 2022").locale("en").dateFormat("dd MMMM yyyy")
-                        .externalId(transactionExternalId).chargeOffReasonId((long) chargeOffReasonId));
+                new PostLoansLoanIdTransactionsRequest().transactionDate("7 September 2022").locale("en")
+                        .dateFormat(CommonConstants.DATE_FORMAT).externalId(transactionExternalId)
+                        .chargeOffReasonId((long) chargeOffReasonId));
 
         loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getActive());
@@ -950,8 +958,8 @@ public class LoanPostChargeOffScenariosTest {
 
         // make Repayment after charge-off on charge off date
         final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 September 2022").locale("en")
-                        .transactionAmount(90.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("7 September 2022")
+                        .locale("en").transactionAmount(90.0));
 
         loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getActive());
@@ -995,8 +1003,8 @@ public class LoanPostChargeOffScenariosTest {
 
         // make Repayment before charge-off on charge off date
         final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 September 2022").locale("en")
-                        .transactionAmount(100.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("7 September 2022")
+                        .locale("en").transactionAmount(100.0));
 
         GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getActive());
@@ -1030,8 +1038,9 @@ public class LoanPostChargeOffScenariosTest {
         Integer chargeOffReasonId = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText, 1);
         String transactionExternalId = UUID.randomUUID().toString();
         PostLoansLoanIdTransactionsResponse chargeOffTransaction = loanTransactionHelper.chargeOffLoan((long) loanId,
-                new PostLoansLoanIdTransactionsRequest().transactionDate("7 September 2022").locale("en").dateFormat("dd MMMM yyyy")
-                        .externalId(transactionExternalId).chargeOffReasonId((long) chargeOffReasonId));
+                new PostLoansLoanIdTransactionsRequest().transactionDate("7 September 2022").locale("en")
+                        .dateFormat(CommonConstants.DATE_FORMAT).externalId(transactionExternalId)
+                        .chargeOffReasonId((long) chargeOffReasonId));
 
         loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getActive());
@@ -1147,7 +1156,7 @@ public class LoanPostChargeOffScenariosTest {
         FundsHelper fh = FundsHelper.create(Utils.uniqueRandomStringGenerator("", 10)).externalId(UUID.randomUUID().toString()).build();
         String jsonData = fh.toJSON();
 
-        final Long fundID = createFund(jsonData, this.requestSpec, this.responseSpec);
+        final Long fundID = createFund(jsonData, requestSpec, responseSpec);
         Assertions.assertNotNull(fundID);
 
         // Delinquency Bucket
@@ -1225,7 +1234,7 @@ public class LoanPostChargeOffScenariosTest {
                 .receivableInterestAccountId(interestFeeReceivable.getAccountID().longValue())//
                 .receivableFeeAccountId(interestFeeReceivable.getAccountID().longValue())//
                 .receivablePenaltyAccountId(interestFeeReceivable.getAccountID().longValue())//
-                .dateFormat("dd MMMM yyyy")//
+                .dateFormat(CommonConstants.DATE_FORMAT)//
                 .locale("en_GB")//
                 .disallowExpectedDisbursements(true)//
                 .allowApprovedDisbursedAmountsOverApplied(true)//

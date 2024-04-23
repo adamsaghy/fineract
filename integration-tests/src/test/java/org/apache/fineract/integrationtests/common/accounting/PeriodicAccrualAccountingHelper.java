@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import java.util.HashMap;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 
 public class PeriodicAccrualAccountingHelper {
@@ -37,12 +38,12 @@ public class PeriodicAccrualAccountingHelper {
 
     public Object runPeriodicAccrualAccounting(String date) {
         String json = getRunPeriodicAccrual(date);
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, PERIODIC_ACCRUAL_URL + "?" + Utils.TENANT_IDENTIFIER, json, "");
+        return Utils.performServerPost(requestSpec, responseSpec, PERIODIC_ACCRUAL_URL + "?" + Utils.TENANT_IDENTIFIER, json, "");
     }
 
     private String getRunPeriodicAccrual(String date) {
         final HashMap<String, String> map = new HashMap<>();
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("locale", "en_GB");
         map.put("tillDate", date);
         return new Gson().toJson(map);

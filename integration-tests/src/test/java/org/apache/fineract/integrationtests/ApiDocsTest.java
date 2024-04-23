@@ -35,8 +35,8 @@ public class ApiDocsTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     @Test

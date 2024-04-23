@@ -42,9 +42,9 @@ public class ClientCollateralIntegrationTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     @Test
@@ -53,10 +53,10 @@ public class ClientCollateralIntegrationTest {
         final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
         ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID.toString(),
+                collateralId);
         Assertions.assertNotNull(clientCollateralId);
     }
 
@@ -66,12 +66,12 @@ public class ClientCollateralIntegrationTest {
         final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
         ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
 
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
-        final HashMap changes = CollateralManagementHelper.updateClientCollateral(this.requestSpec, this.responseSpec, clientCollateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID.toString(),
+                collateralId);
+        final HashMap changes = CollateralManagementHelper.updateClientCollateral(requestSpec, responseSpec, clientCollateralId);
         Assertions.assertEquals("1", changes.get("quantity").toString());
     }
 

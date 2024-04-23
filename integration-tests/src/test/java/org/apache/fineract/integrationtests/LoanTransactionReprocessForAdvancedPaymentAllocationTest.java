@@ -44,6 +44,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -64,7 +65,8 @@ public class LoanTransactionReprocessForAdvancedPaymentAllocationTest {
     private static RequestSpecification REQUEST_SPEC;
     private static ClientHelper CLIENT_HELPER;
     private static AccountHelper ACCOUNT_HELPER;
-    private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
+    private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern(CommonConstants.DATE_FORMAT)
+            .toFormatter();
 
     @BeforeAll
     public static void setupTests() {
@@ -119,8 +121,8 @@ public class LoanTransactionReprocessForAdvancedPaymentAllocationTest {
 
             // make repayment
             final PostLoansLoanIdTransactionsResponse repaymentTransaction = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("20 February 2023").locale("en")
-                            .transactionAmount(50.0).externalId(loanTransactionExternalIdStr));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("20 February 2023")
+                            .locale("en").transactionAmount(50.0).externalId(loanTransactionExternalIdStr));
 
             // verify transaction amounts
             verifyTransaction(LocalDate.of(2023, 2, 20), 50.0f, 0.0f, 0.0f, 50.0f, 0.0f, loanId, "repayment");

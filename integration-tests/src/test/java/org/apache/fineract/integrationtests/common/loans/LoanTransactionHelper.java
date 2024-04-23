@@ -125,7 +125,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     private static final Gson GSON = new JSON().getGson();
     private final RequestSpecification requestSpec;
     private final ResponseSpecification responseSpec;
-    private PaymentTypeHelper paymentTypeHelper;
+    private final PaymentTypeHelper paymentTypeHelper;
 
     public LoanTransactionHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
         this.requestSpec = requestSpec;
@@ -135,31 +135,30 @@ public class LoanTransactionHelper extends IntegrationTest {
 
     public GetLoanProductsProductIdResponse getLoanProduct(final Integer loanProductId) {
         final String GET_LOANPRODUCT_URL = "/fineract-provider/api/v1/loanproducts/" + loanProductId + "?" + Utils.TENANT_IDENTIFIER;
-        final String response = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_LOANPRODUCT_URL);
+        final String response = Utils.performServerGet(requestSpec, responseSpec, GET_LOANPRODUCT_URL);
         return GSON.fromJson(response, GetLoanProductsProductIdResponse.class);
     }
 
     public GetLoanProductsResponse[] listAllLoanProducts() {
         final String GET_LOANPRODUCT_URL = "/fineract-provider/api/v1/loanproducts?" + Utils.TENANT_IDENTIFIER;
-        final String response = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_LOANPRODUCT_URL);
+        final String response = Utils.performServerGet(requestSpec, responseSpec, GET_LOANPRODUCT_URL);
         return GSON.fromJson(response, GetLoanProductsResponse[].class);
     }
 
     public Integer getLoanProductId(final String loanProductJSON) {
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_LOAN_PRODUCT_URL, loanProductJSON, "resourceId");
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_LOAN_PRODUCT_URL, loanProductJSON, "resourceId");
     }
 
     public <T> T getLoanProductError(final String loanProductJSON, final String jsonAttributeToGetBack) {
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_LOAN_PRODUCT_URL, loanProductJSON,
-                jsonAttributeToGetBack);
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_LOAN_PRODUCT_URL, loanProductJSON, jsonAttributeToGetBack);
     }
 
     public Integer getLoanId(final String loanApplicationJSON) {
-        return this.getLoanId(loanApplicationJSON, this.requestSpec, this.responseSpec);
+        return this.getLoanId(loanApplicationJSON, requestSpec, responseSpec);
     }
 
     public HashMap getLoanId(final String loanApplicationJSON, final String responseAttribute) {
-        return (HashMap) this.getLoanId(loanApplicationJSON, responseAttribute, this.requestSpec, this.responseSpec);
+        return (HashMap) this.getLoanId(loanApplicationJSON, responseAttribute, requestSpec, responseSpec);
     }
 
     public Object getLoanId(final String loanApplicationJSON, final String responseAttribute, RequestSpecification requestSpec,
@@ -172,35 +171,35 @@ public class LoanTransactionHelper extends IntegrationTest {
     }
 
     public HashMap<String, Integer> getGlimId(final String loanApplicationJSON) {
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, APPLY_LOAN_URL, loanApplicationJSON, "");
+        return Utils.performServerPost(requestSpec, responseSpec, APPLY_LOAN_URL, loanApplicationJSON, "");
     }
 
     public Object getGlimLoanId(final String glimId) {
         final String GET_LOAN_URL = "/fineract-provider/api/v1/loans/glimAccount/" + glimId + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerGet(this.requestSpec, this.responseSpec, GET_LOAN_URL, "childLoanId");
+        return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_URL, "childLoanId");
 
     }
 
     public Object getLoanError(final String loanApplicationJSON, final String responseAttribute) {
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, APPLY_LOAN_URL, loanApplicationJSON, responseAttribute);
+        return Utils.performServerPost(requestSpec, responseSpec, APPLY_LOAN_URL, loanApplicationJSON, responseAttribute);
     }
 
     public Integer getLoanOfficerId(final String loanId) {
         final String GET_LOAN_URL = "/fineract-provider/api/v1/loans/" + loanId + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerGet(this.requestSpec, this.responseSpec, GET_LOAN_URL, "loanOfficerId");
+        return Utils.performServerGet(requestSpec, responseSpec, GET_LOAN_URL, "loanOfficerId");
     }
 
     public Object createLoanAccount(final String loanApplicationJSON, final String responseAttribute) {
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, APPLY_LOAN_URL, loanApplicationJSON, responseAttribute);
+        return Utils.performServerPost(requestSpec, responseSpec, APPLY_LOAN_URL, loanApplicationJSON, responseAttribute);
     }
 
     public Integer updateLoan(final Integer id, final String loanApplicationJSON) {
-        return Utils.performServerPut(this.requestSpec, this.responseSpec,
-                "/fineract-provider/api/v1/loans/" + id + "?" + Utils.TENANT_IDENTIFIER, loanApplicationJSON, "loanId");
+        return Utils.performServerPut(requestSpec, responseSpec, "/fineract-provider/api/v1/loans/" + id + "?" + Utils.TENANT_IDENTIFIER,
+                loanApplicationJSON, "loanId");
     }
 
     public PutLoansLoanIdResponse modifyLoanApplication(final Integer id, final String loanApplicationJSON) {
-        final String response = Utils.performServerPut(this.requestSpec, this.responseSpec,
+        final String response = Utils.performServerPut(requestSpec, responseSpec,
                 "/fineract-provider/api/v1/loans/" + id + "?" + Utils.TENANT_IDENTIFIER, loanApplicationJSON, null);
         return GSON.fromJson(response, PutLoansLoanIdResponse.class);
     }
@@ -208,7 +207,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     public PutLoansLoanIdResponse modifyLoanCommand(final Integer loanId, final String command, final String payload,
             ResponseSpecification responseSpec) {
         final String url = "/fineract-provider/api/v1/loans/" + loanId + "?" + Utils.TENANT_IDENTIFIER + "&command=" + command;
-        final String response = Utils.performServerPut(this.requestSpec, responseSpec, url, payload, null);
+        final String response = Utils.performServerPut(requestSpec, responseSpec, url, payload, null);
         return GSON.fromJson(response, PutLoansLoanIdResponse.class);
     }
 
@@ -296,14 +295,14 @@ public class LoanTransactionHelper extends IntegrationTest {
     public PostLoansDelinquencyActionResponse createLoanDelinquencyAction(final Long loanid, DelinquencyAction action, String startDate,
             String endDate) {
         PostLoansDelinquencyActionRequest postLoansDelinquencyAction = new PostLoansDelinquencyActionRequest().action(action.name())
-                .startDate(startDate).endDate(endDate).locale("en").dateFormat("dd MMMM yyyy");
+                .startDate(startDate).endDate(endDate).locale("en").dateFormat(CommonConstants.DATE_FORMAT);
         return ok(fineract().loans.createLoanDelinquencyAction(loanid, postLoansDelinquencyAction));
     }
 
     public PostLoansDelinquencyActionResponse createLoanDelinquencyAction(String externalId, DelinquencyAction action, String startDate,
             String endDate) {
         PostLoansDelinquencyActionRequest postLoansDelinquencyAction = new PostLoansDelinquencyActionRequest().action(action.name())
-                .startDate(startDate).endDate(endDate).locale("en").dateFormat("dd MMMM yyyy");
+                .startDate(startDate).endDate(endDate).locale("en").dateFormat(CommonConstants.DATE_FORMAT);
         return ok(fineract().loans.createLoanDelinquencyAction1(externalId, postLoansDelinquencyAction));
     }
 
@@ -346,7 +345,7 @@ public class LoanTransactionHelper extends IntegrationTest {
 
     public HashMap applyLoan(final String payload, final ResponseSpecification responseSpec) {
         final String postURLForLoan = "/fineract-provider/api/v1/loans?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForLoan, payload, null);
+        return Utils.performServerPost(requestSpec, responseSpec, postURLForLoan, payload, null);
     }
 
     public List getRepaymentTemplate(final Integer loanId) {
@@ -440,7 +439,7 @@ public class LoanTransactionHelper extends IntegrationTest {
             final List<HashMap> postDatedChecks) {
         final HashMap<String, Object> map = new HashMap<String, Object>();
         map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("actualDisbursementDate", actualDisbursementDate);
         map.put("note", "DISBURSE NOTE");
         if (transactionAmount != null) {
@@ -484,7 +483,7 @@ public class LoanTransactionHelper extends IntegrationTest {
             undoBodyJson = "{'note' : 'UNDO DISBURSAL'}";
             url = createLoanOperationURL(UNDO_DISBURSE_LOAN_COMMAND, loanId);
         }
-        final String response = Utils.performServerPost(this.requestSpec, this.responseSpec, url, undoBodyJson, null);
+        final String response = Utils.performServerPost(requestSpec, responseSpec, url, undoBodyJson, null);
         return GSON.fromJson(response, PostLoansLoanIdResponse.class);
     }
 
@@ -548,8 +547,8 @@ public class LoanTransactionHelper extends IntegrationTest {
     }
 
     public Integer waiveInterestAndReturnTransactionId(final String date, final String amountToBeWaived, final Integer loanID) {
-        Integer resourceId = Utils.performServerPost(this.requestSpec, this.responseSpec,
-                createLoanTransactionURL(WAIVE_INTEREST_COMMAND, loanID), getWaiveBodyAsJSON(date, amountToBeWaived), "resourceId");
+        Integer resourceId = Utils.performServerPost(requestSpec, responseSpec, createLoanTransactionURL(WAIVE_INTEREST_COMMAND, loanID),
+                getWaiveBodyAsJSON(date, amountToBeWaived), "resourceId");
         return resourceId;
     }
 
@@ -887,7 +886,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     public Object addChargesForAllreadyDisursedLoan(final Integer loanId, final String request,
             final ResponseSpecification responseSpecification) {
         final String ADD_CHARGES_URL = "/fineract-provider/api/v1/loans/" + loanId + "/charges?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPost(this.requestSpec, responseSpecification, ADD_CHARGES_URL, request, "");
+        return Utils.performServerPost(requestSpec, responseSpecification, ADD_CHARGES_URL, request, "");
     }
 
     public Integer updateChargesForLoan(final Integer loanId, final Integer loanchargeId, final String request) {
@@ -1092,7 +1091,7 @@ public class LoanTransactionHelper extends IntegrationTest {
             final String netDisbursalAmount, final String externalId) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("actualDisbursementDate", actualDisbursementDate);
         if (netDisbursalAmount != null) {
             map.put("netDisbursalAmount", netDisbursalAmount);
@@ -1112,7 +1111,7 @@ public class LoanTransactionHelper extends IntegrationTest {
             final String adjustRepaymentDate) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("actualDisbursementDate", actualDisbursementDate);
         map.put("adjustRepaymentDate", adjustRepaymentDate);
         map.put("note", "DISBURSE NOTE");
@@ -1131,7 +1130,7 @@ public class LoanTransactionHelper extends IntegrationTest {
             List<HashMap> tranches) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         if (approvalAmount != null) {
             map.put("approvedLoanAmount", approvalAmount);
         }
@@ -1150,7 +1149,7 @@ public class LoanTransactionHelper extends IntegrationTest {
         final HashMap<String, String> map = new HashMap<>();
         map.put("actualDisbursementDate", date);
         map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         return new Gson().toJson(map);
     }
 
@@ -1158,7 +1157,7 @@ public class LoanTransactionHelper extends IntegrationTest {
         final HashMap<String, String> map = new HashMap<>();
         map.put("rejectedOnDate", date);
         map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         return new Gson().toJson(map);
     }
 
@@ -1166,7 +1165,7 @@ public class LoanTransactionHelper extends IntegrationTest {
             final String externalId) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("loanChargeId", loanChargeId.toString());
         map.put("transactionAmount", transactionAmount.toString());
         map.put("note", "Loancharge Refund Made!!!");
@@ -1182,7 +1181,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     private String getCreditBalanceRefundBodyAsJSON(final String transactionDate, final Float transactionAmount, final String externalId) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("transactionDate", transactionDate);
         map.put("transactionAmount", transactionAmount.toString());
         map.put("note", "Credit Balance Refund Made!!!");
@@ -1195,7 +1194,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     private String getRepaymentBodyAsJSON(final String transactionDate, final Float transactionAmount) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("transactionDate", transactionDate);
         map.put("transactionAmount", transactionAmount.toString());
         map.put("note", "Repayment Made!!!");
@@ -1206,7 +1205,7 @@ public class LoanTransactionHelper extends IntegrationTest {
         final HashMap<String, String> map = new HashMap<>();
         map.put("transactionDate", date);
         map.put("transactionAmount", amount);
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("locale", "en");
         return new Gson().toJson(map);
     }
@@ -1215,7 +1214,7 @@ public class LoanTransactionHelper extends IntegrationTest {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
         map.put("paymentTypeId", paymentTypeId.toString());
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("transactionDate", transactionDate);
         map.put("transactionAmount", transactionAmount.toString());
         map.put("note", "Repayment Made!!!");
@@ -1225,7 +1224,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     private String getForeclosureBodyAsJSON(final String transactionDate, final Integer loanId) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("transactionDate", transactionDate);
         map.put("note", "Foreclosure Made!!!");
         String json = new Gson().toJson(map);
@@ -1235,7 +1234,7 @@ public class LoanTransactionHelper extends IntegrationTest {
 
     private String getWriteOffBodyAsJSON(final String transactionDate) {
         final HashMap<String, String> map = new HashMap<>();
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("locale", "en");
         map.put("note", " LOAN WRITE OFF!!!");
         map.put("transactionDate", transactionDate);
@@ -1245,7 +1244,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     private String getWaiveBodyAsJSON(final String transactionDate, final String amountToBeWaived) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("transactionDate", transactionDate);
         map.put("transactionAmount", amountToBeWaived);
         map.put("note", " Interest Waived!!!");
@@ -1255,7 +1254,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     private String getWithdrawLoanApplicationBodyAsJSON(final String withdrawDate) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("withdrawnOnDate", withdrawDate);
         map.put("note", " Loan Withdrawn By Client!!!");
         return new Gson().toJson(map);
@@ -1274,7 +1273,7 @@ public class LoanTransactionHelper extends IntegrationTest {
             final String externalId) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en_GB");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("amount", amount);
         map.put("dueDate", dueDate);
         map.put("chargeId", chargeId);
@@ -1289,7 +1288,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     public static String getSpecifiedInstallmentChargesForLoanAsJSON(final String chargeId, final String amount) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en_GB");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("amount", amount);
         map.put("chargeId", chargeId);
         String json = new Gson().toJson(map);
@@ -1304,7 +1303,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     public static String getDisbursementChargesForLoanAsJSON(final String chargeId, String amount) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en_GB");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("amount", amount);
         map.put("chargeId", chargeId);
         String json = new Gson().toJson(map);
@@ -1319,7 +1318,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     public static String getInstallmentChargesForLoanAsJSON(final String chargeId, final Object amount, final Locale locale) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("locale", locale.getLanguage());
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("amount", amount);
         map.put("chargeId", chargeId);
         String json = new Gson().toJson(map);
@@ -1330,7 +1329,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     public static String getUpdateChargesForLoanAsJSON(String amount) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en_GB");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("amount", amount);
         String json = new Gson().toJson(map);
         log.info("{}", json);
@@ -1344,7 +1343,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     public static String getPayChargeJSON(final String date, final String installmentNumber, final String externalId) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en_GB");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("transactionDate", date);
         if (installmentNumber != null) {
             map.put("installmentNumber", installmentNumber);
@@ -1368,7 +1367,7 @@ public class LoanTransactionHelper extends IntegrationTest {
 
     public String getLoanCalculationBodyAsJSON(final String productID) {
         final HashMap<String, String> map = new HashMap<>();
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("locale", "en_GB");
         map.put("productId", productID);
         map.put("principal", "4,500.00");
@@ -1414,37 +1413,35 @@ public class LoanTransactionHelper extends IntegrationTest {
     private HashMap performLoanTransaction(final String postURLForLoanTransaction, final String jsonToBeSent) {
         log.info("URL: {}", postURLForLoanTransaction);
         log.info("Body: {}", jsonToBeSent);
-        final HashMap response = Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForLoanTransaction, jsonToBeSent,
-                "changes");
+        final HashMap response = Utils.performServerPost(requestSpec, responseSpec, postURLForLoanTransaction, jsonToBeSent, "changes");
         return (HashMap) response.get("status");
     }
 
     private Float performUndoLastLoanDisbursementTransaction(final String postURLForLoanTransaction, final String jsonToBeSent) {
 
-        final HashMap response = Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForLoanTransaction, jsonToBeSent,
-                "changes");
+        final HashMap response = Utils.performServerPost(requestSpec, responseSpec, postURLForLoanTransaction, jsonToBeSent, "changes");
         return (Float) response.get("disbursedAmount");
     }
 
     private Object performLoanTransaction(final String postURLForLoanTransaction, final String jsonToBeSent,
             final String responseAttribute) {
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForLoanTransaction, jsonToBeSent, responseAttribute);
+        return Utils.performServerPost(requestSpec, responseSpec, postURLForLoanTransaction, jsonToBeSent, responseAttribute);
     }
 
     private PostLoansLoanIdTransactionsResponse postLoanTransaction(final String postURLForLoanTransaction, final String jsonToBeSent) {
-        return postLoanTransaction(postURLForLoanTransaction, jsonToBeSent, this.responseSpec);
+        return postLoanTransaction(postURLForLoanTransaction, jsonToBeSent, responseSpec);
     }
 
     private PostLoansLoanIdTransactionsResponse postLoanTransaction(final String postURLForLoanTransaction, final String jsonToBeSent,
             ResponseSpecification responseSpec) {
-        final String response = Utils.performServerPost(this.requestSpec, responseSpec, postURLForLoanTransaction, jsonToBeSent);
+        final String response = Utils.performServerPost(requestSpec, responseSpec, postURLForLoanTransaction, jsonToBeSent);
         return GSON.fromJson(response, PostLoansLoanIdTransactionsResponse.class);
     }
 
     private Object performLoanTransaction(final String postURLForLoanTransaction, final String jsonToBeSent,
             ResponseSpecification responseValidationError) {
 
-        return Utils.performServerPost(this.requestSpec, responseValidationError, postURLForLoanTransaction, jsonToBeSent,
+        return Utils.performServerPost(requestSpec, responseValidationError, postURLForLoanTransaction, jsonToBeSent,
                 CommonConstants.RESPONSE_ERROR);
     }
 
@@ -1456,13 +1453,13 @@ public class LoanTransactionHelper extends IntegrationTest {
     private Object adjustLoanTransaction(final Integer loanId, final Integer tansactionId, final String jsonToBeSent,
             final String responseAttribute) {
         final String URL = "/fineract-provider/api/v1/loans/" + loanId + "/transactions/" + tansactionId + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, URL, jsonToBeSent, responseAttribute);
+        return Utils.performServerPost(requestSpec, responseSpec, URL, jsonToBeSent, responseAttribute);
     }
 
     private String getAdjustTransactionJSON(final String date, final String transactionAmount) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en_GB");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("transactionDate", date);
         map.put("transactionAmount", transactionAmount);
         String json = new Gson().toJson(map);
@@ -1483,7 +1480,7 @@ public class LoanTransactionHelper extends IntegrationTest {
 
     public void verifyRepaymentScheduleEntryFor(final int repaymentNumber, final float expectedPrincipalOutstanding, final Integer loanID) {
         log.info("---------------------------GETTING LOAN REPAYMENT SCHEDULE--------------------------------");
-        final ArrayList<HashMap> repaymentPeriods = getLoanRepaymentSchedule(this.requestSpec, this.responseSpec, loanID);
+        final ArrayList<HashMap> repaymentPeriods = getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
         assertEquals(expectedPrincipalOutstanding, repaymentPeriods.get(repaymentNumber).get("principalLoanBalanceOutstanding"),
                 "Mismatch in Principal Loan Balance Outstanding ");
     }
@@ -1491,7 +1488,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     public void checkAccrualTransactionForRepayment(final LocalDate transactionDate, final Float interestPortion, final Float feePortion,
             final Float penaltyPortion, final Integer loanID) {
 
-        ArrayList<HashMap> transactions = (ArrayList<HashMap>) getLoanTransactions(this.requestSpec, this.responseSpec, loanID);
+        ArrayList<HashMap> transactions = (ArrayList<HashMap>) getLoanTransactions(requestSpec, responseSpec, loanID);
         boolean isTransactionFound = false;
         for (int i = 0; i < transactions.size(); i++) {
             HashMap transactionType = (HashMap) transactions.get(i).get("type");
@@ -1518,7 +1515,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     }
 
     public void noAccrualTransactionForRepayment(final Integer loanID) {
-        ArrayList<HashMap> transactions = (ArrayList<HashMap>) getLoanTransactions(this.requestSpec, this.responseSpec, loanID);
+        ArrayList<HashMap> transactions = (ArrayList<HashMap>) getLoanTransactions(requestSpec, responseSpec, loanID);
         for (HashMap transaction : transactions) {
             HashMap transactionType = (HashMap) transaction.get("type");
             assertFalse((Boolean) transactionType.get("accrual"), "Accrual entries are posted!");
@@ -1539,7 +1536,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     private String getRefundByCashBodyAsJSON(final String transactionDate, final Float transactionAmount) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("transactionDate", transactionDate);
         map.put("transactionAmount", transactionAmount.toString());
         map.put("note", "Refund Made!!!");
@@ -1555,7 +1552,7 @@ public class LoanTransactionHelper extends IntegrationTest {
         map.put("toClientId", toClientId.toString());
         map.put("toAccountType", "2");
         map.put("toAccountId", toAccountId.toString());
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("transferDate", transactionDate);
         map.put("transferAmount", transactionAmount.toString());
         map.put("transferDescription", "Refund Made!!!");
@@ -1586,7 +1583,7 @@ public class LoanTransactionHelper extends IntegrationTest {
             final String expectedDisbursementDate, final String updatedExpectedDisbursementDate, final String updatedPrincipal,
             final String jsonAttributeToGetBack) {
 
-        return Utils.performServerPut(this.requestSpec, this.responseSpec, createEditDisbursementURL(loanID, disbursementId),
+        return Utils.performServerPut(requestSpec, responseSpec, createEditDisbursementURL(loanID, disbursementId),
                 getEditDisbursementsAsJSON(approvalAmount, expectedDisbursementDate, updatedExpectedDisbursementDate, updatedPrincipal),
                 jsonAttributeToGetBack);
     }
@@ -1594,7 +1591,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     public Object addAndDeleteDisbursementDetail(final Integer loanID, final String approvalAmount, final String expectedDisbursementDate,
             List<HashMap> disbursementData, final String jsonAttributeToGetBack) {
 
-        return Utils.performServerPut(this.requestSpec, this.responseSpec, createAddAndDeleteDisbursementURL(loanID),
+        return Utils.performServerPut(requestSpec, responseSpec, createAddAndDeleteDisbursementURL(loanID),
                 getAddAndDeleteDisbursementsAsJSON(approvalAmount, expectedDisbursementDate, disbursementData), jsonAttributeToGetBack);
     }
 
@@ -1610,7 +1607,7 @@ public class LoanTransactionHelper extends IntegrationTest {
             final String updatedExpectedDisbursementDate, final String updatedPrincipal) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("approvedLoanAmount", approvalAmount);
         map.put("expectedDisbursementDate", expectedDisbursementDate);
         map.put("updatedExpectedDisbursementDate", updatedExpectedDisbursementDate);
@@ -1624,7 +1621,7 @@ public class LoanTransactionHelper extends IntegrationTest {
             final List<HashMap> disbursementData) {
         final HashMap map = new HashMap<>();
         map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("approvedLoanAmount", approvalAmount);
         map.put("expectedDisbursementDate", expectedDisbursementDate);
         map.put("disbursementData", disbursementData);
@@ -1661,7 +1658,7 @@ public class LoanTransactionHelper extends IntegrationTest {
     public String importLoanTemplate(File file) {
 
         String locale = "en";
-        String dateFormat = "dd MMMM yyyy";
+        String dateFormat = CommonConstants.DATE_FORMAT;
         String legalFormType = null;
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA);
         return Utils.performServerTemplatePost(requestSpec, responseSpec,

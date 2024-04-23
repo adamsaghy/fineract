@@ -51,10 +51,10 @@ public class SavingsAccountBalanceCheckAfterReversalTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
         this.savingsProductHelper = new SavingsProductHelper();
         this.scheduleJobHelper = new SchedulerJobHelper(requestSpec);
     }
@@ -62,9 +62,8 @@ public class SavingsAccountBalanceCheckAfterReversalTest {
     @SuppressWarnings("unchecked")
     @Test
     public void testSavingsBalanceAfterWithdrawal() {
-        SavingsAccountHelper savingsAccountHelperValidationError = new SavingsAccountHelper(this.requestSpec,
-                new ResponseSpecBuilder().build());
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, START_DATE);
+        SavingsAccountHelper savingsAccountHelperValidationError = new SavingsAccountHelper(requestSpec, new ResponseSpecBuilder().build());
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, START_DATE);
         Assertions.assertNotNull(clientID);
         final Integer savingsId = createSavingsAccountDailyPosting(clientID);
         Integer depositTransactionId = (Integer) this.savingsAccountHelper.depositToSavingsAccount(savingsId, "10000", START_DATE,
@@ -83,7 +82,7 @@ public class SavingsAccountBalanceCheckAfterReversalTest {
 
     @Test
     public void testSavingsBalanceWithOverDraftAfterWithdrawal() {
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, START_DATE);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, START_DATE);
         Assertions.assertNotNull(clientID);
         final Integer savingsId = createSavingsAccountDailyPostingWithOverDraft(clientID);
         Integer withdrawalTransactionId = (Integer) this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "1000", START_DATE,

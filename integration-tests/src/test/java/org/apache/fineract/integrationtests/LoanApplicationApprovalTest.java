@@ -50,7 +50,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Slf4j
 public class LoanApplicationApprovalTest {
 
-    private static final String DATETIME_PATTERN = "dd MMMM yyyy";
     private ResponseSpecification responseSpec;
     private ResponseSpecification responseSpecForStatusCode403;
     private ResponseSpecification responseSpecForStatusCode400;
@@ -60,12 +59,12 @@ public class LoanApplicationApprovalTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseSpecForStatusCode403 = new ResponseSpecBuilder().expectStatusCode(403).build();
-        this.responseSpecForStatusCode400 = new ResponseSpecBuilder().expectStatusCode(400).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        responseSpecForStatusCode403 = new ResponseSpecBuilder().expectStatusCode(403).build();
+        responseSpecForStatusCode400 = new ResponseSpecBuilder().expectStatusCode(400).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
     }
 
     /*
@@ -78,16 +77,16 @@ public class LoanApplicationApprovalTest {
         final String approvalAmount = "5000";
         final String approveDate = "20 September 2012";
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
-        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder().build(null));
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2012");
+        final Integer loanProductID = loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder().build(null));
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, proposedAmount);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         final String expectedDisbursementDate = null;
         List<HashMap> approveTranches = null;
-        loanStatusHashMap = this.loanTransactionHelper.approveLoanWithApproveAmount(approveDate, expectedDisbursementDate, approvalAmount,
+        loanStatusHashMap = loanTransactionHelper.approveLoanWithApproveAmount(approveDate, expectedDisbursementDate, approvalAmount,
                 loanID, approveTranches);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
@@ -103,17 +102,17 @@ public class LoanApplicationApprovalTest {
         final String approvalAmount = "9000";
         final String approveDate = "20 September 2011";
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
-        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder().build(null));
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2012");
+        final Integer loanProductID = loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder().build(null));
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, proposedAmount);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpecForStatusCode403);
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpecForStatusCode403);
 
         @SuppressWarnings("unchecked")
-        List<HashMap> error = (List<HashMap>) this.loanTransactionHelper.approveLoan(approveDate, approvalAmount, loanID,
+        List<HashMap> error = (List<HashMap>) loanTransactionHelper.approveLoan(approveDate, approvalAmount, loanID,
                 CommonConstants.RESPONSE_ERROR);
 
         assertEquals("error.msg.loan.approval.amount.can't.be.greater.than.loan.amount.demanded",
@@ -136,10 +135,10 @@ public class LoanApplicationApprovalTest {
         createTranches.add(createTrancheDetail("01 March 2014", "1000"));
         createTranches.add(createTrancheDetail("23 March 2014", "4000"));
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2014");
         log.info("---------------------------------CLIENT CREATED WITH ID--------------------------------------------------- {}", clientID);
 
-        final Integer loanProductID = this.loanTransactionHelper
+        final Integer loanProductID = loanTransactionHelper
                 .getLoanProductId(new LoanProductTestBuilder().withInterestTypeAsDecliningBalance().withTranches(true)
                         .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).build(null));
         log.info("----------------------------------LOAN PRODUCT CREATED WITH ID------------------------------------------- {}",
@@ -151,16 +150,16 @@ public class LoanApplicationApprovalTest {
 
     @Test
     public void loanApplicationShouldFailIfTransactionProcessingStrategyIsAdvancedPaymentAllocationButItIsNotConfiguredOnProduct() {
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2014");
         log.info("---------------------------------CLIENT CREATED WITH ID--------------------------------------------------- {}", clientId);
 
-        final Integer loanProductId = this.loanTransactionHelper
+        final Integer loanProductId = loanTransactionHelper
                 .getLoanProductId(new LoanProductTestBuilder().withInterestTypeAsDecliningBalance().withTranches(true)
                         .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).build(null));
         log.info("----------------------------------LOAN PRODUCT CREATED WITH ID------------------------------------------- {}",
                 loanProductId);
 
-        loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpecForStatusCode400);
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpecForStatusCode400);
         final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("1000").withLoanTermFrequency("1")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("1").withRepaymentEveryAfter("1")
                 .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("0").withInterestTypeAsFlatBalance()
@@ -188,11 +187,11 @@ public class LoanApplicationApprovalTest {
         final Integer loanID = applyForLoanApplicationWithTranches(clientID, loanProductID, proposedAmount, createTranches);
         log.info("-----------------------------------LOAN CREATED WITH LOANID------------------------------------------------- {}", loanID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         log.info("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
-        loanStatusHashMap = this.loanTransactionHelper.approveLoanWithApproveAmount(approveDate, expectedDisbursementDate, approvalAmount,
+        loanStatusHashMap = loanTransactionHelper.approveLoanWithApproveAmount(approveDate, expectedDisbursementDate, approvalAmount,
                 loanID, approveTranches);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
@@ -233,53 +232,52 @@ public class LoanApplicationApprovalTest {
         final Integer loanID = applyForLoanApplicationWithTranches(clientID, loanProductID, proposedAmount, createTranches);
         log.info("-----------------------------------LOAN CREATED WITH LOANID------------------------------------------------- {}", loanID);
 
-        HashMap<String, Object> loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap<String, Object> loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         log.info("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpecForStatusCode400);
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpecForStatusCode400);
 
         /* Tranches with same expected disbursement date */
-        List<HashMap<String, Object>> error = this.loanTransactionHelper.approveLoanForTranches(approveDate, expectedDisbursementDate,
+        List<HashMap<String, Object>> error = loanTransactionHelper.approveLoanForTranches(approveDate, expectedDisbursementDate,
                 approvalAmount2, loanID, approveTranche2, CommonConstants.RESPONSE_ERROR);
         assertEquals("validation.msg.loan.expectedDisbursementDate.disbursement.date.must.be.unique.for.tranches",
                 error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         /* Sum of tranches is greater than approved amount */
-        error = this.loanTransactionHelper.approveLoanForTranches(approveDate, expectedDisbursementDate, approvalAmount4, loanID,
+        error = loanTransactionHelper.approveLoanForTranches(approveDate, expectedDisbursementDate, approvalAmount4, loanID,
                 approveTranche4, CommonConstants.RESPONSE_ERROR);
         assertEquals("validation.msg.loan.principal.sum.of.multi.disburse.amounts.must.be.equal.to.or.lesser.than.approved.principal",
                 error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpecForStatusCode403);
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpecForStatusCode403);
 
         /* Sum of tranches exceeds the proposed amount */
-        error = this.loanTransactionHelper.approveLoanForTranches(approveDate, expectedDisbursementDate, approvalAmount1, loanID,
+        error = loanTransactionHelper.approveLoanForTranches(approveDate, expectedDisbursementDate, approvalAmount1, loanID,
                 approveTranche1, CommonConstants.RESPONSE_ERROR);
         assertEquals("error.msg.loan.approval.amount.can't.be.greater.than.loan.amount.demanded",
                 error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         /* No. of tranches exceeds the max tranche count at product level */
-        error = this.loanTransactionHelper.approveLoanForTranches(approveDate, expectedDisbursementDate, approvalAmount3, loanID,
+        error = loanTransactionHelper.approveLoanForTranches(approveDate, expectedDisbursementDate, approvalAmount3, loanID,
                 approveTranche3, CommonConstants.RESPONSE_ERROR);
         assertEquals("error.msg.disbursementData.exceeding.max.tranche.count",
                 error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
         /* If tranches are not specified for a multi-disburse loan */
         /**
-         * error = this.loanTransactionHelper.approveLoanForTranches(approveDate, expectedDisbursementDate,
-         * approvalAmount5, loanID, approveTranche5, CommonConstants.RESPONSE_ERROR);
-         * assertEquals("error.msg.disbursementData.required",
+         * error = loanTransactionHelper.approveLoanForTranches(approveDate, expectedDisbursementDate, approvalAmount5,
+         * loanID, approveTranche5, CommonConstants.RESPONSE_ERROR); assertEquals("error.msg.disbursementData.required",
          * error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
          **/
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, final String proposedAmount) {
         List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID.toString(),
+                collateralId);
         Assertions.assertNotNull(clientCollateralId);
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
 
@@ -288,7 +286,7 @@ public class LoanApplicationApprovalTest {
                 .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("2").withExpectedDisbursementDate("04 April 2012")
                 .withCollaterals(collaterals).withSubmittedOnDate("02 April 2012")
                 .build(clientID.toString(), loanProductID.toString(), null);
-        return this.loanTransactionHelper.getLoanId(loanApplication);
+        return loanTransactionHelper.getLoanId(loanApplication);
     }
 
     private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {
@@ -306,10 +304,10 @@ public class LoanApplicationApprovalTest {
             List<HashMap> tranches) {
         log.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID.toString(),
+                collateralId);
         Assertions.assertNotNull(clientCollateralId);
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
         final String loanApplicationJSON = new LoanApplicationTestBuilder()
@@ -328,6 +326,6 @@ public class LoanApplicationApprovalTest {
                 .withSubmittedOnDate("01 March 2014") //
                 .withCollaterals(collaterals).build(clientID.toString(), loanProductID.toString(), null);
 
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        return loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 }

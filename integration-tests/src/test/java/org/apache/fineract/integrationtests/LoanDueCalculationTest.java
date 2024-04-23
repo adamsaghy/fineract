@@ -37,7 +37,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 public class LoanDueCalculationTest extends BaseLoanIntegrationTest {
 
-    private static Stream<Arguments> processingStrategy() {
+    private static Stream<Arguments> repaymentProcessor() {
         return Stream.of(
                 Arguments.of(Named.of("originalStrategy",
                         DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY)), //
@@ -48,13 +48,13 @@ public class LoanDueCalculationTest extends BaseLoanIntegrationTest {
     // Repayment dates are calculated from the provided date (2024-02-29). As repayment starting date was provided, it
     // overrules `repayment start date type` configuration
     @ParameterizedTest
-    @MethodSource("processingStrategy")
+    @MethodSource("repaymentProcessor")
     public void dueDateBasedOnFirstRepaymentDate(String repaymentProcessor) {
         runAt("2 February 2024", () -> {
             // Client and Loan account creation
-            final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            final Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             PostLoanProductsRequest loanProductsRequest = create4Period1MonthLongWithoutInterestProduct(repaymentProcessor);
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+            PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(loanProductsRequest);
 
             PostLoansRequest loanRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), "2024-01-31", 1000.0, 4,
                     (postLoansRequest) -> {
@@ -62,7 +62,7 @@ public class LoanDueCalculationTest extends BaseLoanIntegrationTest {
                                 .loanTermFrequency(4).loanTermFrequencyType(2).dateFormat("yyyy-MM-dd")
                                 .repaymentsStartingFromDate(LocalDate.of(2024, 2, 29));
                     });
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(loanRequest);
+            PostLoansResponse postLoansResponse = LOAN_TRANSACTION_HELPER.applyLoan(loanRequest);
             verifyRepaymentSchedule(postLoansResponse.getLoanId(), installment(1000.0, null, "31 January 2024"), //
                     installment(250.0, false, "29 February 2024"), //
                     installment(250.0, false, "29 March 2024"), //
@@ -70,7 +70,7 @@ public class LoanDueCalculationTest extends BaseLoanIntegrationTest {
                     installment(250.0, false, "29 May 2024")) //
             ;
 
-            loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(), approveLoanRequest(1000.0, "31 January 2024"));
+            LOAN_TRANSACTION_HELPER.approveLoan(postLoansResponse.getResourceId(), approveLoanRequest(1000.0, "31 January 2024"));
 
             verifyRepaymentSchedule(postLoansResponse.getLoanId(), installment(1000.0, null, "31 January 2024"), //
                     installment(250.0, false, "29 February 2024"), //
@@ -97,21 +97,21 @@ public class LoanDueCalculationTest extends BaseLoanIntegrationTest {
     // on `2024-01-31`,
     // the repayment schedule reflects the "new date" after it got disbursed
     @ParameterizedTest
-    @MethodSource("processingStrategy")
+    @MethodSource("repaymentProcessor")
     public void dueDateBasedOnExpectedDisbursementDate(String repaymentProcessor) {
         runAt("31 March 2024", () -> {
             // Client and Loan account creation
-            final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            final Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             PostLoanProductsRequest loanProductsRequest = create4Period1MonthLongWithoutInterestProduct(repaymentProcessor)
                     .repaymentStartDateType(RepaymentStartDateType.DISBURSEMENT_DATE.getValue());
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+            PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(loanProductsRequest);
 
             PostLoansRequest loanRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), "2024-01-30", 1000.0, 4,
                     (postLoansRequest) -> {
                         postLoansRequest.transactionProcessingStrategyCode(repaymentProcessor).repaymentEvery(1).repaymentFrequencyType(2)
                                 .loanTermFrequency(4).loanTermFrequencyType(2).dateFormat("yyyy-MM-dd");
                     });
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(loanRequest);
+            PostLoansResponse postLoansResponse = LOAN_TRANSACTION_HELPER.applyLoan(loanRequest);
             verifyRepaymentSchedule(postLoansResponse.getLoanId(), installment(1000.0, null, "30 January 2024"), //
                     installment(250.0, false, "29 February 2024"), //
                     installment(250.0, false, "30 March 2024"), //
@@ -119,7 +119,7 @@ public class LoanDueCalculationTest extends BaseLoanIntegrationTest {
                     installment(250.0, false, "30 May 2024")) //
             ;
 
-            loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(), approveLoanRequest(1000.0, "31 January 2024"));
+            LOAN_TRANSACTION_HELPER.approveLoan(postLoansResponse.getResourceId(), approveLoanRequest(1000.0, "31 January 2024"));
 
             verifyRepaymentSchedule(postLoansResponse.getLoanId(), installment(1000.0, null, "30 January 2024"), //
                     installment(250.0, false, "29 February 2024"), //
@@ -145,21 +145,21 @@ public class LoanDueCalculationTest extends BaseLoanIntegrationTest {
     // date
     // when it got disbursed on `2024-02-03`, the repayment schedule due dates got no changed.
     @ParameterizedTest
-    @MethodSource("processingStrategy")
+    @MethodSource("repaymentProcessor")
     public void dueDateBasedOnSubmittedOnDate(String repaymentProcessor) {
         runAt("03 February 2024", () -> {
             // Client and Loan account creation
-            final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            final Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             PostLoanProductsRequest loanProductsRequest = create4Period1MonthLongWithoutInterestProduct(repaymentProcessor)
                     .repaymentStartDateType(RepaymentStartDateType.SUBMITTED_ON_DATE.getValue());
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+            PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(loanProductsRequest);
 
             PostLoansRequest loanRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), "2024-02-01", 1000.0, 4,
                     (postLoansRequest) -> {
                         postLoansRequest.transactionProcessingStrategyCode(repaymentProcessor).repaymentEvery(1).repaymentFrequencyType(2)
                                 .loanTermFrequency(4).loanTermFrequencyType(2).submittedOnDate("2024-01-31").dateFormat("yyyy-MM-dd");
                     });
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(loanRequest);
+            PostLoansResponse postLoansResponse = LOAN_TRANSACTION_HELPER.applyLoan(loanRequest);
             verifyRepaymentSchedule(postLoansResponse.getLoanId(), installment(1000.0, null, "31 January 2024"), //
                     installment(250.0, false, "29 February 2024"), //
                     installment(250.0, false, "31 March 2024"), //
@@ -167,7 +167,7 @@ public class LoanDueCalculationTest extends BaseLoanIntegrationTest {
                     installment(250.0, false, "31 May 2024")) //
             ;
 
-            loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(), approveLoanRequest(1000.0, "31 January 2024"));
+            LOAN_TRANSACTION_HELPER.approveLoan(postLoansResponse.getResourceId(), approveLoanRequest(1000.0, "31 January 2024"));
 
             verifyRepaymentSchedule(postLoansResponse.getLoanId(), installment(1000.0, null, "31 January 2024"), //
                     installment(250.0, false, "29 February 2024"), //
@@ -192,22 +192,22 @@ public class LoanDueCalculationTest extends BaseLoanIntegrationTest {
     // first repayment is 10 days
     // so the repayment schedule got amended accordingly
     @ParameterizedTest
-    @MethodSource("processingStrategy")
+    @MethodSource("repaymentProcessor")
     public void dueDateBasedOnSubmittedOnDateButThereShallBeMinimumDaysBetweenDisbursementAndFirstRepayment(String repaymentProcessor) {
         runAt("31 January 2024", () -> {
             // Client and Loan account creation
-            final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            final Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             PostLoanProductsRequest loanProductsRequest = create4Period1MonthLongWithoutInterestProduct(repaymentProcessor)
                     .repaymentStartDateType(RepaymentStartDateType.SUBMITTED_ON_DATE.getValue())
                     .minimumDaysBetweenDisbursalAndFirstRepayment(10);
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+            PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(loanProductsRequest);
 
             PostLoansRequest loanRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), "2024-02-26", 1000.0, 4,
                     (postLoansRequest) -> {
                         postLoansRequest.transactionProcessingStrategyCode(repaymentProcessor).repaymentEvery(1).repaymentFrequencyType(2)
                                 .loanTermFrequency(4).loanTermFrequencyType(2).submittedOnDate("2024-01-31").dateFormat("yyyy-MM-dd");
                     });
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(loanRequest);
+            PostLoansResponse postLoansResponse = LOAN_TRANSACTION_HELPER.applyLoan(loanRequest);
             verifyRepaymentSchedule(postLoansResponse.getLoanId(), installment(1000.0, null, "31 January 2024"), //
                     installment(250.0, false, "07 March 2024"), //
                     installment(250.0, false, "07 April 2024"), //
@@ -215,7 +215,7 @@ public class LoanDueCalculationTest extends BaseLoanIntegrationTest {
                     installment(250.0, false, "07 June 2024")) //
             ;
 
-            loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(), approveLoanRequest(1000.0, "31 January 2024"));
+            LOAN_TRANSACTION_HELPER.approveLoan(postLoansResponse.getResourceId(), approveLoanRequest(1000.0, "31 January 2024"));
 
             verifyRepaymentSchedule(postLoansResponse.getLoanId(), installment(1000.0, null, "31 January 2024"), //
                     installment(250.0, false, "07 March 2024"), //
@@ -240,23 +240,23 @@ public class LoanDueCalculationTest extends BaseLoanIntegrationTest {
     // first repayment is 36 days
     // so the repayment schedule got amended accordingly
     @ParameterizedTest
-    @MethodSource("processingStrategy")
+    @MethodSource("repaymentProcessor")
     public void dueDateBasedOnExpectedDisbursalDateButThereShallBeMinimumDaysBetweenDisbursementAndFirstRepayment(
             String repaymentProcessor) {
         runAt("31 January 2024", () -> {
             // Client and Loan account creation
-            final Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            final Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             PostLoanProductsRequest loanProductsRequest = create4Period1MonthLongWithoutInterestProduct(repaymentProcessor)
                     .repaymentStartDateType(RepaymentStartDateType.DISBURSEMENT_DATE.getValue())
                     .minimumDaysBetweenDisbursalAndFirstRepayment(36);
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(loanProductsRequest);
+            PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(loanProductsRequest);
 
             PostLoansRequest loanRequest = applyLoanRequest(clientId, loanProductResponse.getResourceId(), "2024-01-31", 1000.0, 4,
                     (postLoansRequest) -> {
                         postLoansRequest.transactionProcessingStrategyCode(repaymentProcessor).repaymentEvery(1).repaymentFrequencyType(2)
                                 .loanTermFrequency(4).loanTermFrequencyType(2).submittedOnDate("2024-01-31").dateFormat("yyyy-MM-dd");
                     });
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(loanRequest);
+            PostLoansResponse postLoansResponse = LOAN_TRANSACTION_HELPER.applyLoan(loanRequest);
             verifyRepaymentSchedule(postLoansResponse.getLoanId(), installment(1000.0, null, "31 January 2024"), //
                     installment(250.0, false, "07 March 2024"), //
                     installment(250.0, false, "07 April 2024"), //
@@ -264,7 +264,7 @@ public class LoanDueCalculationTest extends BaseLoanIntegrationTest {
                     installment(250.0, false, "07 June 2024")) //
             ;
 
-            loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(), approveLoanRequest(1000.0, "31 January 2024"));
+            LOAN_TRANSACTION_HELPER.approveLoan(postLoansResponse.getResourceId(), approveLoanRequest(1000.0, "31 January 2024"));
 
             verifyRepaymentSchedule(postLoansResponse.getLoanId(), installment(1000.0, null, "31 January 2024"), //
                     installment(250.0, false, "07 March 2024"), //

@@ -57,10 +57,10 @@ public class LoanDisbursalDateValidationTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
         this.responseForbiddenError = new ResponseSpecBuilder().expectStatusCode(403).build();
     }
 
@@ -72,11 +72,11 @@ public class LoanDisbursalDateValidationTest {
         final String disbursalDate = "02 March 2014";
 
         // CREATE CLIENT
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2014");
         LOG.info("---------------------------------CLIENT CREATED WITH ID--------------------------------------------------- {}", clientID);
 
         // CREATE LOAN PRODUCT
-        final Integer loanProductID = this.loanTransactionHelper
+        final Integer loanProductID = loanTransactionHelper
                 .getLoanProductId(new LoanProductTestBuilder().withSyncExpectedWithDisbursementDate(true).build(null));
         LOG.info("----------------------------------LOAN PRODUCT CREATED WITH ID------------------------------------------- {}",
                 loanProductID);
@@ -84,22 +84,22 @@ public class LoanDisbursalDateValidationTest {
         // APPLY FOR LOAN
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, proposedAmount);
         LOG.info("-----------------------------------LOAN CREATED WITH LOANID------------------------------------------------- {}", loanID);
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
 
         // VALIDATE THE LOAN STATUS
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(approveDate, loanID);
+        loanStatusHashMap = loanTransactionHelper.approveLoan(approveDate, loanID);
 
         // VALIDATE THE LOAN IS APPROVED
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         // DISBURSE A LOAN
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
+        String loanDetails = loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
         @SuppressWarnings("unchecked")
-        List<HashMap> disbursalError = (List<HashMap>) this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(disbursalDate, loanID,
+        List<HashMap> disbursalError = (List<HashMap>) loanTransactionHelper.disburseLoanWithNetDisbursalAmount(disbursalDate, loanID,
                 this.responseForbiddenError, JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
 
         Assertions.assertEquals(disbursalError.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE),
@@ -109,10 +109,10 @@ public class LoanDisbursalDateValidationTest {
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, final String proposedAmount) {
         List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID.toString(),
+                collateralId);
         Assertions.assertNotNull(clientCollateralId);
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
         final String loanApplication = new LoanApplicationTestBuilder().withPrincipal(proposedAmount).withLoanTermFrequency("5")
@@ -120,7 +120,7 @@ public class LoanDisbursalDateValidationTest {
                 .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("2").withExpectedDisbursementDate("01 March 2014")
                 .withCollaterals(collaterals).withSubmittedOnDate("26 February 2014")
                 .build(clientID.toString(), loanProductID.toString(), null);
-        return this.loanTransactionHelper.getLoanId(loanApplication);
+        return loanTransactionHelper.getLoanId(loanApplication);
     }
 
     private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {

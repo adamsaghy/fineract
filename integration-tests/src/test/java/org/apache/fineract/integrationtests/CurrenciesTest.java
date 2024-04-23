@@ -41,9 +41,9 @@ public class CurrenciesTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     @Test
@@ -73,8 +73,7 @@ public class CurrenciesTest {
         currenciestoUpdate.add("USD");
         currenciestoUpdate.add("INR");
 
-        ArrayList<String> currenciesOutput = CurrenciesHelper.updateSelectedCurrencies(this.requestSpec, this.responseSpec,
-                currenciestoUpdate);
+        ArrayList<String> currenciesOutput = CurrenciesHelper.updateSelectedCurrencies(requestSpec, responseSpec, currenciestoUpdate);
         Assertions.assertNotNull(currenciesOutput);
 
         Assertions.assertEquals(currenciestoUpdate, currenciesOutput, "Verifying Do Outputed Currencies Match after Updation");

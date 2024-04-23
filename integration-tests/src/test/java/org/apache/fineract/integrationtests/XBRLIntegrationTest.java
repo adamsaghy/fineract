@@ -46,14 +46,14 @@ public class XBRLIntegrationTest {
     @BeforeEach
     public void setUp() throws Exception {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     @Test
     public void shouldRetrieveTaxonomyList() {
-        this.xbrlHelper = new XBRLIntegrationTestHelper(this.requestSpec, this.responseSpec);
+        this.xbrlHelper = new XBRLIntegrationTestHelper(requestSpec, responseSpec);
 
         final ArrayList<HashMap> taxonomyList = this.xbrlHelper.getTaxonomyList();
         verifyTaxonomyList(taxonomyList);

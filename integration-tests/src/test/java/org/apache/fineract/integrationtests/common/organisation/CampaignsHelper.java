@@ -29,6 +29,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.report.ReportData;
 import org.springframework.util.Assert;
@@ -40,7 +41,7 @@ public class CampaignsHelper {
     private final ResponseSpecification responseSpec;
 
     private static final String SMS_CAMPAIGNS_URL = "/fineract-provider/api/v1/smscampaigns";
-    public static final String DATE_FORMAT = "dd MMMM yyyy";
+
     public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm:ss";
 
     private static final String BUSINESS_RULE_OPTIONS = "businessRulesOptions";
@@ -85,7 +86,7 @@ public class CampaignsHelper {
         log.info("------------------------------PERFORM ACTION ON CAMPAIGN DETAILS------------------------------------\n");
         final String SMS_CAMPAIGNS_ACTION_URL = SMS_CAMPAIGNS_URL + "/" + generatedCampaignId + "?command=" + command + "&"
                 + Utils.TENANT_IDENTIFIER;
-        String actionDate = Utils.getLocalDateOfTenant().format(DateTimeFormatter.ofPattern(DATE_FORMAT));
+        String actionDate = Utils.getLocalDateOfTenant().format(DateTimeFormatter.ofPattern(CommonConstants.DATE_FORMAT));
         return Utils.performServerPost(requestSpec, responseSpec, SMS_CAMPAIGNS_ACTION_URL, getJSONForCampaignAction(command, actionDate),
                 "resourceId");
     }
@@ -95,8 +96,8 @@ public class CampaignsHelper {
         log.info("--------------------------PERFORM ACTION ON CAMPAIGN DETAILS WITH FAILURE-------------------------------\n");
         final String SMS_CAMPAIGNS_ACTION_URL = SMS_CAMPAIGNS_URL + "/" + generatedCampaignId + "?command=" + command + "&"
                 + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, SMS_CAMPAIGNS_ACTION_URL,
-                getJSONForCampaignAction(command, actionDate), responseJsonAttribute);
+        return Utils.performServerPost(requestSpec, responseSpec, SMS_CAMPAIGNS_ACTION_URL, getJSONForCampaignAction(command, actionDate),
+                responseJsonAttribute);
     }
 
     public String getCreateCampaignJSON(String reportName, Integer triggerType) {
@@ -115,7 +116,7 @@ public class CampaignsHelper {
         map.put("campaignType", 1);
         map.put("message", "Hi, this is from integtration tests runner");
         map.put("locale", "en");
-        map.put("dateFormat", DATE_FORMAT);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("dateTimeFormat", DATE_TIME_FORMAT);
         map.put("runReportId", reportId);
         paramValueMap.put("officeId", "1");
@@ -141,7 +142,7 @@ public class CampaignsHelper {
         map.put("campaignType", 1);
         map.put("message", "Hi, this is from integtration tests runner");
         map.put("locale", "en");
-        map.put("dateFormat", DATE_FORMAT);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("dateTimeFormat", DATE_TIME_FORMAT);
         map.put("runReportId", reportId);
         paramValueMap.put("officeId", "1");
@@ -158,7 +159,7 @@ public class CampaignsHelper {
         String dateString = "close".equalsIgnoreCase(command) ? "closureDate" : "activationDate";
         map.put(dateString, actionDate);
         map.put("locale", "en");
-        map.put("dateFormat", DATE_FORMAT);
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         String json = new Gson().toJson(map);
         log.info("{}", json);
         return json;

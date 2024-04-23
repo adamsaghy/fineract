@@ -63,23 +63,23 @@ public class SkipRepaymentOnMonthFirstTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     @AfterEach
     public void tearDown() {
-        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
-        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(requestSpec, responseSpec);
+        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(requestSpec, responseSpec);
     }
 
     @Test
     public void testSkippingRepaymentOnFirstDayOfMonth() {
-        this.globalConfigurationHelper = new GlobalConfigurationHelper(this.requestSpec, this.responseSpec);
+        this.globalConfigurationHelper = new GlobalConfigurationHelper(requestSpec, responseSpec);
 
         // Retrieving All Global Configuration details
-        final ArrayList<HashMap> globalConfig = GlobalConfigurationHelper.getAllGlobalConfigurations(this.requestSpec, this.responseSpec);
+        final ArrayList<HashMap> globalConfig = GlobalConfigurationHelper.getAllGlobalConfigurations(requestSpec, responseSpec);
         Assertions.assertNotNull(globalConfig);
 
         String configName = "skip-repayment-on-first-day-of-month";
@@ -88,8 +88,8 @@ public class SkipRepaymentOnMonthFirstTest {
         for (Integer configIndex = 0; configIndex < globalConfig.size(); configIndex++) {
             if (globalConfig.get(configIndex).get("name").equals(configName)) {
                 String configId = globalConfig.get(configIndex).get("id").toString();
-                Integer updateConfigId = GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec,
-                        this.responseSpec, configId.toString(), newBooleanValue);
+                Integer updateConfigId = GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec,
+                        configId.toString(), newBooleanValue);
                 Assertions.assertNotNull(updateConfigId);
                 break;
             }
@@ -99,11 +99,11 @@ public class SkipRepaymentOnMonthFirstTest {
 
     @Test
     public void checkRepaymentSkipOnFirstDayOfMonth() {
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
-        groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientID.toString());
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        Integer groupID = GroupHelper.createGroup(requestSpec, responseSpec, true);
+        groupID = GroupHelper.associateClient(requestSpec, responseSpec, groupID.toString(), clientID.toString());
         final String startDate = "15 September 2011";
         final String frequency = "3"; // Monthly
         final String interval = "1"; // Every One Moth
@@ -112,8 +112,7 @@ public class SkipRepaymentOnMonthFirstTest {
         final Integer loanProductID = createLoanProduct();
         final Integer loanID = applyForLoanApplication(groupID, loanProductID, calendarID, clientID);
         LOG.info("loanID---- {}", loanID);
-        final ArrayList<HashMap> loanSchedule = this.loanTransactionHelper.getLoanRepaymentSchedule(this.requestSpec, this.responseSpec,
-                loanID);
+        final ArrayList<HashMap> loanSchedule = loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
         verifyLoanRepaymentSchedule(loanSchedule);
 
     }
@@ -130,16 +129,16 @@ public class SkipRepaymentOnMonthFirstTest {
                 .withAmortizationTypeAsEqualInstallments() //
                 .withInterestTypeAsDecliningBalance() //
                 .build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        return loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
     private Integer applyForLoanApplication(final Integer groupID, final Integer loanProductID, Integer calendarID, Integer clientID) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID.toString(),
+                collateralId);
         Assertions.assertNotNull(clientCollateralId);
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
 
@@ -160,7 +159,7 @@ public class SkipRepaymentOnMonthFirstTest {
                 .withCollaterals(collaterals).withLoanType("jlg")
                 .build(clientID.toString(), groupID.toString(), loanProductID.toString(), null);
         LOG.info(loanApplicationJSON);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        return loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
     private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {

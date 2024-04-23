@@ -30,6 +30,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
@@ -53,12 +54,12 @@ public class LoanApplicationRejectionForLoanProductWithPeriodicAccrualAccounting
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
+        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
     }
 
     @Test
@@ -82,12 +83,12 @@ public class LoanApplicationRejectionForLoanProductWithPeriodicAccrualAccounting
         final Integer loanId = createLoanAccount(clientId, loanProductID, loanExternalIdStr);
 
         // verify Loan status as submitted and pending approval
-        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getPendingApproval());
 
         // Reject Loan application
-        PostLoansLoanIdResponse result = this.loanTransactionHelper.rejectLoan(loanExternalIdStr,
-                new PostLoansLoanIdRequest().rejectedOnDate("3 September 2022").locale("en").dateFormat("dd MMMM yyyy"));
+        PostLoansLoanIdResponse result = loanTransactionHelper.rejectLoan(loanExternalIdStr,
+                new PostLoansLoanIdRequest().rejectedOnDate("3 September 2022").locale("en").dateFormat(CommonConstants.DATE_FORMAT));
 
         // Verify Loan application status is Rejected
         assertTrue(result.getChanges().getStatus().getValue().equals("Rejected"));
@@ -102,7 +103,7 @@ public class LoanApplicationRejectionForLoanProductWithPeriodicAccrualAccounting
                 .withAccountingRulePeriodicAccrual(accounts).withDaysInMonth("30").withDaysInYear("365").withMoratorium("0", "0")
                 .build(null);
 
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        return loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
     private Integer createLoanAccount(final Integer clientID, final Integer loanProductID, final String externalId) {

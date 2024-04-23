@@ -29,6 +29,7 @@ import java.util.Optional;
 import lombok.Builder;
 import org.apache.fineract.client.models.AdvancedPaymentData;
 import org.apache.fineract.client.models.CreditAllocationData;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
@@ -186,7 +187,7 @@ public class LoanProductTestBuilder {
         map.put("externalId", this.externalId);
         map.put("currencyCode", this.currencyCode);
         map.put("locale", LOCALE);
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("digitsAfterDecimal", digitsAfterDecimal);
         map.put("inMultiplesOf", inMultiplesOf);
         map.put("principal", this.principal);

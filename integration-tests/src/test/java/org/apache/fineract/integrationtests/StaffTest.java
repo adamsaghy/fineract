@@ -47,11 +47,11 @@ public class StaffTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseSpecForValidationError = new ResponseSpecBuilder().expectStatusCode(400).build();
-        this.responseSpecForNotFoundError = new ResponseSpecBuilder().expectStatusCode(404).build();
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        responseSpecForValidationError = new ResponseSpecBuilder().expectStatusCode(400).build();
+        responseSpecForNotFoundError = new ResponseSpecBuilder().expectStatusCode(404).build();
     }
 
     @Test

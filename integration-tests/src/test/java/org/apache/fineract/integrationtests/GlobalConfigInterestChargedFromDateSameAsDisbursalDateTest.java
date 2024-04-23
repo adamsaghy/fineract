@@ -41,24 +41,24 @@ public class GlobalConfigInterestChargedFromDateSameAsDisbursalDateTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     @AfterEach
     public void tearDown() {
-        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
-        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(requestSpec, responseSpec);
+        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(requestSpec, responseSpec);
     }
 
     @SuppressWarnings({ "static-access", "rawtypes", "unchecked" })
     @Test
     public void testInterestChargedFromDateSameAsDisbursalDate() {
-        this.globalConfigurationHelper = new GlobalConfigurationHelper(this.requestSpec, this.responseSpec);
+        this.globalConfigurationHelper = new GlobalConfigurationHelper(requestSpec, responseSpec);
 
         // Retrieving All Global Configuration details
-        final ArrayList<HashMap> globalConfig = GlobalConfigurationHelper.getAllGlobalConfigurations(this.requestSpec, this.responseSpec);
+        final ArrayList<HashMap> globalConfig = GlobalConfigurationHelper.getAllGlobalConfigurations(requestSpec, responseSpec);
         Assertions.assertNotNull(globalConfig);
 
         String configName = "interest-charged-from-date-same-as-disbursal-date";
@@ -67,8 +67,8 @@ public class GlobalConfigInterestChargedFromDateSameAsDisbursalDateTest {
         for (Integer configIndex = 0; configIndex < globalConfig.size(); configIndex++) {
             if (globalConfig.get(configIndex).get("name").equals(configName)) {
                 String configId = globalConfig.get(configIndex).get("id").toString();
-                Integer updateConfigId = GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec,
-                        this.responseSpec, configId.toString(), newBooleanValue);
+                Integer updateConfigId = GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec,
+                        configId.toString(), newBooleanValue);
                 Assertions.assertNotNull(updateConfigId);
                 break;
             }

@@ -30,6 +30,7 @@ import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
 import org.junit.jupiter.api.Test;
@@ -42,7 +43,7 @@ public class LoanDownPaymentTransactionChargebackTest extends BaseLoanIntegratio
     public void loanDownPaymentTransactionChargebackTest() {
         runAt("03 March 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepaymentsWithEnableDownPayment(false);
 
@@ -65,14 +66,14 @@ public class LoanDownPaymentTransactionChargebackTest extends BaseLoanIntegratio
             );
 
             // make down payment
-            final PostLoansLoanIdTransactionsResponse downPaymentTransaction_1 = loanTransactionHelper.makeLoanDownPayment(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("01 March 2023").locale("en")
-                            .transactionAmount(250.0));
+            final PostLoansLoanIdTransactionsResponse downPaymentTransaction_1 = LOAN_TRANSACTION_HELPER.makeLoanDownPayment(loanId,
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("01 March 2023")
+                            .locale("en").transactionAmount(250.0));
             assertNotNull(downPaymentTransaction_1);
 
             // chargeback down payment transaction
-            final Long chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId.intValue(),
-                    downPaymentTransaction_1.getResourceId(), "50.00", 0, responseSpec);
+            final Long chargebackTransactionId = LOAN_TRANSACTION_HELPER.applyChargebackTransaction(loanId.intValue(),
+                    downPaymentTransaction_1.getResourceId(), "50.00", 0, RESPONSE_SPEC);
 
             reviewLoanTransactionRelations(loanId.intValue(), downPaymentTransaction_1.getResourceId(), 1, Double.valueOf("750.00"));
             reviewLoanTransactionRelations(loanId.intValue(), chargebackTransactionId, 0, Double.valueOf("800.00"));
@@ -88,8 +89,8 @@ public class LoanDownPaymentTransactionChargebackTest extends BaseLoanIntegratio
 
             // verify journal entries for chargeback transaction
             verifyTRJournalEntries(chargebackTransactionId, //
-                    credit(fundSource, 50.0), //
-                    debit(loansReceivableAccount, 50.0) //
+                    credit(FUND_SOURCE, 50.0), //
+                    debit(LOANS_RECEIVABLE_ACCOUNT, 50.0) //
             );
         });
     }
@@ -98,7 +99,7 @@ public class LoanDownPaymentTransactionChargebackTest extends BaseLoanIntegratio
     public void loanDownPaymentTransactionChargebackForAdvancedPaymentAllocationTest() {
         runAt("03 March 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepaymentsWithEnableDownPayment(true);
 
@@ -124,14 +125,14 @@ public class LoanDownPaymentTransactionChargebackTest extends BaseLoanIntegratio
             );
 
             // make down payment
-            final PostLoansLoanIdTransactionsResponse downPaymentTransaction_1 = loanTransactionHelper.makeLoanDownPayment(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("01 March 2023").locale("en")
-                            .transactionAmount(250.0));
+            final PostLoansLoanIdTransactionsResponse downPaymentTransaction_1 = LOAN_TRANSACTION_HELPER.makeLoanDownPayment(loanId,
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("01 March 2023")
+                            .locale("en").transactionAmount(250.0));
             assertNotNull(downPaymentTransaction_1);
 
             // chargeback down payment transaction
-            final Long chargebackTransactionId = loanTransactionHelper.applyChargebackTransaction(loanId.intValue(),
-                    downPaymentTransaction_1.getResourceId(), "50.00", 0, responseSpec);
+            final Long chargebackTransactionId = LOAN_TRANSACTION_HELPER.applyChargebackTransaction(loanId.intValue(),
+                    downPaymentTransaction_1.getResourceId(), "50.00", 0, RESPONSE_SPEC);
 
             reviewLoanTransactionRelations(loanId.intValue(), downPaymentTransaction_1.getResourceId(), 1, Double.valueOf("750.00"));
             reviewLoanTransactionRelations(loanId.intValue(), chargebackTransactionId, 0, Double.valueOf("800.00"));
@@ -147,8 +148,8 @@ public class LoanDownPaymentTransactionChargebackTest extends BaseLoanIntegratio
 
             // verify journal entries for chargeback transaction
             verifyTRJournalEntries(chargebackTransactionId, //
-                    credit(fundSource, 50.0), //
-                    debit(loansReceivableAccount, 50.0) //
+                    credit(FUND_SOURCE, 50.0), //
+                    debit(LOANS_RECEIVABLE_ACCOUNT, 50.0) //
             );
         });
     }
@@ -173,8 +174,8 @@ public class LoanDownPaymentTransactionChargebackTest extends BaseLoanIntegratio
         product.setDisbursedAmountPercentageForDownPayment(DOWN_PAYMENT_PERCENTAGE);
         product.setEnableAutoRepaymentForDownPayment(false);
 
-        PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = loanProductHelper
+        PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(product);
+        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = LOAN_PRODUCT_HELPER
                 .retrieveLoanProductById(loanProductResponse.getResourceId());
         assertNotNull(getLoanProductsProductIdResponse);
         return loanProductResponse.getResourceId();
@@ -184,7 +185,7 @@ public class LoanDownPaymentTransactionChargebackTest extends BaseLoanIntegratio
     private void reviewLoanTransactionRelations(final Integer loanId, final Long transactionId, final Integer expectedSize,
             final Double outstandingBalance) {
 
-        GetLoansLoanIdTransactionsTransactionIdResponse getLoansTransactionResponse = loanTransactionHelper.getLoanTransaction(loanId,
+        GetLoansLoanIdTransactionsTransactionIdResponse getLoansTransactionResponse = LOAN_TRANSACTION_HELPER.getLoanTransaction(loanId,
                 transactionId.intValue());
         assertNotNull(getLoansTransactionResponse);
         assertNotNull(getLoansTransactionResponse.getTransactionRelations());

@@ -36,6 +36,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
@@ -64,23 +65,23 @@ public class ConcurrencyIntegrationTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
     }
 
     @Test
     public void verifyConcurrentLoanRepayments() {
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
         final Integer loanProductID = createLoanProduct(false, NO_ACCOUNTING);
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, "12,000.00");
-        this.loanTransactionHelper.approveLoan("20 September 2011", loanID);
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("20 September 2011", loanID, "12,000.00",
+        loanTransactionHelper.approveLoan("20 September 2011", loanID);
+        String loanDetails = loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
+        loanTransactionHelper.disburseLoanWithNetDisbursalAmount("20 September 2011", loanID, "12,000.00",
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         ExecutorService executor = Executors.newFixedThreadPool(MYTHREADS);
         Calendar date = Calendar.getInstance();
@@ -121,16 +122,16 @@ public class ConcurrencyIntegrationTest {
             builder = builder.withInterestCalculationPeriodTypeAsRepaymentPeriod(true);
         }
         final String loanProductJSON = builder.build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        return loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, String principal) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID.toString(),
+                collateralId);
         Assertions.assertNotNull(clientCollateralId);
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
@@ -147,7 +148,7 @@ public class ConcurrencyIntegrationTest {
                 .withExpectedDisbursementDate("20 September 2011") //
                 .withSubmittedOnDate("20 September 2011") //
                 .withCollaterals(collaterals).build(clientID.toString(), loanProductID.toString(), null);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        return loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
     private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {
@@ -168,7 +169,7 @@ public class ConcurrencyIntegrationTest {
         private final String repaymentDate;
         private final LoanTransactionHelper loanTransactionHelper;
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
 
         LoanRepaymentExecutor(LoanTransactionHelper loanTransactionHelper, Integer loanId, Float repaymentAmount, Calendar repaymentDate) {
             this.loanId = loanId;
@@ -180,7 +181,7 @@ public class ConcurrencyIntegrationTest {
         @Override
         public void run() {
             try {
-                this.loanTransactionHelper.makeRepayment(repaymentDate, repaymentAmount, loanId);
+                loanTransactionHelper.makeRepayment(repaymentDate, repaymentAmount, loanId);
             } catch (Exception e) {
                 LOG.info("Found an exception {}", e.getMessage());
                 LOG.info("Details of failed concurrent transaction (date, amount, loanId) are {},{},{}", repaymentDate, repaymentAmount,

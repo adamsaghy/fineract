@@ -39,13 +39,13 @@ public class XBRLIntegrationTestHelper {
     }
 
     public ArrayList getTaxonomyList() {
-        final ArrayList response = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_TAXONOMY_LIST_URL, "");
+        final ArrayList response = Utils.performServerGet(requestSpec, responseSpec, GET_TAXONOMY_LIST_URL, "");
 
         return response;
     }
 
     public HashMap getTaxonomyMapping() {
-        final HashMap response = Utils.performServerGet(this.requestSpec, this.responseSpec, TAXONOMY_MAPPING_URL, "config");
+        final HashMap response = Utils.performServerGet(requestSpec, responseSpec, TAXONOMY_MAPPING_URL, "config");
         return response;
     }
 

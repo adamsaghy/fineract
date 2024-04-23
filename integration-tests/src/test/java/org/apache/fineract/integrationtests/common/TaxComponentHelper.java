@@ -55,7 +55,7 @@ public final class TaxComponentHelper {
     public static HashMap<String, String> getBasicTaxComponentMap(final String percentage) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("name", randomNameGenerator("Tax_component_Name_", 5));
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("locale", "en");
         map.put("percentage", percentage);
         map.put("startDate", "01 January 2013");

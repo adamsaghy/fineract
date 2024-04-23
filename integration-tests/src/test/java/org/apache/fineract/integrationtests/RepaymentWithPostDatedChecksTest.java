@@ -39,6 +39,7 @@ import org.apache.fineract.client.models.PostPaymentTypesRequest;
 import org.apache.fineract.client.models.PostPaymentTypesResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
@@ -56,58 +57,58 @@ public class RepaymentWithPostDatedChecksTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
-    private final SimpleDateFormat dateFormatterStandard = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+    private final SimpleDateFormat dateFormatterStandard = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
     private LoanTransactionHelper loanTransactionHelper;
     private PaymentTypeHelper paymentTypeHelper;
 
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.paymentTypeHelper = new PaymentTypeHelper();
     }
 
     @Test
     public void testRepaymentWithPostDatedChecks() {
-        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
         Calendar meetingCalendar = Calendar.getInstance();
         meetingCalendar.set(2012, 3, 4);
 
         final String disbursalDate = this.dateFormatterStandard.format(meetingCalendar.getTime());
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientID);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
-        final Integer loanProductID = this.loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder().build(null));
+        final Integer loanProductID = loanTransactionHelper.getLoanProductId(new LoanProductTestBuilder().build(null));
         Assertions.assertNotNull(loanProductID, "Could not create Loan Product");
 
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, "8000");
         Assertions.assertNotNull(loanID, "Could not create Loan Account");
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
 
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         // Test for loan account is created, can be approved
-        this.loanTransactionHelper.approveLoan(disbursalDate, loanID);
-        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        loanTransactionHelper.approveLoan(disbursalDate, loanID);
+        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
 
         // Get repayments Template for Repayment
-        ArrayList<HashMap> installmentData = this.loanTransactionHelper.getRepayments(loanID);
+        ArrayList<HashMap> installmentData = loanTransactionHelper.getRepayments(loanID);
         Assertions.assertNotNull(installmentData, "Empty Installment Data Template");
 
         // Get repayments for Disburse
-        installmentData = this.loanTransactionHelper.getRepayments(loanID);
+        installmentData = loanTransactionHelper.getRepayments(loanID);
         Assertions.assertNotNull(installmentData, "Empty Installment Data");
         List<HashMap> postDatedChecks = new ArrayList<>();
         Gson gson = new Gson();
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         // Get the first installment date
@@ -130,8 +131,8 @@ public class RepaymentWithPostDatedChecksTest {
         Assertions.assertNotNull(postDatedChecks);
 
         // Test for loan account approved can be disbursed
-        this.loanTransactionHelper.disburseLoanWithPostDatedChecks(disbursalDate, loanID, BigDecimal.valueOf(8000), postDatedChecks);
-        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        loanTransactionHelper.disburseLoanWithPostDatedChecks(disbursalDate, loanID, BigDecimal.valueOf(8000), postDatedChecks);
+        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         // Create payment type PDC - Post Dated Checks
@@ -149,19 +150,19 @@ public class RepaymentWithPostDatedChecksTest {
         Assertions.assertEquals(name, paymentTypeResponse.getName());
 
         // Repay for the installment 1 using post dated check
-        HashMap postDatedCheck = this.loanTransactionHelper.getPostDatedCheck(loanID, Integer.valueOf(1));
+        HashMap postDatedCheck = loanTransactionHelper.getPostDatedCheck(loanID, Integer.valueOf(1));
         Assertions.assertNotNull(postDatedCheck);
         Assertions.assertNotNull(Float.valueOf(String.valueOf(postDatedCheck.get("amount"))));
 
-        this.loanTransactionHelper.makeRepaymentWithPDC(LOAN_REPAYMENT_DATE, firstInstallmentAmount, loanID, paymentTypeId);
+        loanTransactionHelper.makeRepaymentWithPDC(LOAN_REPAYMENT_DATE, firstInstallmentAmount, loanID, paymentTypeId);
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, final String proposedAmount) {
         List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID.toString(),
+                collateralId);
         Assertions.assertNotNull(clientCollateralId);
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
         final String loanApplication = new LoanApplicationTestBuilder().withPrincipal(proposedAmount).withLoanTermFrequency("5")
@@ -169,7 +170,7 @@ public class RepaymentWithPostDatedChecksTest {
                 .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("2").withExpectedDisbursementDate("04 April 2012")
                 .withCollaterals(collaterals).withSubmittedOnDate("02 April 2012")
                 .build(clientID.toString(), loanProductID.toString(), null);
-        return this.loanTransactionHelper.getLoanId(loanApplication);
+        return loanTransactionHelper.getLoanId(loanApplication);
     }
 
     private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {

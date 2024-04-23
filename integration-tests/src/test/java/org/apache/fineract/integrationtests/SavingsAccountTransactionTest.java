@@ -95,14 +95,14 @@ public class SavingsAccountTransactionTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(SC_OK).build();
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(SC_OK).build();
         this.concurrentResponseSpec = new ResponseSpecBuilder().expectStatusCode(anyOf(is(SC_OK), is(SC_CONFLICT))).build();
         this.deadlockResponseSpec = new ResponseSpecBuilder().expectStatusCode(anyOf(is(SC_OK), is(SC_CONFLICT), is(SC_FORBIDDEN))).build();
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
         this.savingsProductHelper = new SavingsProductHelper();
-        this.datatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
+        this.datatableHelper = new DatatableHelper(requestSpec, responseSpec);
     }
 
     @Test
@@ -115,7 +115,7 @@ public class SavingsAccountTransactionTest {
             LocalDate depositDate = Utils.getDateAsLocalDate(depositDateString);
             LocalDate withdrawDate = Utils.getDateAsLocalDate(withdrawDateString);
 
-            final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDateString);
+            final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, startDateString);
             assertNotNull(clientID);
 
             final Integer savingsId = createApproveActivateSavingsAccountDailyPosting(clientID, startDateString);
@@ -130,8 +130,8 @@ public class SavingsAccountTransactionTest {
 
     @Test
     public void testConcurrentSavingsTransactions() {
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
         final Integer savingsProductId = createSavingsProductDailyPosting();
         assertNotNull(savingsProductId);
@@ -163,8 +163,8 @@ public class SavingsAccountTransactionTest {
 
     @Test
     public void testConcurrentSavingsBatchTransactions() {
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
         final Integer savingsProductId = createSavingsProductDailyPosting();
         assertNotNull(savingsProductId);
@@ -456,7 +456,7 @@ public class SavingsAccountTransactionTest {
     // Reset configuration fields
     @AfterEach
     public void tearDown() {
-        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
-        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(requestSpec, responseSpec);
+        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(requestSpec, responseSpec);
     }
 }

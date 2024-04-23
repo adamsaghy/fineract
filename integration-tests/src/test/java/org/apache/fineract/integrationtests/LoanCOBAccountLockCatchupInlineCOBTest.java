@@ -70,7 +70,7 @@ public class LoanCOBAccountLockCatchupInlineCOBTest {
         requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         requestSpec.header("Fineract-Platform-TenantId", "default");
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         loanCOBCatchUpHelper = new LoanCOBCatchUpHelper();
         inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
     }
@@ -80,7 +80,7 @@ public class LoanCOBAccountLockCatchupInlineCOBTest {
         try {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 2));
-            GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec, "10", "0");
+            GlobalConfigurationHelper.updateValueForGlobalConfiguration(requestSpec, responseSpec, "10", "0");
             loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
             loanAccountLockHelper = new LoanAccountLockHelper(requestSpec, new ResponseSpecBuilder().expectStatusCode(202).build());
 
@@ -127,7 +127,7 @@ public class LoanCOBAccountLockCatchupInlineCOBTest {
             requestSpec.header("Fineract-Platform-TenantId", "default");
             responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
-            GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec, "10", "2");
+            GlobalConfigurationHelper.updateValueForGlobalConfiguration(requestSpec, responseSpec, "10", "2");
         }
     }
 
@@ -136,7 +136,7 @@ public class LoanCOBAccountLockCatchupInlineCOBTest {
         try {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 2));
-            GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec, "10", "0");
+            GlobalConfigurationHelper.updateValueForGlobalConfiguration(requestSpec, responseSpec, "10", "0");
             loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
             loanAccountLockHelper = new LoanAccountLockHelper(requestSpec, new ResponseSpecBuilder().expectStatusCode(202).build());
 
@@ -182,7 +182,7 @@ public class LoanCOBAccountLockCatchupInlineCOBTest {
             requestSpec.header("Fineract-Platform-TenantId", "default");
             responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
-            GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec, "10", "2");
+            GlobalConfigurationHelper.updateValueForGlobalConfiguration(requestSpec, responseSpec, "10", "2");
         }
     }
 
@@ -191,7 +191,7 @@ public class LoanCOBAccountLockCatchupInlineCOBTest {
         try {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 2));
-            GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec, "10", "0");
+            GlobalConfigurationHelper.updateValueForGlobalConfiguration(requestSpec, responseSpec, "10", "0");
             loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
             loanAccountLockHelper = new LoanAccountLockHelper(requestSpec, new ResponseSpecBuilder().expectStatusCode(202).build());
 
@@ -256,7 +256,7 @@ public class LoanCOBAccountLockCatchupInlineCOBTest {
             requestSpec.header("Fineract-Platform-TenantId", "default");
             responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
-            GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec, "10", "2");
+            GlobalConfigurationHelper.updateValueForGlobalConfiguration(requestSpec, responseSpec, "10", "2");
         }
     }
 
@@ -265,7 +265,7 @@ public class LoanCOBAccountLockCatchupInlineCOBTest {
         try {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 2));
-            GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec, "10", "0");
+            GlobalConfigurationHelper.updateValueForGlobalConfiguration(requestSpec, responseSpec, "10", "0");
             loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
             loanAccountLockHelper = new LoanAccountLockHelper(requestSpec, new ResponseSpecBuilder().expectStatusCode(202).build());
 
@@ -314,7 +314,7 @@ public class LoanCOBAccountLockCatchupInlineCOBTest {
             requestSpec.header("Fineract-Platform-TenantId", "default");
             responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
-            GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec, "10", "2");
+            GlobalConfigurationHelper.updateValueForGlobalConfiguration(requestSpec, responseSpec, "10", "2");
         }
     }
 
@@ -323,7 +323,7 @@ public class LoanCOBAccountLockCatchupInlineCOBTest {
         try {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 2));
-            GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec, "10", "0");
+            GlobalConfigurationHelper.updateValueForGlobalConfiguration(requestSpec, responseSpec, "10", "0");
             loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
             loanAccountLockHelper = new LoanAccountLockHelper(requestSpec, new ResponseSpecBuilder().expectStatusCode(202).build());
             final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
@@ -369,7 +369,7 @@ public class LoanCOBAccountLockCatchupInlineCOBTest {
             requestSpec.header("Fineract-Platform-TenantId", "default");
             responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
-            GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec, "10", "2");
+            GlobalConfigurationHelper.updateValueForGlobalConfiguration(requestSpec, responseSpec, "10", "2");
         }
     }
 
@@ -378,7 +378,7 @@ public class LoanCOBAccountLockCatchupInlineCOBTest {
         try {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, LocalDate.of(2020, 3, 2));
-            GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec, "10", "0");
+            GlobalConfigurationHelper.updateValueForGlobalConfiguration(requestSpec, responseSpec, "10", "0");
             loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
             loanAccountLockHelper = new LoanAccountLockHelper(requestSpec, new ResponseSpecBuilder().expectStatusCode(202).build());
             final SchedulerJobHelper schedulerJobHelper = new SchedulerJobHelper(requestSpec);
@@ -426,7 +426,7 @@ public class LoanCOBAccountLockCatchupInlineCOBTest {
             requestSpec.header("Fineract-Platform-TenantId", "default");
             responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
-            GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec, "10", "2");
+            GlobalConfigurationHelper.updateValueForGlobalConfiguration(requestSpec, responseSpec, "10", "2");
         }
     }
 
@@ -435,15 +435,15 @@ public class LoanCOBAccountLockCatchupInlineCOBTest {
                 .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("1")
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
                 .build(chargeId);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        return loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
     private Integer applyForLoanApplication(final String clientID, final String loanProductID, final String savingsID, final String date) {
 
         List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec, clientID,
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID,
                 collateralId);
         Assertions.assertNotNull(clientCollateralId);
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
@@ -454,7 +454,7 @@ public class LoanCOBAccountLockCatchupInlineCOBTest {
                 .withInterestTypeAsDecliningBalance().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
                 .withExpectedDisbursementDate(date).withSubmittedOnDate(date).withCollaterals(collaterals)
                 .build(clientID, loanProductID, savingsID);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        return loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
     private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {

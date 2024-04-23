@@ -54,19 +54,18 @@ public class ClientAuditingIntegrationTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
 
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
     }
 
     @Test
     public void checkAuditDates() throws InterruptedException {
-        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+        final Integer staffId = StaffHelper.createStaff(requestSpec, responseSpec);
         String username = Utils.uniqueRandomStringGenerator("user", 8);
-        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, 1, staffId, username, "password",
-                "resourceId");
+        final Integer userId = (Integer) UserHelper.createUser(requestSpec, responseSpec, 1, staffId, username, "password", "resourceId");
         OffsetDateTime now = Utils.getAuditDateTimeToCompare();
         LOG.info("-------------------------Creating Client---------------------------");
 
@@ -86,10 +85,9 @@ public class ClientAuditingIntegrationTest {
         assertTrue(DateUtils.isEqual(now, lastModifiedDate, ChronoUnit.MINUTES));
 
         LOG.info("-------------------------Modify Client with System user---------------------------");
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization",
-                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(username, "password"));
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(username, "password"));
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
 
         OffsetDateTime now2 = Utils.getAuditDateTimeToCompare();
         this.clientHelper.activateClient(clientID);

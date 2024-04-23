@@ -40,7 +40,7 @@ public class GroupHelper {
     private static final Logger LOG = LoggerFactory.getLogger(GroupHelper.class);
 
     private static final String CREATE_GROUP_URL = "/fineract-provider/api/v1/groups?" + Utils.TENANT_IDENTIFIER;
-    public static final String DATE_FORMAT = "dd MMMM yyyy";
+
     public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";
 
     public GroupHelper(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
@@ -67,8 +67,7 @@ public class GroupHelper {
 
     public Object createGroupWithError(final String jsonAttributeToGetBack) {
         LOG.info("---------------------------------CREATING A GROUP WITH ERROR---------------------------------------------");
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, CREATE_GROUP_URL, getTestGroupAsJSON(false, ""),
-                jsonAttributeToGetBack);
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_GROUP_URL, getTestGroupAsJSON(false, ""), jsonAttributeToGetBack);
     }
 
     public static Integer createGroupPendingWithDatatable(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
@@ -137,7 +136,7 @@ public class GroupHelper {
         map.put("officeId", "1");
         map.put("name", randomNameGenerator("Group_Name_", 5));
         map.put("externalId", UUID.randomUUID().toString());
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("locale", "en");
         if (active) {
             map.put("active", "true");
@@ -162,7 +161,7 @@ public class GroupHelper {
 
     public static String activateGroupAsJSON(final String activationDate) {
         final HashMap<String, String> map = new HashMap<>();
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("locale", "en");
         if (!Strings.isNullOrEmpty(activationDate)) {
             map.put("activationDate", activationDate);
@@ -300,7 +299,7 @@ public class GroupHelper {
         map.put("officeId", "1");
         map.put("name", randomNameGenerator("Group_Name_", 5));
         map.put("externalId", UUID.randomUUID().toString());
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("locale", "en");
         map.put("active", "false");
         map.put("submittedOnDate", "04 March 2011");

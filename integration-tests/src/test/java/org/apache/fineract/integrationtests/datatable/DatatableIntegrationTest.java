@@ -95,32 +95,31 @@ public class DatatableIntegrationTest extends IntegrationTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.datatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.datatableHelper = new DatatableHelper(requestSpec, responseSpec);
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
     }
 
     @Test
     public void validateCreateReadDeleteDatatable() throws ParseException {
         // Fetch / Create tst code
         String tst_tst_tst = "TST_TST_TST".toLowerCase();
-        HashMap<String, Object> codeResponse = CodeHelper.getCodeByName(this.requestSpec, this.responseSpec, tst_tst_tst);
+        HashMap<String, Object> codeResponse = CodeHelper.getCodeByName(requestSpec, responseSpec, tst_tst_tst);
 
         Integer createdCodeId = (Integer) codeResponse.get("id");
         Integer createdCodeValueId;
         Integer createdCodeValueIdSecond;
         if (createdCodeId == null) {
-            createdCodeId = (Integer) CodeHelper.createCode(this.requestSpec, this.responseSpec, tst_tst_tst, "resourceId");
+            createdCodeId = (Integer) CodeHelper.createCode(requestSpec, responseSpec, tst_tst_tst, "resourceId");
 
-            createdCodeValueId = CodeHelper.createCodeValue(this.requestSpec, this.responseSpec, createdCodeId,
-                    Utils.randomStringGenerator("cv_", 8), 1);
-            createdCodeValueIdSecond = CodeHelper.createCodeValue(this.requestSpec, this.responseSpec, createdCodeId,
+            createdCodeValueId = CodeHelper.createCodeValue(requestSpec, responseSpec, createdCodeId, Utils.randomStringGenerator("cv_", 8),
+                    1);
+            createdCodeValueIdSecond = CodeHelper.createCodeValue(requestSpec, responseSpec, createdCodeId,
                     Utils.randomStringGenerator("cv_", 8), 2);
         } else {
-            List<HashMap<String, Object>> codeValuesForCode = CodeHelper.getCodeValuesForCode(this.requestSpec, this.responseSpec,
-                    createdCodeId, "");
+            List<HashMap<String, Object>> codeValuesForCode = CodeHelper.getCodeValuesForCode(requestSpec, responseSpec, createdCodeId, "");
             createdCodeValueId = (Integer) codeValuesForCode.get(0).get("id");
             createdCodeValueIdSecond = (Integer) codeValuesForCode.get(1).get("id");
         }
@@ -156,7 +155,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
         columnMap.put("apptableName", null);
         String errorRequestJsonString = new Gson().toJson(columnMap);
         ResponseSpecification responseSpecError400 = new ResponseSpecBuilder().expectStatusCode(400).build();
-        DatatableHelper error400Helper = new DatatableHelper(this.requestSpec, responseSpecError400);
+        DatatableHelper error400Helper = new DatatableHelper(requestSpec, responseSpecError400);
         HashMap<String, Object> errorResponse = error400Helper.createDatatable(errorRequestJsonString, "");
         assertEquals("validation.msg.validation.errors.exist", ((Map) errorResponse).get("userMessageGlobalisationCode"));
         List errors = (List) ((Map) errorResponse).get("errors");
@@ -190,7 +189,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
 
         HashMap<String, Object> datatableResponse = this.datatableHelper.createDatatable(datatabelRequestJsonString, "");
         String datatableName = (String) datatableResponse.get("resourceIdentifier");
-        DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, datatableName);
+        DatatableHelper.verifyDatatableCreatedOnServer(requestSpec, responseSpec, datatableName);
 
         // try to create with the same name
         errorResponse = error400Helper.createDatatable(datatabelRequestJsonString, "");
@@ -220,7 +219,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
 
         String datatabelEntryRequestJsonString = new Gson().toJson(datatableEntryMap);
         ResponseSpecification responseSpecError403 = new ResponseSpecBuilder().expectStatusCode(403).build();
-        DatatableHelper error403Helper = new DatatableHelper(this.requestSpec, responseSpecError403);
+        DatatableHelper error403Helper = new DatatableHelper(requestSpec, responseSpecError403);
         errorResponse = error403Helper.createDatatableEntry(datatableName, clientID, genericResultSet, datatabelEntryRequestJsonString);
 
         // add valid json
@@ -386,7 +385,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
 
         HashMap<String, Object> datatableResponse = this.datatableHelper.createDatatable(datatabelRequestJsonString, "");
         String datatableName = (String) datatableResponse.get("resourceIdentifier");
-        DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, datatableName);
+        DatatableHelper.verifyDatatableCreatedOnServer(requestSpec, responseSpec, datatableName);
 
         // creating client with datatables
         final Integer clientID = ClientHelper.createClientAsPerson(requestSpec, responseSpec);
@@ -467,7 +466,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
     @Test
     public void validateInsertNullValues() {
         // Fetch / Create TST code
-        HashMap<String, Object> codeResponse = CodeHelper.getCodeByName(this.requestSpec, this.responseSpec, "TST_TST_TST");
+        HashMap<String, Object> codeResponse = CodeHelper.getCodeByName(requestSpec, responseSpec, "TST_TST_TST");
 
         // creating datatable for client entity
         final HashMap<String, Object> columnMap = new HashMap<>();
@@ -490,11 +489,11 @@ public class DatatableIntegrationTest extends IntegrationTest {
 
         HashMap<String, Object> datatableResponse = this.datatableHelper.createDatatable(datatabelRequestJsonString, "");
         String datatableName = (String) datatableResponse.get("resourceIdentifier");
-        DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, datatableName);
+        DatatableHelper.verifyDatatableCreatedOnServer(requestSpec, responseSpec, datatableName);
 
         // try to create with the same name
         ResponseSpecification responseSpecError400 = new ResponseSpecBuilder().expectStatusCode(400).build();
-        DatatableHelper error400Helper = new DatatableHelper(this.requestSpec, responseSpecError400);
+        DatatableHelper error400Helper = new DatatableHelper(requestSpec, responseSpecError400);
         HashMap<String, Object> response = error400Helper.createDatatable(datatabelRequestJsonString, "");
         assertEquals("validation.msg.validation.errors.exist", ((Map) response).get("userMessageGlobalisationCode"));
 
@@ -614,7 +613,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
 
         PostDataTablesResponse datatableCreateResponse = this.datatableHelper.createDatatable(datatabelRequestJsonString);
         assertEquals(datatableName, datatableCreateResponse.getResourceIdentifier());
-        DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, datatableName);
+        DatatableHelper.verifyDatatableCreatedOnServer(requestSpec, responseSpec, datatableName);
 
         // Insert first values
         final String randomString = Utils.randomStringGenerator("Q", 8);
@@ -713,21 +712,20 @@ public class DatatableIntegrationTest extends IntegrationTest {
     public void validateReadDatatableMultirow() {
         // Fetch / Create TST code
         String tst_tst_tst = "tst_tst_tst";
-        HashMap<String, Object> codeResponse = CodeHelper.getCodeByName(this.requestSpec, this.responseSpec, tst_tst_tst);
+        HashMap<String, Object> codeResponse = CodeHelper.getCodeByName(requestSpec, responseSpec, tst_tst_tst);
 
         Integer createdCodeId = (Integer) codeResponse.get("id");
         Integer createdCodeValueId;
         Integer createdCodeValueIdSecond;
         if (createdCodeId == null) {
-            createdCodeId = (Integer) CodeHelper.createCode(this.requestSpec, this.responseSpec, tst_tst_tst, "resourceId");
+            createdCodeId = (Integer) CodeHelper.createCode(requestSpec, responseSpec, tst_tst_tst, "resourceId");
 
-            createdCodeValueId = CodeHelper.createCodeValue(this.requestSpec, this.responseSpec, createdCodeId,
-                    Utils.randomStringGenerator("cv_", 8), 1);
-            createdCodeValueIdSecond = CodeHelper.createCodeValue(this.requestSpec, this.responseSpec, createdCodeId,
+            createdCodeValueId = CodeHelper.createCodeValue(requestSpec, responseSpec, createdCodeId, Utils.randomStringGenerator("cv_", 8),
+                    1);
+            createdCodeValueIdSecond = CodeHelper.createCodeValue(requestSpec, responseSpec, createdCodeId,
                     Utils.randomStringGenerator("cv_", 8), 2);
         } else {
-            List<HashMap<String, Object>> codeValuesForCode = CodeHelper.getCodeValuesForCode(this.requestSpec, this.responseSpec,
-                    createdCodeId, "");
+            List<HashMap<String, Object>> codeValuesForCode = CodeHelper.getCodeValuesForCode(requestSpec, responseSpec, createdCodeId, "");
             createdCodeValueId = (Integer) codeValuesForCode.get(0).get("id");
             createdCodeValueIdSecond = (Integer) codeValuesForCode.get(1).get("id");
         }
@@ -753,11 +751,11 @@ public class DatatableIntegrationTest extends IntegrationTest {
 
         HashMap<String, Object> datatableResponse = this.datatableHelper.createDatatable(datatabelRequestJsonString, "");
         String datatableName = (String) datatableResponse.get("resourceIdentifier");
-        DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, datatableName);
+        DatatableHelper.verifyDatatableCreatedOnServer(requestSpec, responseSpec, datatableName);
 
         // try to create with the same name
         ResponseSpecification responseSpecError400 = new ResponseSpecBuilder().expectStatusCode(400).build();
-        DatatableHelper error400Helper = new DatatableHelper(this.requestSpec, responseSpecError400);
+        DatatableHelper error400Helper = new DatatableHelper(requestSpec, responseSpecError400);
         HashMap<String, Object> response = error400Helper.createDatatable(datatabelRequestJsonString, "");
         assertEquals("validation.msg.validation.errors.exist", ((Map) response).get("userMessageGlobalisationCode"));
 
@@ -952,7 +950,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withExpectedDisbursementDate(EXPECTED_DISBURSAL_DATE)
                 .withSubmittedOnDate(LOAN_APPLICATION_SUBMISSION_DATE).withLoanType(INDIVIDUAL_LOAN)
                 .build(clientID.toString(), loanProductID.toString(), null);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        return loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
     private Integer createLoanProductWithPeriodicAccrualAccountingEnabled() {
@@ -962,7 +960,7 @@ public class DatatableIntegrationTest extends IntegrationTest {
                 .withinterestRatePerPeriod(LP_INTEREST_RATE).withInterestRateFrequencyTypeAsMonths()
                 .withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat().withAccountingRuleAsNone().withDaysInMonth("30")
                 .withDaysInYear("365").build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        return loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
 }

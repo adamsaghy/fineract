@@ -47,7 +47,7 @@ public final class TaxGroupHelper {
     public static String getTaxGroupAsJSON(final Collection<Integer> taxComponentIds) {
         final HashMap<String, Object> map = new HashMap<>();
         map.put("name", randomNameGenerator("Tax_component_Name_", 5));
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("locale", "en");
         map.put("taxComponents", getTaxGroupComponents(taxComponentIds));
         return new Gson().toJson(map);

@@ -41,6 +41,7 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -63,20 +64,20 @@ public class LoanAccrualTransactionReversalTest {
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;
     private ClientHelper clientHelper;
-    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
+    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern(CommonConstants.DATE_FORMAT).toFormatter();
     private PeriodicAccrualAccountingHelper periodicAccrualAccountingHelper;
     private AccountHelper accountHelper;
 
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-        this.periodicAccrualAccountingHelper = new PeriodicAccrualAccountingHelper(this.requestSpec, this.responseSpec);
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
+        periodicAccrualAccountingHelper = new PeriodicAccrualAccountingHelper(requestSpec, responseSpec);
+        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
     }
 
     @Test
@@ -116,11 +117,11 @@ public class LoanAccrualTransactionReversalTest {
         LocalDate targetDate = LocalDate.of(2022, 9, 4);
         final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-        Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+        Integer penalty1LoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
 
         // Run accrual till charge date
-        this.periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(penaltyCharge1AddedDate);
+        periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(penaltyCharge1AddedDate);
 
         // verify accrual transaction created
         checkAccrualTransaction(targetDate, 0.0f, 0.0f, 10.0f, loanId);
@@ -166,13 +167,13 @@ public class LoanAccrualTransactionReversalTest {
             final Integer loanId = createLoanAccountWithInterestRecalculation(clientId, getLoanProductsProductResponse.getId(),
                     loanExternalIdStr);
             // run accruals till business date
-            this.periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(accrualRunTillDate);
+            periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(accrualRunTillDate);
             // check amount for last accrual on business date
             checkAccrualTransaction(currentDate, 0.82f, 0.0f, 0.0f, loanId);
             // make repayment on due date
             final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("5 February 2022").locale("en")
-                            .transactionAmount(106.57));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("5 February 2022")
+                            .locale("en").transactionAmount(106.57));
             // check previous accrual is reversed and new accrual created for same date and different amount.
             checkAccrualTransaction(currentDate, 0.71f, 0.0f, 0.0f, loanId);
         } finally {
@@ -222,7 +223,7 @@ public class LoanAccrualTransactionReversalTest {
                         recalculationCompoundingFrequencyDayOfWeekType)
                 .withAccountingRulePeriodicAccrual(accounts).build(null);
 
-        final Integer loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        final Integer loanProductId = loanTransactionHelper.getLoanProductId(loanProductJSON);
         return loanTransactionHelper.getLoanProduct(loanProductId);
     }
 
@@ -256,8 +257,7 @@ public class LoanAccrualTransactionReversalTest {
     private void checkAccrualTransaction(final LocalDate transactionDate, final Float interestPortion, final Float feePortion,
             final Float penaltyPortion, final Integer loanID) {
 
-        ArrayList<HashMap> transactions = (ArrayList<HashMap>) loanTransactionHelper.getLoanTransactions(this.requestSpec,
-                this.responseSpec, loanID);
+        ArrayList<HashMap> transactions = (ArrayList<HashMap>) loanTransactionHelper.getLoanTransactions(requestSpec, responseSpec, loanID);
         boolean isTransactionFound = false;
         for (int i = 0; i < transactions.size(); i++) {
             HashMap transactionType = (HashMap) transactions.get(i).get("type");

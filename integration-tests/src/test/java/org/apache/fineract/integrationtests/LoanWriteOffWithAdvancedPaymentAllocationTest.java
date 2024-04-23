@@ -44,6 +44,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.client.util.CallFailedRuntimeException;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
@@ -62,7 +63,8 @@ public class LoanWriteOffWithAdvancedPaymentAllocationTest {
     private static ResponseSpecification RESPONSE_SPEC;
     private static RequestSpecification REQUEST_SPEC;
     private static ClientHelper CLIENT_HELPER;
-    private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
+    private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern(CommonConstants.DATE_FORMAT)
+            .toFormatter();
 
     @BeforeAll
     public static void setupTests() {
@@ -99,13 +101,13 @@ public class LoanWriteOffWithAdvancedPaymentAllocationTest {
 
         // make Repayment
         final PostLoansLoanIdTransactionsResponse repaymentTransaction = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("9 September 2022").locale("en")
-                        .transactionAmount(100.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("9 September 2022")
+                        .locale("en").transactionAmount(100.0));
 
         // write off loan and verify amount
         final PostLoansLoanIdTransactionsResponse writeOffTransaction = LOAN_TRANSACTION_HELPER.writeOffLoanAccount(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("10 September 2022").locale("en")
-                        .note("test WriteOff"));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("10 September 2022")
+                        .locale("en").note("test WriteOff"));
 
         GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getClosedWrittenOff());
@@ -131,13 +133,13 @@ public class LoanWriteOffWithAdvancedPaymentAllocationTest {
 
         // make Repayment
         final PostLoansLoanIdTransactionsResponse repaymentTransaction = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("9 September 2022").locale("en")
-                        .transactionAmount(250.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("9 September 2022")
+                        .locale("en").transactionAmount(250.0));
 
         // write off loan
         final PostLoansLoanIdTransactionsResponse writeOffTransaction = LOAN_TRANSACTION_HELPER.writeOffLoanAccount(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("10 September 2022").locale("en")
-                        .note("test WriteOff"));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("10 September 2022")
+                        .locale("en").note("test WriteOff"));
 
         GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getClosedWrittenOff());
@@ -146,7 +148,7 @@ public class LoanWriteOffWithAdvancedPaymentAllocationTest {
         CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                 () -> LOAN_TRANSACTION_HELPER.reverseLoanTransaction(loanExternalIdStr, repaymentTransaction.getResourceId(),
                         new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate("9 September 2022").locale("en")
-                                .dateFormat("dd MMMM yyyy").transactionAmount(0.0)));
+                                .dateFormat(CommonConstants.DATE_FORMAT).transactionAmount(0.0)));
 
         assertEquals(503, exception.getResponse().code());
         assertTrue(exception.getMessage().contains("error.msg.loan.written.off.update.not.allowed"));
@@ -168,13 +170,13 @@ public class LoanWriteOffWithAdvancedPaymentAllocationTest {
 
         // make Repayment
         final PostLoansLoanIdTransactionsResponse repaymentTransaction = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("9 September 2022").locale("en")
-                        .transactionAmount(250.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("9 September 2022")
+                        .locale("en").transactionAmount(250.0));
 
         // write off loan
         final PostLoansLoanIdTransactionsResponse writeOffTransaction = LOAN_TRANSACTION_HELPER.writeOffLoanAccount(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("10 September 2022").locale("en")
-                        .note("test WriteOff"));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("10 September 2022")
+                        .locale("en").note("test WriteOff"));
 
         GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getClosedWrittenOff());
@@ -182,7 +184,7 @@ public class LoanWriteOffWithAdvancedPaymentAllocationTest {
         // backdate repayment after write-off
         CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                 () -> LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest()
-                        .dateFormat("dd MMMM yyyy").transactionDate("8 September 2022").locale("en").transactionAmount(50.0)));
+                        .dateFormat(CommonConstants.DATE_FORMAT).transactionDate("8 September 2022").locale("en").transactionAmount(50.0)));
 
         assertEquals(400, exception.getResponse().code());
         assertTrue(exception.getMessage().contains("error.msg.loan.must.be.active.fully.paid.or.overpaid"));
@@ -204,13 +206,13 @@ public class LoanWriteOffWithAdvancedPaymentAllocationTest {
 
         // make Repayment
         final PostLoansLoanIdTransactionsResponse repaymentTransaction = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("9 September 2022").locale("en")
-                        .transactionAmount(250.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("9 September 2022")
+                        .locale("en").transactionAmount(250.0));
 
         // write off loan
         final PostLoansLoanIdTransactionsResponse writeOffTransaction = LOAN_TRANSACTION_HELPER.writeOffLoanAccount(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("10 September 2022").locale("en")
-                        .note("test WriteOff"));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("10 September 2022")
+                        .locale("en").note("test WriteOff"));
 
         GetLoansLoanIdResponse loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getClosedWrittenOff());
@@ -219,7 +221,7 @@ public class LoanWriteOffWithAdvancedPaymentAllocationTest {
         CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class,
                 () -> LOAN_TRANSACTION_HELPER.reverseLoanTransaction(loanExternalIdStr, writeOffTransaction.getResourceId(),
                         new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate("8 September 2022").locale("en")
-                                .dateFormat("dd MMMM yyyy").transactionAmount(0.0)));
+                                .dateFormat(CommonConstants.DATE_FORMAT).transactionAmount(0.0)));
 
         assertEquals(503, exception.getResponse().code());
         assertTrue(exception.getMessage().contains("error.msg.loan.written.off.update.not.allowed"));

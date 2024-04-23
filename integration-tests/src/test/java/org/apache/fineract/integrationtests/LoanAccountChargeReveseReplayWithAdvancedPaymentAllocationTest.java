@@ -55,6 +55,7 @@ import org.apache.fineract.client.models.PostPaymentTypesRequest;
 import org.apache.fineract.client.models.PostPaymentTypesResponse;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.PaymentTypeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -80,7 +81,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(LoanTestLifecycleExtension.class)
 public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest {
 
-    private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
+    private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern(CommonConstants.DATE_FORMAT)
+            .toFormatter();
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private ClientHelper clientHelper;
@@ -90,7 +92,7 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest {
     private LoanProductHelper loanProductHelper;
     private PaymentTypeHelper paymentTypeHelper;
     private final BusinessDateHelper businessDateHelper = new BusinessDateHelper();
-    private static final String DATETIME_PATTERN = "dd MMMM yyyy";
+
     // asset
     private Account loansReceivable;
     private Account interestFeeReceivable;
@@ -114,11 +116,11 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
         this.loanProductHelper = new LoanProductHelper();
         this.paymentTypeHelper = new PaymentTypeHelper();
 
@@ -145,8 +147,8 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest {
         this.writtenOff = this.accountHelper.createExpenseAccount();
         this.goodwillExpenseAccount = this.accountHelper.createExpenseAccount();
 
-        this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+        this.journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
     }
 
     @Test
@@ -160,8 +162,8 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest {
 
             // make an in advance repayment
             final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("8 September 2022").locale("en")
-                            .transactionAmount(100.0));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("8 September 2022")
+                            .locale("en").transactionAmount(100.0));
 
             // apply charges
             Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
@@ -178,10 +180,10 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest {
 
             final String penaltyCharge1AddedDate = DATE_FORMATTER.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+            Integer penalty1LoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "20"));
 
-            GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
             assertNotNull(loanDetails.getRepaymentSchedule());
             assertNotNull(loanDetails.getRepaymentSchedule().getPeriods());
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().size());
@@ -203,8 +205,8 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest {
 
             // make an in advance repayment
             final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("8 September 2022").locale("en")
-                            .transactionAmount(100.0));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("8 September 2022")
+                            .locale("en").transactionAmount(100.0));
 
             // apply charges
             Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
@@ -221,10 +223,10 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest {
 
             final String penaltyCharge1AddedDate = DATE_FORMATTER.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+            Integer penalty1LoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "20"));
 
-            GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
             assertNotNull(loanDetails.getRepaymentSchedule());
             assertNotNull(loanDetails.getRepaymentSchedule().getPeriods());
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().size());
@@ -247,8 +249,8 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest {
             // make a repayment on 3rd od Sept
             updateBusinessDate("3 September 2022");
             final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("3 September 2022").locale("en")
-                            .transactionAmount(100.0));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("3 September 2022")
+                            .locale("en").transactionAmount(100.0));
 
             // apply charges on 4th of Sept backdated to 2nd of Sept 2022
             updateBusinessDate("4 September 2022");
@@ -266,10 +268,10 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest {
 
             final String penaltyCharge1AddedDate = DATE_FORMATTER.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+            Integer penalty1LoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "20"));
 
-            GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
             assertNotNull(loanDetails.getRepaymentSchedule());
             assertNotNull(loanDetails.getRepaymentSchedule().getPeriods());
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().size());
@@ -292,8 +294,8 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest {
             // make a repayment on 3rd od Sept
             updateBusinessDate("3 September 2022");
             final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("3 September 2022").locale("en")
-                            .transactionAmount(100.0));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("3 September 2022")
+                            .locale("en").transactionAmount(100.0));
 
             // apply charges on 4th of Sept backdated to 2nd of Sept 2022
             updateBusinessDate("4 September 2022");
@@ -311,16 +313,16 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest {
 
             final String penaltyCharge1AddedDate = DATE_FORMATTER.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+            Integer penalty1LoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "20"));
 
             // make a full repayment of 10th of September
             updateBusinessDate("10 September 2022");
             PostLoansLoanIdTransactionsResponse fullRepayment = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("10 September 2022").locale("en")
-                            .transactionAmount(930.0));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("10 September 2022")
+                            .locale("en").transactionAmount(930.0));
 
-            GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+            GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
             assertNotNull(loanDetails.getRepaymentSchedule());
             assertNotNull(loanDetails.getRepaymentSchedule().getPeriods());
             assertEquals(2, loanDetails.getRepaymentSchedule().getPeriods().size());
@@ -336,7 +338,7 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest {
             loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(snoozeFee), "11 October 2022", "30.0"));
 
-            loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+            loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
             assertNotNull(loanDetails.getRepaymentSchedule());
             assertNotNull(loanDetails.getRepaymentSchedule().getPeriods());
             assertEquals(3, loanDetails.getRepaymentSchedule().getPeriods().size()); // extra instalment is created
@@ -393,7 +395,7 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest {
         FundsHelper fh = FundsHelper.create(Utils.uniqueRandomStringGenerator("", 10)).externalId(UUID.randomUUID().toString()).build();
         String jsonData = fh.toJSON();
 
-        final Long fundID = createFund(jsonData, this.requestSpec, this.responseSpec);
+        final Long fundID = createFund(jsonData, requestSpec, responseSpec);
         Assertions.assertNotNull(fundID);
 
         // Delinquency Bucket
@@ -473,7 +475,7 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest {
                 .receivableInterestAccountId(interestFeeReceivable.getAccountID().longValue())//
                 .receivableFeeAccountId(interestFeeReceivable.getAccountID().longValue())//
                 .receivablePenaltyAccountId(interestFeeReceivable.getAccountID().longValue())//
-                .dateFormat("dd MMMM yyyy")//
+                .dateFormat(CommonConstants.DATE_FORMAT)//
                 .locale("en_GB")//
                 .disallowExpectedDisbursements(true)//
                 .allowApprovedDisbursedAmountsOverApplied(true)//
@@ -546,8 +548,8 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest {
         try {
             GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, 42, true);
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, TRUE);
-            businessDateHelper.updateBusinessDate(
-                    new BusinessDateRequest().type(BUSINESS_DATE.getName()).date(date).dateFormat(DATETIME_PATTERN).locale("en"));
+            businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BUSINESS_DATE.getName()).date(date)
+                    .dateFormat(CommonConstants.DATE_FORMAT).locale("en"));
             runnable.run();
         } finally {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, FALSE);
@@ -557,7 +559,7 @@ public class LoanAccountChargeReveseReplayWithAdvancedPaymentAllocationTest {
 
     private void updateBusinessDate(String date) {
         businessDateHelper.updateBusinessDate(
-                new BusinessDateRequest().type(BUSINESS_DATE.getName()).date(date).dateFormat(DATETIME_PATTERN).locale("en"));
+                new BusinessDateRequest().type(BUSINESS_DATE.getName()).date(date).dateFormat(CommonConstants.DATE_FORMAT).locale("en"));
     }
 
 }

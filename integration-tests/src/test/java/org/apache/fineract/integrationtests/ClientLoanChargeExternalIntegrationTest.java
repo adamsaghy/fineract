@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
@@ -60,25 +61,25 @@ public class ClientLoanChargeExternalIntegrationTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
     }
 
     @Test
     public void checkNewClientLoanChargeSavesExternalId() {
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
         final Integer loanProductID = createLoanProduct(false, NONE);
 
         List<HashMap> collaterals = new ArrayList<>();
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, null, null, "12,000.00", collaterals);
-        HashMap loanStatusHashMap = this.loanTransactionHelper.approveLoan("20 September 2011", loanID);
+        HashMap loanStatusHashMap = loanTransactionHelper.approveLoan("20 September 2011", loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("20 September 2011", loanID, "12,000.00");
+        loanStatusHashMap = loanTransactionHelper.disburseLoanWithNetDisbursalAmount("20 September 2011", loanID, "12,000.00");
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         final Integer charge = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
@@ -86,11 +87,11 @@ public class ClientLoanChargeExternalIntegrationTest {
 
         final float amount = 1.0f;
         final String externalId = "extId" + loanID.toString();
-        final Integer chargeID = this.loanTransactionHelper.addChargesForLoan(loanID,
+        final Integer chargeID = loanTransactionHelper.addChargesForLoan(loanID,
                 getLoanChargeAsJSON(String.valueOf(charge), "22 September 2011", String.valueOf(amount), externalId));
         Assertions.assertNotNull(chargeID);
 
-        HashMap loanChargeMap = this.loanTransactionHelper.getLoanCharge(loanID, chargeID);
+        HashMap loanChargeMap = loanTransactionHelper.getLoanCharge(loanID, chargeID);
         Assertions.assertNotNull(loanChargeMap.get("externalId"));
         Assertions.assertEquals(loanChargeMap.get("externalId"), externalId, "Incorrect External Id Saved");
 
@@ -99,16 +100,16 @@ public class ClientLoanChargeExternalIntegrationTest {
     @Test
     public void checkNewClientLoanChargeFindsDuplicateExternalId() {
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
         final Integer loanProductID = createLoanProduct(false, NONE);
 
         List<HashMap> collaterals = new ArrayList<>();
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, null, null, "12,000.00", collaterals);
-        HashMap loanStatusHashMap = this.loanTransactionHelper.approveLoan("20 September 2011", loanID);
+        HashMap loanStatusHashMap = loanTransactionHelper.approveLoan("20 September 2011", loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("20 September 2011", loanID, "12,000.00");
+        loanStatusHashMap = loanTransactionHelper.disburseLoanWithNetDisbursalAmount("20 September 2011", loanID, "12,000.00");
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         final Integer charge = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper
@@ -116,13 +117,13 @@ public class ClientLoanChargeExternalIntegrationTest {
 
         final String externalId = "extId" + loanID.toString();
         final float amount = 1.0f;
-        final Integer chargeID = this.loanTransactionHelper.addChargesForLoan(loanID,
+        final Integer chargeID = loanTransactionHelper.addChargesForLoan(loanID,
                 getLoanChargeAsJSON(String.valueOf(charge), "22 September 2011", String.valueOf(amount), externalId));
         Assertions.assertNotNull(chargeID);
 
         final float amount2 = 2.0f;
         ResponseSpecification responseSpec403 = new ResponseSpecBuilder().expectStatusCode(403).build();
-        final Integer chargeID2 = this.loanTransactionHelper.addChargesForLoan(loanID,
+        final Integer chargeID2 = loanTransactionHelper.addChargesForLoan(loanID,
                 getLoanChargeAsJSON(String.valueOf(charge), "23 September 2011", String.valueOf(amount2), externalId), responseSpec403);
 
         Assertions.assertNull(chargeID2);
@@ -131,7 +132,7 @@ public class ClientLoanChargeExternalIntegrationTest {
     private static String getLoanChargeAsJSON(final String chargeId, final String dueDate, final String amount, final String externalId) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en_GB");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("amount", amount);
         map.put("dueDate", dueDate);
         map.put("chargeId", chargeId);
@@ -158,7 +159,7 @@ public class ClientLoanChargeExternalIntegrationTest {
             builder = builder.withInterestCalculationPeriodTypeAsRepaymentPeriod(true);
         }
         final String loanProductJSON = builder.build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        return loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, List<HashMap> charges,
@@ -178,7 +179,7 @@ public class ClientLoanChargeExternalIntegrationTest {
                 .withExpectedDisbursementDate("20 September 2011") //
                 .withSubmittedOnDate("20 September 2011") //
                 .withCollaterals(collaterals).withCharges(charges).build(clientID.toString(), loanProductID.toString(), savingsId);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        return loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
 }

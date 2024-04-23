@@ -47,7 +47,7 @@ public class AccountNumberPreferencesHelper {
 
         final String URL = ACCOUNT_NUMBER_FORMATS_REQUEST_URL + "?" + Utils.TENANT_IDENTIFIER;
 
-        return Utils.performServerPost(this.requestSpec, responseSpec, URL, requestJSON, jsonAttributeToGetBack);
+        return Utils.performServerPost(requestSpec, responseSpec, URL, requestJSON, jsonAttributeToGetBack);
     }
 
     public Object createLoanAccountNumberPreference(ResponseSpecification responseSpec, String jsonAttributeToGetBack) {
@@ -56,7 +56,7 @@ public class AccountNumberPreferencesHelper {
         final String requestJSON = new AccountNumberPreferencesTestBuilder().loanBuild();
 
         final String URL = ACCOUNT_NUMBER_FORMATS_REQUEST_URL + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPost(this.requestSpec, responseSpec, URL, requestJSON, jsonAttributeToGetBack);
+        return Utils.performServerPost(requestSpec, responseSpec, URL, requestJSON, jsonAttributeToGetBack);
     }
 
     public Object createSavingsAccountNumberPreference(ResponseSpecification responseSpec, String jsonAttributeToGetBack) {
@@ -65,7 +65,7 @@ public class AccountNumberPreferencesHelper {
         final String requestJSON = new AccountNumberPreferencesTestBuilder().savingsBuild();
 
         final String URL = ACCOUNT_NUMBER_FORMATS_REQUEST_URL + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPost(this.requestSpec, responseSpec, URL, requestJSON, jsonAttributeToGetBack);
+        return Utils.performServerPost(requestSpec, responseSpec, URL, requestJSON, jsonAttributeToGetBack);
 
     }
 
@@ -75,7 +75,7 @@ public class AccountNumberPreferencesHelper {
         final String requestJSON = new AccountNumberPreferencesTestBuilder().groupsBuild();
 
         final String URL = ACCOUNT_NUMBER_FORMATS_REQUEST_URL + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPost(this.requestSpec, responseSpec, URL, requestJSON, jsonAttributeToGetBack);
+        return Utils.performServerPost(requestSpec, responseSpec, URL, requestJSON, jsonAttributeToGetBack);
 
     }
 
@@ -85,7 +85,7 @@ public class AccountNumberPreferencesHelper {
         final String requestJSON = new AccountNumberPreferencesTestBuilder().centerBuild();
 
         final String URL = ACCOUNT_NUMBER_FORMATS_REQUEST_URL + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPost(this.requestSpec, responseSpec, URL, requestJSON, jsonAttributeToGetBack);
+        return Utils.performServerPost(requestSpec, responseSpec, URL, requestJSON, jsonAttributeToGetBack);
 
     }
 
@@ -95,7 +95,7 @@ public class AccountNumberPreferencesHelper {
         final String requestJSON = new AccountNumberPreferencesTestBuilder().invalidDataBuild(accountType, prefixType);
 
         final String URL = ACCOUNT_NUMBER_FORMATS_REQUEST_URL + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPost(this.requestSpec, responseSpec, URL, requestJSON, jsonAttributeToGetBack);
+        return Utils.performServerPost(requestSpec, responseSpec, URL, requestJSON, jsonAttributeToGetBack);
 
     }
 
@@ -106,7 +106,7 @@ public class AccountNumberPreferencesHelper {
 
         final String URL = ACCOUNT_NUMBER_FORMATS_REQUEST_URL + "/" + accountNumberFormatId + "?" + Utils.TENANT_IDENTIFIER;
 
-        return Utils.performServerPut(this.requestSpec, responseSpec, URL, requestJSON, jsonAttributeToGetBack);
+        return Utils.performServerPut(requestSpec, responseSpec, URL, requestJSON, jsonAttributeToGetBack);
 
     }
 
@@ -117,7 +117,7 @@ public class AccountNumberPreferencesHelper {
 
         final String URL = ACCOUNT_NUMBER_FORMATS_REQUEST_URL + "/" + accountNumberFormatId + "?" + Utils.TENANT_IDENTIFIER;
 
-        return Utils.performServerDelete(this.requestSpec, responseSpec, URL, jsonAttributeToGetBack);
+        return Utils.performServerDelete(requestSpec, responseSpec, URL, jsonAttributeToGetBack);
     }
 
     public Object getAccountNumberPreference(final Integer accountNumberFormatId, final String jsonAttributeToGetBack) {

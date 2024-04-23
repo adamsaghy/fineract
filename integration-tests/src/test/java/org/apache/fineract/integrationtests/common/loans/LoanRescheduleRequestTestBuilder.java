@@ -20,6 +20,7 @@ package org.apache.fineract.integrationtests.common.loans;
 
 import com.google.gson.Gson;
 import java.util.HashMap;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 
 public class LoanRescheduleRequestTestBuilder {
 
@@ -39,7 +40,7 @@ public class LoanRescheduleRequestTestBuilder {
     public String build(final String loanId) {
         final HashMap<String, Object> map = new HashMap<>();
 
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("locale", "en_GB");
         map.put("loanId", loanId);
         map.put("submittedOnDate", submittedOnDate);
@@ -160,7 +161,7 @@ public class LoanRescheduleRequestTestBuilder {
     public String getRejectLoanRescheduleRequestJSON() {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("rejectedOnDate", submittedOnDate);
         return new Gson().toJson(map);
     }
@@ -168,7 +169,7 @@ public class LoanRescheduleRequestTestBuilder {
     public String getApproveLoanRescheduleRequestJSON() {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("approvedOnDate", submittedOnDate);
         return new Gson().toJson(map);
     }

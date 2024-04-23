@@ -73,57 +73,57 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
     }
 
     @Test
     public void checkClientLoanCreateAndDisburseFlow() {
         // CREATE CLIENT
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, DATE_OF_JOINING);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
         // CREATE LOAN PRODUCT
         final Integer loanProductID = createLoanProduct();
         // APPLY FOR LOAN
         final Integer loanID = applyForLoanApplication(clientID, loanProductID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan("28 September 2010", loanID);
+        loanStatusHashMap = loanTransactionHelper.approveLoan("28 September 2010", loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         // UNDO APPROVAL
-        loanStatusHashMap = this.loanTransactionHelper.undoApproval(loanID);
+        loanStatusHashMap = loanTransactionHelper.undoApproval(loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         LOG.info("-----------------------------------RE-APPROVE LOAN-----------------------------------------");
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan("01 October 2010", loanID);
+        loanStatusHashMap = loanTransactionHelper.approveLoan("01 October 2010", loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         // DISBURSE
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(DISBURSEMENT_DATE, loanID,
+        String loanDetails = loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
+        loanStatusHashMap = loanTransactionHelper.disburseLoanWithNetDisbursalAmount(DISBURSEMENT_DATE, loanID,
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LOG.info("DISBURSE {}", loanStatusHashMap.toString());
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         // PERFORM REPAYMENTS AND CHECK LOAN STATUS
-        this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(1, 4000.0F, loanID);
-        this.loanTransactionHelper.makeRepayment("01 January 2011", 540.0f, loanID);
+        loanTransactionHelper.verifyRepaymentScheduleEntryFor(1, 4000.0F, loanID);
+        loanTransactionHelper.makeRepayment("01 January 2011", 540.0f, loanID);
 
         // UNDO DISBURSE LOAN
-        loanStatusHashMap = this.loanTransactionHelper.undoDisbursal(loanID);
+        loanStatusHashMap = loanTransactionHelper.undoDisbursal(loanID);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         // DIBURSE AGAIN
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(DISBURSEMENT_DATE, loanID,
+        loanStatusHashMap = loanTransactionHelper.disburseLoanWithNetDisbursalAmount(DISBURSEMENT_DATE, loanID,
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LOG.info("DISBURSE {}", loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
@@ -132,46 +132,46 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
         final float repayment_with_interest = 540.0f;
         final float repayment_without_interest = 500.0f;
 
-        this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(1, 4000.0F, loanID);
-        this.loanTransactionHelper.makeRepayment("01 January 2011", repayment_with_interest, loanID);
-        this.loanTransactionHelper.makeRepayment("01 March 2011", repayment_with_interest, loanID);
-        this.loanTransactionHelper.waiveInterest("01 May 2011", INTEREST_VALUE_AMOUNT, loanID);
-        this.loanTransactionHelper.makeRepayment("01 May 2011", repayment_without_interest, loanID);
-        this.loanTransactionHelper.makeRepayment("01 July 2011", repayment_with_interest, loanID);
-        this.loanTransactionHelper.waiveInterest("01 September 2011", INTEREST_VALUE_AMOUNT, loanID);
-        this.loanTransactionHelper.makeRepayment("01 September 2011", repayment_without_interest, loanID);
-        this.loanTransactionHelper.makeRepayment("01 November 2011", repayment_with_interest, loanID);
-        this.loanTransactionHelper.waiveInterest("01 January 2012", INTEREST_VALUE_AMOUNT, loanID);
-        this.loanTransactionHelper.makeRepayment("01 January 2012", repayment_without_interest, loanID);
-        this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(7, 1000.0f, loanID);
+        loanTransactionHelper.verifyRepaymentScheduleEntryFor(1, 4000.0F, loanID);
+        loanTransactionHelper.makeRepayment("01 January 2011", repayment_with_interest, loanID);
+        loanTransactionHelper.makeRepayment("01 March 2011", repayment_with_interest, loanID);
+        loanTransactionHelper.waiveInterest("01 May 2011", INTEREST_VALUE_AMOUNT, loanID);
+        loanTransactionHelper.makeRepayment("01 May 2011", repayment_without_interest, loanID);
+        loanTransactionHelper.makeRepayment("01 July 2011", repayment_with_interest, loanID);
+        loanTransactionHelper.waiveInterest("01 September 2011", INTEREST_VALUE_AMOUNT, loanID);
+        loanTransactionHelper.makeRepayment("01 September 2011", repayment_without_interest, loanID);
+        loanTransactionHelper.makeRepayment("01 November 2011", repayment_with_interest, loanID);
+        loanTransactionHelper.waiveInterest("01 January 2012", INTEREST_VALUE_AMOUNT, loanID);
+        loanTransactionHelper.makeRepayment("01 January 2012", repayment_without_interest, loanID);
+        loanTransactionHelper.verifyRepaymentScheduleEntryFor(7, 1000.0f, loanID);
 
         // WRITE OFF LOAN AND CHECK ACCOUNT IS CLOSED
-        LoanStatusChecker.verifyLoanAccountIsClosed(this.loanTransactionHelper.writeOffLoan("01 March 2012", loanID));
+        LoanStatusChecker.verifyLoanAccountIsClosed(loanTransactionHelper.writeOffLoan("01 March 2012", loanID));
 
     }
 
     @Test
     public void checkClientLoan_WRITTEN_OFF() {
         // CREATE CLIENT
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, DATE_OF_JOINING);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
         // CREATE LOAN PRODUCT
         final Integer loanProductID = createLoanProduct();
         // APPLY FOR LOAN
         final Integer loanID = applyForLoanApplication(clientID, loanProductID);
 
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan("28 September 2010", loanID);
+        loanStatusHashMap = loanTransactionHelper.approveLoan("28 September 2010", loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         // DISBURSE
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(DISBURSEMENT_DATE, loanID,
+        String loanDetails = loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
+        loanStatusHashMap = loanTransactionHelper.disburseLoanWithNetDisbursalAmount(DISBURSEMENT_DATE, loanID,
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         LOG.info("DISBURSE {}", loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
@@ -179,10 +179,10 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
         // MAKE REPAYMENTS
         final float repayment_with_interest = 680.0f;
 
-        this.loanTransactionHelper.verifyRepaymentScheduleEntryFor(1, 4000.0F, loanID);
-        this.loanTransactionHelper.makeRepayment("01 January 2011", repayment_with_interest, loanID);
+        loanTransactionHelper.verifyRepaymentScheduleEntryFor(1, 4000.0F, loanID);
+        loanTransactionHelper.makeRepayment("01 January 2011", repayment_with_interest, loanID);
 
-        HashMap toLoanSummaryAfter = this.loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
+        HashMap toLoanSummaryAfter = loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
         Assertions.assertTrue(Float.valueOf("500.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("principalPaid")))) == 0,
                 "Checking for Principal paid ");
         Assertions.assertTrue(Float.valueOf("180.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("interestPaid")))) == 0,
@@ -192,8 +192,8 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
                 "Checking for total paid ");
 
         // WRITE OFF LOAN AND CHECK ACCOUNT IS CLOSED
-        LoanStatusChecker.verifyLoanAccountIsClosed(this.loanTransactionHelper.writeOffLoan("01 January 2011", loanID));
-        toLoanSummaryAfter = this.loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
+        LoanStatusChecker.verifyLoanAccountIsClosed(loanTransactionHelper.writeOffLoan("01 January 2011", loanID));
+        toLoanSummaryAfter = loanTransactionHelper.getLoanSummary(requestSpec, responseSpec, loanID);
         Assertions.assertTrue(
                 Float.valueOf("4000.0").compareTo(Float.valueOf(String.valueOf(toLoanSummaryAfter.get("principalWrittenOff")))) == 0,
                 "Checking for Principal written off ");
@@ -213,16 +213,16 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
                 .withinterestRatePerPeriod(LP_INTEREST_RATE).withInterestRateFrequencyTypeAsMonths()
                 .withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat().build(null);
 
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        return loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID.toString(),
+                collateralId);
         Assertions.assertNotNull(clientCollateralId);
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
         final String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal(PRINCIPAL)
@@ -232,7 +232,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
                 .withAmortizationTypeAsEqualInstallments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
                 .withExpectedDisbursementDate(EXPECTED_DISBURSAL_DATE).withSubmittedOnDate(LOAN_APPLICATION_SUBMISSION_DATE)
                 .withCollaterals(collaterals).build(clientID.toString(), loanProductID.toString(), null);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        return loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
     private void addCollaterals(List<HashMap> collaterals, Integer collateralId, BigDecimal quantity) {

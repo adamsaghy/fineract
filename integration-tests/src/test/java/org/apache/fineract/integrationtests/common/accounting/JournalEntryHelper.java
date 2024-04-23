@@ -82,7 +82,7 @@ public class JournalEntryHelper {
 
     private void checkJournalEntry(final Integer officeId, final Account account, final String date, final JournalEntry... accountEntries) {
         final String url = createURLForGettingAccountEntries(account, date, officeId);
-        final ArrayList<HashMap> response = Utils.performServerGet(this.requestSpec, this.responseSpec, url, "pageItems");
+        final ArrayList<HashMap> response = Utils.performServerGet(requestSpec, responseSpec, url, "pageItems");
 
         for (JournalEntry entry : accountEntries) {
             boolean matchFound = false;
@@ -101,7 +101,7 @@ public class JournalEntryHelper {
 
     private String getJournalEntryTransactionId(final Account account, final String date, final JournalEntry... accountEntries) {
         final String url = createURLForGettingAccountEntries(account, date, null);
-        final ArrayList<HashMap> response = Utils.performServerGet(this.requestSpec, this.responseSpec, url, "pageItems");
+        final ArrayList<HashMap> response = Utils.performServerGet(requestSpec, responseSpec, url, "pageItems");
 
         for (JournalEntry entry : accountEntries) {
             for (HashMap map : response) {
@@ -127,7 +127,7 @@ public class JournalEntryHelper {
 
     public ArrayList<HashMap> getJournalEntriesByTransactionId(final String transactionId) {
         final String url = createURLForGettingAccountEntriesByTransactionId(transactionId);
-        final ArrayList<HashMap> response = Utils.performServerGet(this.requestSpec, this.responseSpec, url, "pageItems");
+        final ArrayList<HashMap> response = Utils.performServerGet(requestSpec, responseSpec, url, "pageItems");
         return response;
     }
 
@@ -139,7 +139,7 @@ public class JournalEntryHelper {
     public GetJournalEntriesTransactionIdResponse getJournalEntries(final String transactionId) {
         log.info("Getting GL Journal entries for transaction id {}", transactionId);
         final String url = createURLForGettingAccountEntriesByTransactionId(transactionId);
-        final String response = Utils.performServerGet(this.requestSpec, this.responseSpec, url, null);
+        final String response = Utils.performServerGet(requestSpec, responseSpec, url, null);
         log.info("response {}", response);
         return GSON.fromJson(response, GetJournalEntriesTransactionIdResponse.class);
     }
@@ -148,7 +148,7 @@ public class JournalEntryHelper {
         log.info("Getting GL Journal entries for loan id {}", loanId);
         final String url = "/fineract-provider/api/v1/journalentries?loanId=" + loanId + "&tenantIdentifier=default"
                 + "&orderBy=id&sortOrder=desc&locale=en&dateFormat=dd MMMM yyyy";
-        final String response = Utils.performServerGet(this.requestSpec, this.responseSpec, url, null);
+        final String response = Utils.performServerGet(requestSpec, responseSpec, url, null);
         log.info("response {}", response);
         return GSON.fromJson(response, GetJournalEntriesTransactionIdResponse.class);
     }

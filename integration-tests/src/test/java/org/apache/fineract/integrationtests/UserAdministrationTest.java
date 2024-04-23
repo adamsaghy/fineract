@@ -63,15 +63,15 @@ public class UserAdministrationTest extends IntegrationTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = expectStatusCode(200);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = expectStatusCode(200);
     }
 
     @AfterEach
     public void tearDown() {
         for (Integer userId : this.transientUsers) {
-            UserHelper.deleteUser(this.requestSpec, this.responseSpec, userId);
+            UserHelper.deleteUser(requestSpec, responseSpec, userId);
         }
         this.transientUsers.clear();
     }
@@ -79,18 +79,17 @@ public class UserAdministrationTest extends IntegrationTest {
     @Test
     public void testCreateNewUserBlocksDuplicateUsername() {
 
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
+        final Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
         Assertions.assertNotNull(roleId);
 
-        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+        final Integer staffId = StaffHelper.createStaff(requestSpec, responseSpec);
         Assertions.assertNotNull(staffId);
 
-        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "alphabet",
-                "resourceId");
+        final Integer userId = (Integer) UserHelper.createUser(requestSpec, responseSpec, roleId, staffId, "alphabet", "resourceId");
         Assertions.assertNotNull(userId);
         this.transientUsers.add(userId);
 
-        final List errors = (List) UserHelper.createUser(this.requestSpec, expectStatusCode(403), roleId, staffId, "alphabet", "errors");
+        final List errors = (List) UserHelper.createUser(requestSpec, expectStatusCode(403), roleId, staffId, "alphabet", "errors");
         Map reason = (Map) errors.get(0);
         LOG.info("Reason: {}", reason.get("defaultUserMessage"));
         LOG.info("Code: {}", reason.get("userMessageGlobalisationCode"));
@@ -100,43 +99,40 @@ public class UserAdministrationTest extends IntegrationTest {
 
     @Test
     public void testUpdateUserAcceptsNewOrSameUsername() {
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
+        final Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
         Assertions.assertNotNull(roleId);
 
-        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+        final Integer staffId = StaffHelper.createStaff(requestSpec, responseSpec);
         Assertions.assertNotNull(staffId);
 
-        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "alphabet",
-                "resourceId");
+        final Integer userId = (Integer) UserHelper.createUser(requestSpec, responseSpec, roleId, staffId, "alphabet", "resourceId");
         Assertions.assertNotNull(userId);
         this.transientUsers.add(userId);
 
-        final Integer userId2 = (Integer) UserHelper.updateUser(this.requestSpec, this.responseSpec, userId, "renegade", "resourceId");
+        final Integer userId2 = (Integer) UserHelper.updateUser(requestSpec, responseSpec, userId, "renegade", "resourceId");
         Assertions.assertNotNull(userId2);
 
-        final Integer userId3 = (Integer) UserHelper.updateUser(this.requestSpec, this.responseSpec, userId, "renegade", "resourceId");
+        final Integer userId3 = (Integer) UserHelper.updateUser(requestSpec, responseSpec, userId, "renegade", "resourceId");
         Assertions.assertNotNull(userId3);
     }
 
     @Test
     public void testUpdateUserBlockDuplicateUsername() {
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
+        final Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
         Assertions.assertNotNull(roleId);
 
-        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+        final Integer staffId = StaffHelper.createStaff(requestSpec, responseSpec);
         Assertions.assertNotNull(staffId);
 
-        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "alphabet",
-                "resourceId");
+        final Integer userId = (Integer) UserHelper.createUser(requestSpec, responseSpec, roleId, staffId, "alphabet", "resourceId");
         Assertions.assertNotNull(userId);
         this.transientUsers.add(userId);
 
-        final Integer userId2 = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, "bilingual",
-                "resourceId");
+        final Integer userId2 = (Integer) UserHelper.createUser(requestSpec, responseSpec, roleId, staffId, "bilingual", "resourceId");
         Assertions.assertNotNull(userId2);
         this.transientUsers.add(userId2);
 
-        final List errors = (List) UserHelper.updateUser(this.requestSpec, expectStatusCode(403), userId2, "alphabet", "errors");
+        final List errors = (List) UserHelper.updateUser(requestSpec, expectStatusCode(403), userId2, "alphabet", "errors");
         Map reason = (Map) errors.get(0);
         Assertions.assertEquals("User with username alphabet already exists.", reason.get("defaultUserMessage"));
         Assertions.assertEquals("error.msg.user.duplicate.username", reason.get("userMessageGlobalisationCode"));
@@ -144,21 +140,21 @@ public class UserAdministrationTest extends IntegrationTest {
 
     @Test
     public void testCreateNewUserBlocksDuplicateClientId() {
-        final Integer roleId = RolesHelper.createRole(this.requestSpec, this.responseSpec);
+        final Integer roleId = RolesHelper.createRole(requestSpec, responseSpec);
         Assertions.assertNotNull(roleId);
 
-        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+        final Integer staffId = StaffHelper.createStaff(requestSpec, responseSpec);
         Assertions.assertNotNull(staffId);
 
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientId);
 
-        final Integer userId = (Integer) UserHelper.createUserForSelfService(this.requestSpec, this.responseSpec, roleId, staffId, clientId,
+        final Integer userId = (Integer) UserHelper.createUserForSelfService(requestSpec, responseSpec, roleId, staffId, clientId,
                 "resourceId");
         Assertions.assertNotNull(userId);
         this.transientUsers.add(userId);
 
-        final List errors = (List) UserHelper.createUserForSelfService(this.requestSpec, expectStatusCode(403), roleId, staffId, clientId,
+        final List errors = (List) UserHelper.createUserForSelfService(requestSpec, expectStatusCode(403), roleId, staffId, clientId,
                 "errors");
         Map reason = (Map) errors.get(0);
         Assertions.assertEquals("Self Service User Id is already created. Go to Admin->Users to edit or delete the self-service user.",
@@ -178,7 +174,7 @@ public class UserAdministrationTest extends IntegrationTest {
         final Integer userId = UserHelper.getUserId(requestSpec, responseSpec, AppUserConstants.SYSTEM_USER_NAME);
         Assertions.assertNotNull(userId);
 
-        final List errors = (List) UserHelper.updateUser(this.requestSpec, expectStatusCode(403), userId, "systemtest", "errors");
+        final List errors = (List) UserHelper.updateUser(requestSpec, expectStatusCode(403), userId, "systemtest", "errors");
     }
 
     @Test

@@ -52,6 +52,7 @@ import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.ExternalAssetOwnerHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
@@ -85,7 +86,7 @@ public class ExternalAssetOwnerTransferTest {
     protected static SchedulerJobHelper SCHEDULER_JOB_HELPER;
     protected static LocalDate TODAYS_DATE;
     public String ownerExternalId;
-    protected DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
+    protected DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern(CommonConstants.DATE_FORMAT).toFormatter();
 
     @BeforeAll
     public static void setupInvestorBusinessStep() {

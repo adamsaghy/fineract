@@ -68,11 +68,11 @@ public class LoanRescheduleWithAdvancePaymentTest {
     @BeforeEach
     public void initialize() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        this.loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(requestSpec, responseSpec);
 
         this.generalResponseSpec = new ResponseSpecBuilder().build();
 
@@ -87,28 +87,28 @@ public class LoanRescheduleWithAdvancePaymentTest {
      * enables the configuration `is-interest-to-be-recovered-first-when-greater-than-emi`
      **/
     private void enableConfig() {
-        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "42", true);
+        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, "42", true);
     }
 
     /**
      * disables the configuration `is-interest-to-be-recovered-first-when-greater-than-emi`
      **/
     private void disableConfig() {
-        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "42", false);
+        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, "42", false);
     }
 
     /**
      * enables the configuration `is-principal-compounding-disabled-for-overdue-loans`
      **/
     private void enablePrincipalCompoundingConfig() {
-        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "43", true);
+        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, "43", true);
     }
 
     /**
      * disables the configuration `is-principal-compounding-disabled-for-overdue-loans`
      **/
     private void disablePrincipalCompoundingConfig() {
-        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec, "43", false);
+        GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec, "43", false);
     }
 
     /**
@@ -117,7 +117,7 @@ public class LoanRescheduleWithAdvancePaymentTest {
     private void approveLoanApplication(String approveDate) {
 
         if (this.loanId != null) {
-            this.loanTransactionHelper.approveLoan(approveDate, this.loanId);
+            loanTransactionHelper.approveLoan(approveDate, this.loanId);
             LOG.info("Successfully approved loan (ID: {} )", this.loanId);
         }
     }
@@ -128,8 +128,8 @@ public class LoanRescheduleWithAdvancePaymentTest {
     private void disburseLoan(String disburseDate) {
 
         if (this.loanId != null) {
-            String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, this.loanId);
-            this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(disburseDate, this.loanId,
+            String loanDetails = loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, this.loanId);
+            loanTransactionHelper.disburseLoanWithNetDisbursalAmount(disburseDate, this.loanId,
                     JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
             LOG.info("Successfully disbursed loan (ID: {} )", this.loanId);
         }
@@ -140,11 +140,11 @@ public class LoanRescheduleWithAdvancePaymentTest {
     public void testRescheduleAfterLatePayment() {
         this.enableConfig();
         this.enablePrincipalCompoundingConfig();
-        WorkingDaysHelper.updateWorkingDaysWeekDays(this.requestSpec, this.responseSpec);
+        WorkingDaysHelper.updateWorkingDaysWeekDays(requestSpec, responseSpec);
         // create all required entities
         this.createRequiredEntitiesWithLatePayment();
         this.createApproveLoanRescheduleRequestAfterLatePayment();
-        WorkingDaysHelper.updateWorkingDays(this.requestSpec, this.responseSpec);
+        WorkingDaysHelper.updateWorkingDays(requestSpec, responseSpec);
         this.disablePrincipalCompoundingConfig();
         this.disableConfig();
     }
@@ -153,9 +153,9 @@ public class LoanRescheduleWithAdvancePaymentTest {
      * create a new client
      **/
     private void createClientEntity() {
-        this.clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        this.clientId = ClientHelper.createClient(requestSpec, responseSpec);
 
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, this.clientId);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, this.clientId);
     }
 
     private void createRequiredEntitiesWithLatePayment() {
@@ -192,7 +192,7 @@ public class LoanRescheduleWithAdvancePaymentTest {
                         recalculationCompoundingFrequencyDayOfWeekType)
                 .build(null);
 
-        this.loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        this.loanProductId = loanTransactionHelper.getLoanProductId(loanProductJSON);
         LOG.info("Successfully created loan product  (ID:{}) ", this.loanProductId);
     }
 
@@ -210,7 +210,7 @@ public class LoanRescheduleWithAdvancePaymentTest {
                 .withRepaymentStrategy(LoanApplicationTestBuilder.INTEREST_PRINCIPAL_PENALTIES_FEES_ORDER_STRATEGY)
                 .withinterestChargedFromDate(submittedDate).build(this.clientId.toString(), this.loanProductId.toString(), null);
 
-        this.loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        this.loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
 
         LOG.info("Sucessfully created loan (ID: {} )", this.loanId);
 
@@ -220,10 +220,10 @@ public class LoanRescheduleWithAdvancePaymentTest {
 
     private void createApproveLoanRescheduleRequestAfterLatePayment() {
         LOG.info("-------------Make repayment 1-----------");
-        this.loanTransactionHelper.makeRepayment("14 June 2021", Float.parseFloat("1331.58"), loanId);
+        loanTransactionHelper.makeRepayment("14 June 2021", Float.parseFloat("1331.58"), loanId);
 
         LOG.info("-------------Make repayment 2-----------");
-        this.loanTransactionHelper.makeRepayment("15 July 2021", Float.parseFloat("1331.58"), loanId);
+        loanTransactionHelper.makeRepayment("15 July 2021", Float.parseFloat("1331.58"), loanId);
 
         LOG.info(
                 "---------------------------------CREATING LOAN RESCHEDULE REQUEST FOR LOAN WITH RECALCULATION------------------------------------");
@@ -246,7 +246,7 @@ public class LoanRescheduleWithAdvancePaymentTest {
 
         LOG.info("Successfully approved loan reschedule request (ID: {})", this.loanRescheduleRequestId);
 
-        final Map repaymentSchedule = (Map) this.loanTransactionHelper.getLoanDetailExcludeFutureSchedule(requestSpec, generalResponseSpec,
+        final Map repaymentSchedule = (Map) loanTransactionHelper.getLoanDetailExcludeFutureSchedule(requestSpec, generalResponseSpec,
                 this.loanId, "repaymentSchedule");
         LOG.info("Repayment Schedule for id {} : {}", this.loanId, repaymentSchedule);
         final ArrayList periods = (ArrayList) repaymentSchedule.get("periods");
@@ -263,11 +263,11 @@ public class LoanRescheduleWithAdvancePaymentTest {
     public void testMultipleAdvancePaymentWithReschedule() {
         this.enableConfig();
         this.enablePrincipalCompoundingConfig();
-        WorkingDaysHelper.updateWorkingDaysWeekDays(this.requestSpec, this.responseSpec);
+        WorkingDaysHelper.updateWorkingDaysWeekDays(requestSpec, responseSpec);
         // create all required entities
         this.createRequiredEntitiesForTestMultipleAdvancePaymentWithReschedule();
         this.doMultipleAdvancePaymentsAndVerifySchedule();
-        WorkingDaysHelper.updateWorkingDays(this.requestSpec, this.responseSpec);
+        WorkingDaysHelper.updateWorkingDays(requestSpec, responseSpec);
         this.disablePrincipalCompoundingConfig();
         this.disableConfig();
     }
@@ -306,7 +306,7 @@ public class LoanRescheduleWithAdvancePaymentTest {
                         recalculationCompoundingFrequencyDayOfWeekType)
                 .withInstallmentAmountInMultiplesOf("10").build(null);
 
-        this.loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        this.loanProductId = loanTransactionHelper.getLoanProductId(loanProductJSON);
         LOG.info("Successfully created loan product  (ID:{}) ", this.loanProductId);
     }
 
@@ -324,7 +324,7 @@ public class LoanRescheduleWithAdvancePaymentTest {
                 .withRepaymentStrategy(LoanApplicationTestBuilder.INTEREST_PRINCIPAL_PENALTIES_FEES_ORDER_STRATEGY)
                 .withinterestChargedFromDate(submittedDate).build(this.clientId.toString(), this.loanProductId.toString(), null);
 
-        this.loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        this.loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
 
         LOG.info("Sucessfully created loan (ID: {} )", this.loanId);
 
@@ -335,12 +335,12 @@ public class LoanRescheduleWithAdvancePaymentTest {
     private void doMultipleAdvancePaymentsAndVerifySchedule() {
 
         LOG.info("-------------Make Advance repayment 1-----------");
-        this.loanTransactionHelper.makeRepayment("02 December 2021", Float.parseFloat("1"), this.loanId);
+        loanTransactionHelper.makeRepayment("02 December 2021", Float.parseFloat("1"), this.loanId);
 
         LOG.info("-------------Make Advance repayment 2-----------");
-        this.loanTransactionHelper.makeRepayment("03 December 2021", Float.parseFloat("1"), this.loanId);
+        loanTransactionHelper.makeRepayment("03 December 2021", Float.parseFloat("1"), this.loanId);
 
-        final Map repaymentSchedule = (Map) this.loanTransactionHelper.getLoanDetailExcludeFutureSchedule(requestSpec, generalResponseSpec,
+        final Map repaymentSchedule = (Map) loanTransactionHelper.getLoanDetailExcludeFutureSchedule(requestSpec, generalResponseSpec,
                 this.loanId, "repaymentSchedule");
 
         final ArrayList periods = (ArrayList) repaymentSchedule.get("periods");

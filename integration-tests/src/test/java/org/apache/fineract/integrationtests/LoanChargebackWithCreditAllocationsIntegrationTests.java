@@ -52,7 +52,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public void simpleChargebackWithCreditAllocationPenaltyFeeInterestAndPrincipal() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProduct(//
                     createDefaultPaymentAllocation(), //
@@ -92,7 +92,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             // Add Chargeback
             addChargebackForLoan(loanId, repaymentTransaction, 100.0); // 20 penalty + 50 fee + 0 interest + 30
-                                                                       // principal
+            // principal
 
             verifyTransactions(loanId, //
                     transaction(1250.0, "Disbursement", "01 January 2023", 1250.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0), //
@@ -115,7 +115,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public void simpleChargebackWithCreditAllocationPenaltyFeeInterestAndPrincipalOnTheLastDayOfTheInstallment() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProduct(//
                     createDefaultPaymentAllocation(), //
@@ -180,7 +180,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public void simpleChargebackWithCreditAllocationPenaltyFeeInterestAndPrincipalOnTheLastDayOfTheLoan() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProduct(//
                     createDefaultPaymentAllocation(), //
@@ -245,7 +245,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public void chargebackWithCreditAllocationPenaltyFeeInterestAndPrincipalOnNPlusOneInstallment() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProduct(//
                     createDefaultPaymentAllocation(), //
@@ -322,7 +322,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public void chargebackWithCreditAllocationAndReverseReplayWithBackdatedPayment() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProduct(//
                     createDefaultPaymentAllocation(), //
@@ -397,7 +397,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public void chargebackWithCreditAllocationReverseReplayedWithBackdatedPayment() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProduct(//
                     createDefaultPaymentAllocation(), //
@@ -475,7 +475,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public void chargebackWithCreditAllocationPrincipalInterestFeePenalty() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
             // Create Loan Product
             Long loanProductId = createLoanProduct(//
@@ -541,7 +541,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public void chargebackWithCreditAllocationPrincipalInterestFeePenaltyWhenOverpaid() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProduct(//
                     createDefaultPaymentAllocation(), //
@@ -570,7 +570,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             // Add Repayment
             Long repaymentTransaction = addRepaymentForLoan(loanId, 1370.0, "20 January 2023"); // 1250 + 70 = 1320; 50
-                                                                                                // overpayment
+            // overpayment
 
             verifyRepaymentSchedule(loanId, //
                     installment(0, null, "01 January 2023"), //
@@ -609,7 +609,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public void chargebackWithCreditAllocationFeePenaltyPrincipalInterestWhenOverpaid() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProduct(//
                     createDefaultPaymentAllocation(), //
@@ -638,7 +638,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             // Add Repayment
             Long repaymentTransaction = addRepaymentForLoan(loanId, 1370.0, "20 January 2023"); // 1250 + 70 = 1320; 50
-                                                                                                // overpayment
+            // overpayment
 
             verifyRepaymentSchedule(loanId, //
                     installment(0, null, "01 January 2023"), //
@@ -676,7 +676,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public void chargebackWithCreditAllocationFeePenaltyPrincipalInterestWhenOverpaidDefaultPaymentPrincipalFirst() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProduct(//
                     createDefaultPaymentAllocationPrincipalFirst(), //
@@ -743,7 +743,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public void doubleChargebackWithCreditAllocationPenaltyFeeInterestAndPrincipal() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProduct(//
                     createDefaultPaymentAllocation(), //
@@ -827,7 +827,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public void doubleChargebackReverseReplayedBothFeeAndPenaltyPayedWithCreditAllocationPenaltyFeeInterestAndPrincipal() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProduct(//
                     createDefaultPaymentAllocation(), //
@@ -921,7 +921,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public void doubleChargebackReverseReplayedOnlyPenaltyPayedWithCreditAllocationPenaltyFeeInterestAndPrincipal() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProduct(//
                     createDefaultPaymentAllocation(), //
@@ -1015,7 +1015,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public void testAccountingChargebackOnPrincipal() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProduct(//
                     createDefaultPaymentAllocation(), //
@@ -1059,23 +1059,23 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             // Verify GL entries
             verifyTRJournalEntries(repaymentTransaction1, //
-                    debit(fundSource, 250), //
-                    credit(loansReceivableAccount, 250)//
+                    debit(FUND_SOURCE, 250), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250)//
             );
 
             verifyTRJournalEntries(repaymentTransaction2, //
-                    debit(fundSource, 250), //
-                    credit(loansReceivableAccount, 250) //
+                    debit(FUND_SOURCE, 250), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250) //
             );
 
             verifyTRJournalEntries(repaymentTransaction3, //
-                    debit(fundSource, 250), //
-                    credit(loansReceivableAccount, 250)//
+                    debit(FUND_SOURCE, 250), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250)//
             );
 
             verifyTRJournalEntries(chargeback, //
-                    debit(loansReceivableAccount, 250), //
-                    credit(fundSource, 250) //
+                    debit(LOANS_RECEIVABLE_ACCOUNT, 250), //
+                    credit(FUND_SOURCE, 250) //
             );
 
         });
@@ -1085,7 +1085,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public void testAccountingChargebackOnPrincipalAndFees() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProduct(//
                     createDefaultPaymentAllocation(), //
@@ -1115,7 +1115,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             Long repaymentTransaction2 = addRepaymentForLoan(loanId, 280.0, "01 March 2023");
 
             // Run periodic accrual
-            schedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions");
+            SCHEDULER_JOB_HELPER.executeAndAwaitJob("Add Accrual Transactions");
 
             // Repayment #3
             updateBusinessDate("30 March 2023");
@@ -1135,25 +1135,25 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             // Verify GL entries
             verifyTRJournalEntries(repaymentTransaction1, //
-                    debit(fundSource, 250), //
-                    credit(loansReceivableAccount, 250) //
+                    debit(FUND_SOURCE, 250), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250) //
             );
 
             verifyTRJournalEntries(repaymentTransaction2, //
-                    debit(fundSource, 280), //
-                    credit(loansReceivableAccount, 250), //
-                    credit(feeReceivableAccount, 30)//
+                    debit(FUND_SOURCE, 280), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250), //
+                    credit(FEE_RECEIVABLE_ACCOUNT, 30)//
             );
 
             verifyTRJournalEntries(repaymentTransaction3, //
-                    debit(fundSource, 250), //
-                    credit(loansReceivableAccount, 250)//
+                    debit(FUND_SOURCE, 250), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250)//
             );
 
             verifyTRJournalEntries(chargeback, //
-                    debit(loansReceivableAccount, 250), //
-                    debit(feeReceivableAccount, 30), //
-                    credit(fundSource, 280) //
+                    debit(LOANS_RECEIVABLE_ACCOUNT, 250), //
+                    debit(FEE_RECEIVABLE_ACCOUNT, 30), //
+                    credit(FUND_SOURCE, 280) //
             );
 
         });
@@ -1163,7 +1163,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public void testAccountingChargebackOnPrincipalAndPenalties() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProduct(//
                     createDefaultPaymentAllocation(), //
@@ -1193,7 +1193,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             Long repaymentTransaction2 = addRepaymentForLoan(loanId, 280.0, "01 March 2023");
 
             // Run periodic accrual
-            schedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions");
+            SCHEDULER_JOB_HELPER.executeAndAwaitJob("Add Accrual Transactions");
 
             // Repayment #3
             updateBusinessDate("30 March 2023");
@@ -1213,25 +1213,25 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             // Verify GL entries
             verifyTRJournalEntries(repaymentTransaction1, //
-                    debit(fundSource, 250), //
-                    credit(loansReceivableAccount, 250) //
+                    debit(FUND_SOURCE, 250), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250) //
             );
 
             verifyTRJournalEntries(repaymentTransaction2, //
-                    debit(fundSource, 280), //
-                    credit(loansReceivableAccount, 250), //
-                    credit(penaltyReceivableAccount, 30)//
+                    debit(FUND_SOURCE, 280), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250), //
+                    credit(PENALTY_RECEIVABLE_ACCOUNT, 30)//
             );
 
             verifyTRJournalEntries(repaymentTransaction3, //
-                    debit(fundSource, 250), //
-                    credit(loansReceivableAccount, 250)//
+                    debit(FUND_SOURCE, 250), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250)//
             );
 
             verifyTRJournalEntries(chargeback, //
-                    debit(loansReceivableAccount, 250), //
-                    debit(penaltyReceivableAccount, 30), //
-                    credit(fundSource, 280) //
+                    debit(LOANS_RECEIVABLE_ACCOUNT, 250), //
+                    debit(PENALTY_RECEIVABLE_ACCOUNT, 30), //
+                    credit(FUND_SOURCE, 280) //
             );
 
         });
@@ -1241,7 +1241,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public void testAccountingOverpaymentAmountIsSmallerThanChargeback() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProduct(//
                     createDefaultPaymentAllocation(), //
@@ -1286,25 +1286,25 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             // Verify GL entries
             verifyTRJournalEntries(repaymentTransaction1, //
-                    debit(fundSource, 250), //
-                    credit(loansReceivableAccount, 250) //
+                    debit(FUND_SOURCE, 250), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250) //
             );
 
             verifyTRJournalEntries(repaymentTransaction2, //
-                    debit(fundSource, 250), //
-                    credit(loansReceivableAccount, 250) //
+                    debit(FUND_SOURCE, 250), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250) //
             );
 
             verifyTRJournalEntries(repaymentTransaction3, //
-                    debit(fundSource, 400), //
-                    credit(loansReceivableAccount, 250), //
-                    credit(overpaymentAccount, 150) //
+                    debit(FUND_SOURCE, 400), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250), //
+                    credit(OVERPAYMENT_ACCOUNT, 150) //
             );
 
             verifyTRJournalEntries(chargeback, //
-                    debit(loansReceivableAccount, 100), //
-                    debit(overpaymentAccount, 150), //
-                    credit(fundSource, 250) //
+                    debit(LOANS_RECEIVABLE_ACCOUNT, 100), //
+                    debit(OVERPAYMENT_ACCOUNT, 150), //
+                    credit(FUND_SOURCE, 250) //
             );
         });
     }
@@ -1313,7 +1313,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public void testAccountingOverpaymentAmountIsBiggerThanChargeback() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProduct(//
                     createDefaultPaymentAllocation(), //
@@ -1358,24 +1358,24 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             // Verify GL entries
             verifyTRJournalEntries(repaymentTransaction1, //
-                    debit(fundSource, 250), //
-                    credit(loansReceivableAccount, 250) //
+                    debit(FUND_SOURCE, 250), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250) //
             );
 
             verifyTRJournalEntries(repaymentTransaction2, //
-                    debit(fundSource, 250), //
-                    credit(loansReceivableAccount, 250) //
+                    debit(FUND_SOURCE, 250), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250) //
             );
 
             verifyTRJournalEntries(repaymentTransaction3, //
-                    debit(fundSource, 400), //
-                    credit(loansReceivableAccount, 250), //
-                    credit(overpaymentAccount, 150) //
+                    debit(FUND_SOURCE, 400), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250), //
+                    credit(OVERPAYMENT_ACCOUNT, 150) //
             );
 
             verifyTRJournalEntries(chargeback, //
-                    debit(overpaymentAccount, 100), //
-                    credit(fundSource, 100) //
+                    debit(OVERPAYMENT_ACCOUNT, 100), //
+                    credit(FUND_SOURCE, 100) //
             );
         });
     }
@@ -1384,7 +1384,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public void testAccountingOverpaidLoansWithFeesWhenOverpaymentAmountIsBiggerThanChargeback() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProduct(//
                     createDefaultPaymentAllocation(), //
@@ -1411,7 +1411,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             updateBusinessDate("01 March 2023");
             Long feeId = addCharge(loanId, false, 30, "01 March 2023");
             Long repaymentTransaction2 = addRepaymentForLoan(loanId, 280.0, "01 March 2023");
-            schedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions");
+            SCHEDULER_JOB_HELPER.executeAndAwaitJob("Add Accrual Transactions");
 
             // Repayment #3
             updateBusinessDate("30 March 2023");
@@ -1432,30 +1432,30 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             // Verify GL entries
             verifyTRJournalEntries(repaymentTransaction1, //
-                    debit(fundSource, 250), //
-                    credit(loansReceivableAccount, 250) //
+                    debit(FUND_SOURCE, 250), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250) //
             );
 
             verifyTRJournalEntries(repaymentTransaction2, //
-                    debit(fundSource, 280), //
-                    credit(loansReceivableAccount, 250), //
-                    credit(feeReceivableAccount, 30) //
+                    debit(FUND_SOURCE, 280), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250), //
+                    credit(FEE_RECEIVABLE_ACCOUNT, 30) //
             );
 
             verifyTRJournalEntries(getTransactionId(loanId, "Accrual", "01 March 2023"), //
-                    debit(feeReceivableAccount, 30), //
-                    credit(feeIncomeAccount, 30) //
+                    debit(FEE_RECEIVABLE_ACCOUNT, 30), //
+                    credit(FEE_INCOME_ACCOUNT, 30) //
             );
 
             verifyTRJournalEntries(repaymentTransaction3, //
-                    debit(fundSource, 400), //
-                    credit(loansReceivableAccount, 250), //
-                    credit(overpaymentAccount, 150) //
+                    debit(FUND_SOURCE, 400), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250), //
+                    credit(OVERPAYMENT_ACCOUNT, 150) //
             );
 
             verifyTRJournalEntries(chargeback, //
-                    debit(overpaymentAccount, 100), //
-                    credit(fundSource, 100) //
+                    debit(OVERPAYMENT_ACCOUNT, 100), //
+                    credit(FUND_SOURCE, 100) //
             );
         });
     }
@@ -1464,7 +1464,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public void testAccountingChargebackOnChargeOffWithPrincipal() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProduct(//
                     createDefaultPaymentAllocation(), //
@@ -1509,23 +1509,23 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             // Verify GL entries
             verifyTRJournalEntries(repaymentTransaction1, //
-                    debit(fundSource, 250), //
-                    credit(loansReceivableAccount, 250)//
+                    debit(FUND_SOURCE, 250), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250)//
             );
 
             verifyTRJournalEntries(repaymentTransaction2, //
-                    debit(fundSource, 250), //
-                    credit(loansReceivableAccount, 250) //
+                    debit(FUND_SOURCE, 250), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250) //
             );
 
             verifyTRJournalEntries(chargeOff, //
-                    debit(chargeOffExpenseAccount, 250), //
-                    credit(loansReceivableAccount, 250)//
+                    debit(CHARGE_OFF_EXPENSE_ACCOUNT, 250), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250)//
             );
 
             verifyTRJournalEntries(chargeback, //
-                    debit(chargeOffExpenseAccount, 250), //
-                    credit(fundSource, 250) //
+                    debit(CHARGE_OFF_EXPENSE_ACCOUNT, 250), //
+                    credit(FUND_SOURCE, 250) //
             );
         });
     }
@@ -1534,7 +1534,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public void testAccountingChargebackOnChargeOffFraudWithPrincipal() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProduct(//
                     createDefaultPaymentAllocation(), //
@@ -1580,23 +1580,23 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             // Verify GL entries
             verifyTRJournalEntries(repaymentTransaction1, //
-                    debit(fundSource, 250), //
-                    credit(loansReceivableAccount, 250)//
+                    debit(FUND_SOURCE, 250), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250)//
             );
 
             verifyTRJournalEntries(repaymentTransaction2, //
-                    debit(fundSource, 250), //
-                    credit(loansReceivableAccount, 250) //
+                    debit(FUND_SOURCE, 250), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250) //
             );
 
             verifyTRJournalEntries(chargeOff, //
-                    debit(chargeOffExpenseAccount, 250), //
-                    credit(loansReceivableAccount, 250)//
+                    debit(CHARGE_OFF_EXPENSE_ACCOUNT, 250), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250)//
             );
 
             verifyTRJournalEntries(chargeback, //
-                    debit(chargeOffFraudExpenseAccount, 250), //
-                    credit(fundSource, 250) //
+                    debit(CHARGE_OFF_FRAUD_EXPENSE_ACCOUNT, 250), //
+                    credit(FUND_SOURCE, 250) //
             );
         });
     }
@@ -1605,7 +1605,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public void testAccountingChargebackOnChargeOffWithFees() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProduct(//
                     createDefaultPaymentAllocation(), //
@@ -1636,7 +1636,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             Long repaymentTransaction2 = addRepaymentForLoan(loanId, 280.0, "01 March 2023");
 
             // Run periodic accrual
-            schedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions");
+            SCHEDULER_JOB_HELPER.executeAndAwaitJob("Add Accrual Transactions");
 
             // Charge-Off
             updateBusinessDate("15 March 2023");
@@ -1658,32 +1658,32 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             // Verify GL entries
             verifyTRJournalEntries(repaymentTransaction1, //
-                    debit(fundSource, 250), //
-                    credit(loansReceivableAccount, 250)//
+                    debit(FUND_SOURCE, 250), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250)//
             );
 
             verifyTRJournalEntries(repaymentTransaction2, //
-                    debit(fundSource, 280), //
-                    credit(loansReceivableAccount, 250), //
-                    credit(feeReceivableAccount, 30) //
+                    debit(FUND_SOURCE, 280), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250), //
+                    credit(FEE_RECEIVABLE_ACCOUNT, 30) //
             );
 
             verifyTRJournalEntries(getTransactionId(loanId, "Accrual", "01 March 2023"), //
-                    debit(feeReceivableAccount, 30), //
-                    credit(feeIncomeAccount, 30) //
+                    debit(FEE_RECEIVABLE_ACCOUNT, 30), //
+                    credit(FEE_INCOME_ACCOUNT, 30) //
             );
 
             verifyTRJournalEntries(chargeOff, //
-                    debit(chargeOffExpenseAccount, 250), //
-                    credit(loansReceivableAccount, 250), //
-                    credit(feeReceivableAccount, 20), //
-                    debit(feeChargeOffAccount, 20) //
+                    debit(CHARGE_OFF_EXPENSE_ACCOUNT, 250), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250), //
+                    credit(FEE_RECEIVABLE_ACCOUNT, 20), //
+                    debit(FEE_CHARGE_OFF_ACCOUNT, 20) //
             );
 
             verifyTRJournalEntries(chargeback, //
-                    credit(fundSource, 280), //
-                    debit(chargeOffExpenseAccount, 250), //
-                    debit(feeChargeOffAccount, 30) //
+                    credit(FUND_SOURCE, 280), //
+                    debit(CHARGE_OFF_EXPENSE_ACCOUNT, 250), //
+                    debit(FEE_CHARGE_OFF_ACCOUNT, 30) //
             );
         });
     }
@@ -1692,10 +1692,10 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public void testAccountingChargebackOnChargeOffWithPenalties() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProduct(//
-                    createDefaultPaymentAllocation(), //
+                    createDefaultPaymentAllocation("NEXT_INSTALLMENT"), //
                     chargebackAllocation("PENALTY", "FEE", "INTEREST", "PRINCIPAL")//
             );
             // Apply and Approve Loan
@@ -1723,7 +1723,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             Long repaymentTransaction2 = addRepaymentForLoan(loanId, 280.0, "01 March 2023");
 
             // Run periodic accrual
-            schedulerJobHelper.executeAndAwaitJob("Add Accrual Transactions");
+            SCHEDULER_JOB_HELPER.executeAndAwaitJob("Add Accrual Transactions");
 
             // Charge-Off
             updateBusinessDate("15 March 2023");
@@ -1745,39 +1745,39 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
 
             // Verify GL entries
             verifyTRJournalEntries(repaymentTransaction1, //
-                    debit(fundSource, 250), //
-                    credit(loansReceivableAccount, 250)//
+                    debit(FUND_SOURCE, 250), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250)//
             );
 
             verifyTRJournalEntries(repaymentTransaction2, //
-                    debit(fundSource, 280), //
-                    credit(loansReceivableAccount, 250), //
-                    credit(penaltyReceivableAccount, 30) //
+                    debit(FUND_SOURCE, 280), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250), //
+                    credit(PENALTY_RECEIVABLE_ACCOUNT, 30) //
             );
 
             verifyTRJournalEntries(getTransactionId(loanId, "Accrual", "01 March 2023"), //
-                    debit(penaltyReceivableAccount, 30), //
-                    credit(penaltyIncomeAccount, 30) //
+                    debit(PENALTY_RECEIVABLE_ACCOUNT, 30), //
+                    credit(PENALTY_INCOME_ACCOUNT, 30) //
             );
 
             verifyTRJournalEntries(chargeOff, //
-                    debit(chargeOffExpenseAccount, 250), //
-                    credit(loansReceivableAccount, 250), //
-                    credit(penaltyReceivableAccount, 20), //
-                    debit(penaltyChargeOffAccount, 20) //
+                    debit(CHARGE_OFF_EXPENSE_ACCOUNT, 250), //
+                    credit(LOANS_RECEIVABLE_ACCOUNT, 250), //
+                    credit(PENALTY_RECEIVABLE_ACCOUNT, 20), //
+                    debit(PENALTY_CHARGE_OFF_ACCOUNT, 20) //
             );
 
             verifyTRJournalEntries(chargeback, //
-                    credit(fundSource, 280), //
-                    debit(chargeOffExpenseAccount, 250), //
-                    debit(penaltyChargeOffAccount, 30) //
+                    credit(FUND_SOURCE, 280), //
+                    debit(CHARGE_OFF_EXPENSE_ACCOUNT, 250), //
+                    debit(PENALTY_CHARGE_OFF_ACCOUNT, 30) //
             );
         });
     }
 
     private void verifyLoanSummaryAmounts(Long loanId, double creditedPrincipal, double creditedFee, double creditedPenalty,
             double totalOutstanding) {
-        GetLoansLoanIdResponse loanResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanId.intValue());
+        GetLoansLoanIdResponse loanResponse = LOAN_TRANSACTION_HELPER.getLoan(REQUEST_SPEC, RESPONSE_SPEC, loanId.intValue());
         GetLoansLoanIdSummary summary = loanResponse.getSummary();
         Assertions.assertNotNull(summary);
         Assertions.assertEquals(creditedPrincipal, summary.getPrincipalAdjustments());
@@ -1794,9 +1794,9 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
                 .loanTermFrequencyType(RepaymentFrequencyType.MONTHS)//
                 .transactionProcessingStrategyCode("advanced-payment-allocation-strategy");
 
-        PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+        PostLoansResponse postLoansResponse = LOAN_TRANSACTION_HELPER.applyLoan(applicationRequest);
 
-        PostLoansLoanIdResponse approvedLoanResult = loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(),
+        PostLoansLoanIdResponse approvedLoanResult = LOAN_TRANSACTION_HELPER.approveLoan(postLoansResponse.getResourceId(),
                 approveLoanRequest(1250.0, "01 January 2023"));
         Assertions.assertNotNull(approvedLoanResult);
         Assertions.assertNotNull(approvedLoanResult.getLoanId());
@@ -1811,7 +1811,7 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
     public Long createLoanProduct(AdvancedPaymentData defaultAllocation, CreditAllocationData creditAllocationData) {
         PostLoanProductsRequest postLoanProductsRequest = loanProductWithAdvancedPaymentAllocationWith4Installments(defaultAllocation,
                 creditAllocationData);
-        PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(postLoanProductsRequest);
+        PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(postLoanProductsRequest);
         return loanProductResponse.getResourceId();
     }
 
@@ -1823,23 +1823,8 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
                 .loanScheduleType(LoanScheduleType.PROGRESSIVE.toString()) //
                 .loanScheduleProcessingType(LoanScheduleProcessingType.VERTICAL.toString()) //
                 .transactionProcessingStrategyCode("advanced-payment-allocation-strategy")
-                .paymentAllocation(List.of(defaultAllocation, createRepaymentPaymentAllocation()))
+                .paymentAllocation(List.of(defaultAllocation, createPaymentAllocation("REPAYMENT", "NEXT_INSTALLMENT")))
                 .creditAllocation(List.of(creditAllocationData));
-    }
-
-    private AdvancedPaymentData createDefaultPaymentAllocation() {
-        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
-        advancedPaymentData.setTransactionType("DEFAULT");
-        advancedPaymentData.setFutureInstallmentAllocationRule("NEXT_INSTALLMENT");
-
-        List<PaymentAllocationOrder> paymentAllocationOrders = getPaymentAllocationOrder(PaymentAllocationType.PAST_DUE_PENALTY,
-                PaymentAllocationType.PAST_DUE_FEE, PaymentAllocationType.PAST_DUE_PRINCIPAL, PaymentAllocationType.PAST_DUE_INTEREST,
-                PaymentAllocationType.DUE_PENALTY, PaymentAllocationType.DUE_FEE, PaymentAllocationType.DUE_PRINCIPAL,
-                PaymentAllocationType.DUE_INTEREST, PaymentAllocationType.IN_ADVANCE_PENALTY, PaymentAllocationType.IN_ADVANCE_FEE,
-                PaymentAllocationType.IN_ADVANCE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_INTEREST);
-
-        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
-        return advancedPaymentData;
     }
 
     private AdvancedPaymentData createDefaultPaymentAllocationPrincipalFirst() {
@@ -1852,21 +1837,6 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
                 PaymentAllocationType.DUE_PRINCIPAL, PaymentAllocationType.DUE_FEE, PaymentAllocationType.DUE_PENALTY,
                 PaymentAllocationType.DUE_INTEREST, PaymentAllocationType.IN_ADVANCE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_FEE,
                 PaymentAllocationType.IN_ADVANCE_PENALTY, PaymentAllocationType.IN_ADVANCE_INTEREST);
-
-        advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
-        return advancedPaymentData;
-    }
-
-    private AdvancedPaymentData createRepaymentPaymentAllocation() {
-        AdvancedPaymentData advancedPaymentData = new AdvancedPaymentData();
-        advancedPaymentData.setTransactionType("REPAYMENT");
-        advancedPaymentData.setFutureInstallmentAllocationRule("NEXT_INSTALLMENT");
-
-        List<PaymentAllocationOrder> paymentAllocationOrders = getPaymentAllocationOrder(PaymentAllocationType.PAST_DUE_PENALTY,
-                PaymentAllocationType.PAST_DUE_FEE, PaymentAllocationType.PAST_DUE_INTEREST, PaymentAllocationType.PAST_DUE_PRINCIPAL,
-                PaymentAllocationType.DUE_PENALTY, PaymentAllocationType.DUE_FEE, PaymentAllocationType.DUE_INTEREST,
-                PaymentAllocationType.DUE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_PENALTY, PaymentAllocationType.IN_ADVANCE_FEE,
-                PaymentAllocationType.IN_ADVANCE_PRINCIPAL, PaymentAllocationType.IN_ADVANCE_INTEREST);
 
         advancedPaymentData.setPaymentAllocationOrder(paymentAllocationOrders);
         return advancedPaymentData;
@@ -1886,16 +1856,6 @@ public class LoanChargebackWithCreditAllocationsIntegrationTests extends BaseLoa
             creditAllocationOrder.setCreditAllocationRule(allocation);
             creditAllocationOrder.setOrder(integer.getAndIncrement());
             return creditAllocationOrder;
-        }).toList();
-    }
-
-    private List<PaymentAllocationOrder> getPaymentAllocationOrder(PaymentAllocationType... paymentAllocationTypes) {
-        AtomicInteger integer = new AtomicInteger(1);
-        return Arrays.stream(paymentAllocationTypes).map(pat -> {
-            PaymentAllocationOrder paymentAllocationOrder = new PaymentAllocationOrder();
-            paymentAllocationOrder.setPaymentAllocationRule(pat.name());
-            paymentAllocationOrder.setOrder(integer.getAndIncrement());
-            return paymentAllocationOrder;
         }).toList();
     }
 

@@ -52,6 +52,7 @@ import org.apache.fineract.infrastructure.core.serialization.FromJsonHelper;
 import org.apache.fineract.integrationtests.common.BatchHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
@@ -109,16 +110,16 @@ public class BatchApiTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.datatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
-        GlobalConfigurationHelper.updateIsAutomaticExternalIdGenerationEnabled(this.requestSpec, this.responseSpec, true);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.datatableHelper = new DatatableHelper(requestSpec, responseSpec);
+        GlobalConfigurationHelper.updateIsAutomaticExternalIdGenerationEnabled(requestSpec, responseSpec, true);
     }
 
     @AfterEach
     public void postActions() {
-        GlobalConfigurationHelper.updateIsAutomaticExternalIdGenerationEnabled(this.requestSpec, this.responseSpec, false);
+        GlobalConfigurationHelper.updateIsAutomaticExternalIdGenerationEnabled(requestSpec, responseSpec, false);
     }
 
     /**
@@ -135,7 +136,7 @@ public class BatchApiTest {
         br.setRelativeUrl("/nirvana");
         br.setMethod("POST");
 
-        final List<BatchResponse> response = BatchHelper.postWithSingleRequest(this.requestSpec, this.responseSpec, br);
+        final List<BatchResponse> response = BatchHelper.postWithSingleRequest(requestSpec, responseSpec, br);
 
         // Verify that only 501 is returned as the status code
         for (BatchResponse resp : response) {
@@ -154,7 +155,7 @@ public class BatchApiTest {
 
         final BatchRequest br = BatchHelper.createClientRequest(4712L, "");
 
-        final List<BatchResponse> response = BatchHelper.postWithSingleRequest(this.requestSpec, this.responseSpec, br);
+        final List<BatchResponse> response = BatchHelper.postWithSingleRequest(requestSpec, responseSpec, br);
 
         // Verify that a 200 response is returned as the status code
         for (BatchResponse resp : response) {
@@ -189,12 +190,12 @@ public class BatchApiTest {
         batchRequests.add(br3);
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec,
                 jsonifiedRequest);
 
         // Verifies that none of the client in BatchRequest is created on the server
-        BatchHelper.verifyClientNotCreatedOnServer(this.requestSpec, this.responseSpec, "TestExtId11");
-        BatchHelper.verifyClientNotCreatedOnServer(this.requestSpec, this.responseSpec, "TestExtId12");
+        BatchHelper.verifyClientNotCreatedOnServer(requestSpec, responseSpec, "TestExtId11");
+        BatchHelper.verifyClientNotCreatedOnServer(requestSpec, responseSpec, "TestExtId12");
 
         // Asserts that all the transactions have been successfully rolled back
         Assertions.assertEquals(1, response.size());
@@ -223,7 +224,7 @@ public class BatchApiTest {
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 jsonifiedRequest);
 
         // Get the changes parameter from updateClient Response
@@ -254,16 +255,16 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec,
                 String.valueOf(clientID), collateralId);
         Assertions.assertNotNull(clientCollateralId);
 
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         // Create a createClient Request
         final BatchRequest br1 = BatchHelper.createClientRequest(4718L, "");
@@ -282,7 +283,7 @@ public class BatchApiTest {
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 jsonifiedRequest);
 
         // Get the clientId parameter from createClient Response
@@ -308,7 +309,7 @@ public class BatchApiTest {
                 .withInterestCalculationPeriodTypeAsDailyBalance() //
                 .withMinimumOpenningBalance("5000").build();
 
-        final Integer productId = SavingsProductHelper.createSavingsProduct(savingsProductJSON, this.requestSpec, this.responseSpec);
+        final Integer productId = SavingsProductHelper.createSavingsProduct(savingsProductJSON, requestSpec, responseSpec);
 
         // Create a createClient Request
         final BatchRequest br1 = BatchHelper.createClientRequest(4720L, "");
@@ -327,7 +328,7 @@ public class BatchApiTest {
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 jsonifiedRequest);
 
         Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(1).getStatusCode(), "Verify Status Code 200");
@@ -355,16 +356,16 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec,
                 String.valueOf(clientID), collateralId);
         Assertions.assertNotNull(clientCollateralId);
 
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         // Create a createClient Request
         final BatchRequest br1 = BatchHelper.createClientRequest(4722L, "");
@@ -387,7 +388,7 @@ public class BatchApiTest {
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 jsonifiedRequest);
 
         Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(3).getStatusCode(), "Verify Status Code 200 for Create Loan Charge");
@@ -421,15 +422,14 @@ public class BatchApiTest {
         final Long getChargeByIdRequestId = createChargeRequestId + 1;
 
         // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
 
         // Create charge object and get id
-        final Integer chargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON());
+        final Integer chargeId = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper.getLoanSpecifiedDueDateJSON());
 
         final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
 
@@ -447,7 +447,7 @@ public class BatchApiTest {
                 createChargeRequest, getChargeByIdRequest);
 
         // Create batch responses list
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 BatchHelper.toJsonString(batchRequests));
 
         Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
@@ -483,15 +483,14 @@ public class BatchApiTest {
         final Long getTransactionRequestId = adjustChargeRequestId + 1;
 
         // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
 
         // Create charge object and get id
-        final Integer chargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON());
+        final Integer chargeId = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper.getLoanSpecifiedDueDateJSON());
 
         final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
 
@@ -512,7 +511,7 @@ public class BatchApiTest {
                 createChargeRequest, adjustChargeRequest, getTransactionRequest);
 
         // Create batch responses list
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 BatchHelper.toJsonString(batchRequests));
 
         Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
@@ -561,15 +560,14 @@ public class BatchApiTest {
         final Long getChargeByIdRequestId = getTransactionByExternalIdRequestId + 1;
 
         // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
 
         // Create charge object and get id
-        final Integer chargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec,
-                ChargesHelper.getLoanSpecifiedDueDateJSON());
+        final Integer chargeId = ChargesHelper.createCharges(requestSpec, responseSpec, ChargesHelper.getLoanSpecifiedDueDateJSON());
 
         final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
 
@@ -593,7 +591,7 @@ public class BatchApiTest {
                 createChargeRequest, collectChargesRequest);
 
         // Create batch responses list
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 BatchHelper.toJsonString(batchRequests));
 
         Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
@@ -616,8 +614,8 @@ public class BatchApiTest {
                 getTransactionByExternalIdRequestId, loanExternalId, chargeExternalId);
 
         // Create batch responses list
-        final List<BatchResponse> adjustChargeAndGetResponses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec,
-                this.responseSpec,
+        final List<BatchResponse> adjustChargeAndGetResponses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec,
+                responseSpec,
                 BatchHelper.toJsonString(Arrays.asList(adjustChargeByExternalId, getTransactionByExternalIdRequest, getChargeByIdRequest)));
 
         Assertions.assertEquals(HttpStatus.SC_OK, adjustChargeAndGetResponses.get(0).getStatusCode(),
@@ -655,16 +653,16 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID.toString(),
+                collateralId);
         Assertions.assertNotNull(clientCollateralId);
 
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         // Create a createClient Request
         final BatchRequest br1 = BatchHelper.createClientRequest(4730L, "");
@@ -699,7 +697,7 @@ public class BatchApiTest {
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 jsonifiedRequest);
 
         Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(5).getStatusCode(), "Verify Status Code 200 for Repayment");
@@ -727,16 +725,16 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID.toString(),
+                collateralId);
         Assertions.assertNotNull(clientCollateralId);
 
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         final Long createActiveClientRequestId = 4730L;
         final Long applyLoanRequestId = createActiveClientRequestId + 1;
@@ -775,7 +773,7 @@ public class BatchApiTest {
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 jsonifiedRequest);
 
         Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(4).getStatusCode(), "Verify Status Code 200 for Repayment");
@@ -797,16 +795,16 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID.toString(),
+                collateralId);
         Assertions.assertNotNull(clientCollateralId);
 
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         final Long createActiveClientRequestId = 4730L;
         final Long applyLoanRequestId = createActiveClientRequestId + 1;
@@ -836,7 +834,7 @@ public class BatchApiTest {
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 jsonifiedRequest);
 
         Assertions.assertEquals(HttpStatus.SC_NOT_IMPLEMENTED, (long) response.get(2).getStatusCode(), "Resource doesn not exists");
@@ -864,16 +862,16 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID.toString(),
+                collateralId);
         Assertions.assertNotNull(clientCollateralId);
 
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         final Long createActiveClientRequestId = 4730L;
         final Long applyLoanRequestId = createActiveClientRequestId + 1;
@@ -907,7 +905,7 @@ public class BatchApiTest {
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 jsonifiedRequest);
 
         Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(4).getStatusCode(), "Verify Status Code 200 for Goodwill credit");
@@ -935,7 +933,7 @@ public class BatchApiTest {
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 jsonifiedRequest);
 
         Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(0).getStatusCode(), "Verify Status Code 200 for Create Client");
@@ -962,16 +960,16 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec,
                 String.valueOf(clientID), collateralId);
         Assertions.assertNotNull(clientCollateralId);
 
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         // Create a createClient Request
         final BatchRequest br1 = BatchHelper.createClientRequest(4730L, "");
@@ -998,7 +996,7 @@ public class BatchApiTest {
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 jsonifiedRequest);
 
         Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(3).getStatusCode(), "Verify Status Code 200 for Approve Loan");
@@ -1025,16 +1023,16 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec,
                 String.valueOf(clientID), collateralId);
         Assertions.assertNotNull(clientCollateralId);
 
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         // Create a createClient Request
         final BatchRequest br1 = BatchHelper.createActiveClientRequest(4740L, "");
@@ -1052,7 +1050,7 @@ public class BatchApiTest {
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec,
                 jsonifiedRequest);
 
         Assertions.assertEquals(HttpStatus.SC_OK, (long) response.get(0).getStatusCode(), "Verify Status Code 200 for create client");
@@ -1086,11 +1084,11 @@ public class BatchApiTest {
         final Long getTransactionRequestId = 6733L;
 
         // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
 
         // Create an ApplyLoan Request
         final BatchRequest batchRequest1 = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
@@ -1106,7 +1104,7 @@ public class BatchApiTest {
 
         final List<BatchRequest> batchRequests = Arrays.asList(batchRequest1, batchRequest2, batchRequest3, batchRequest4);
 
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 BatchHelper.toJsonString(batchRequests));
 
         Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
@@ -1144,14 +1142,14 @@ public class BatchApiTest {
 
         // Create product
         LOG.info("LoanProduct {}", loanProductJSON);
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
 
         /* Retrieve/Create Code Values for the Code "LoanRescheduleReason = 23" */
-        final HashMap<String, Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(23, this.requestSpec, this.responseSpec);
+        final HashMap<String, Object> codeValue = CodeHelper.retrieveOrCreateCodeValue(23, requestSpec, responseSpec);
 
         final Integer codeValueId = (Integer) codeValue.get("id");
 
@@ -1178,7 +1176,7 @@ public class BatchApiTest {
                 rescheduleLoanRequest, approveRescheduleLoanRequest);
 
         LOG.info("shouldReturnOkStatusOnSuccessfulDisbursementAndRescheduleLoan Request - {}", BatchHelper.toJsonString(batchRequests));
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 BatchHelper.toJsonString(batchRequests));
 
         Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
@@ -1218,7 +1216,7 @@ public class BatchApiTest {
         final Long getLoanByIdRequestId = 4733L;
 
         // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         // Create createClient Request
         final BatchRequest batchRequest1 = BatchHelper.createActiveClientRequest(createActiveClientRequestId, "");
@@ -1234,7 +1232,7 @@ public class BatchApiTest {
 
         final List<BatchRequest> batchRequests = Arrays.asList(batchRequest1, batchRequest2, batchRequest3, batchRequest4);
 
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec,
                 BatchHelper.toJsonString(batchRequests));
 
         Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Create Client");
@@ -1279,11 +1277,11 @@ public class BatchApiTest {
         final Long getLoanByIdWithQueryParametersRequestId = 5733L;
 
         // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
 
         // Create an ApplyLoan Request
         final BatchRequest batchRequest1 = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
@@ -1300,7 +1298,7 @@ public class BatchApiTest {
 
         final List<BatchRequest> batchRequests = Arrays.asList(batchRequest1, batchRequest2, batchRequest3, batchRequest4);
 
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec,
                 BatchHelper.toJsonString(batchRequests));
 
         Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
@@ -1351,8 +1349,8 @@ public class BatchApiTest {
 
             final List<BatchRequest> batchRequestsGetLoan = Arrays.asList(getLoanBatchRequest, getDatatableBatchRequest);
 
-            final List<BatchResponse> responsesGetLoan = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec,
-                    this.responseSpec, BatchHelper.toJsonString(batchRequestsGetLoan));
+            final List<BatchResponse> responsesGetLoan = BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec,
+                    BatchHelper.toJsonString(batchRequestsGetLoan));
 
             final String getLoanResponse = responsesGetLoan.get(0).getBody();
             final String getDatatableResponse = responsesGetLoan.get(1).getBody();
@@ -1442,8 +1440,8 @@ public class BatchApiTest {
                 updateDatatableEntryByEntryIdRequest, getDatatableEntriesRequest, getDatatableEntryByIdRequest);
         LOG.info("Batch Request : {}", BatchHelper.toJsonString(batchRequestsDatatableEntries));
 
-        final List<BatchResponse> responseDatatableBatch = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec,
-                this.responseSpec, BatchHelper.toJsonString(batchRequestsDatatableEntries));
+        final List<BatchResponse> responseDatatableBatch = BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec,
+                BatchHelper.toJsonString(batchRequestsDatatableEntries));
 
         LOG.info("Batch Response : {}", new Gson().toJson(responseDatatableBatch));
 
@@ -1492,8 +1490,8 @@ public class BatchApiTest {
 
             final List<BatchRequest> batchRequestsGetLoan = Arrays.asList(getLoanBatchRequest, getDatatableBatchRequest);
 
-            final List<BatchResponse> responsesGetLoan = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec,
-                    this.responseSpec, BatchHelper.toJsonString(batchRequestsGetLoan));
+            final List<BatchResponse> responsesGetLoan = BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec,
+                    BatchHelper.toJsonString(batchRequestsGetLoan));
 
             final String getLoanResponse = responsesGetLoan.get(0).getBody();
 
@@ -1541,11 +1539,11 @@ public class BatchApiTest {
         final Long payoutRefundRequestId = 5734L;
 
         // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
 
         // Create an ApplyLoan Request
         final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
@@ -1567,7 +1565,7 @@ public class BatchApiTest {
         final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequest, approveLoanRequest, disburseLoanRequest,
                 merchantIssuedRefundRequest, payoutRefundRequest);
 
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec,
                 BatchHelper.toJsonString(batchRequests));
 
         Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
@@ -1596,7 +1594,7 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         final LocalDate date = LocalDate.now(Utils.getZoneIdOfTenant());
         final Long applyLoanRequestId = 5730L;
@@ -1607,8 +1605,8 @@ public class BatchApiTest {
         final Long getLoanRequestId = 5735L;
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
 
         // Create an apply loan request
         final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
@@ -1633,7 +1631,7 @@ public class BatchApiTest {
         final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequest, approveLoanRequest, disburseLoanRequest, repaymentRequest,
                 repaymentReversalRequest, getLoanTransactionsRequest);
 
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 BatchHelper.toJsonString(batchRequests));
 
         final FromJsonHelper jsonHelper = new FromJsonHelper();
@@ -1669,7 +1667,7 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         final LocalDate date = LocalDate.now(Utils.getZoneIdOfTenant());
         final Long applyLoanRequestId = Long.valueOf(RandomStringUtils.randomNumeric(4));
@@ -1682,8 +1680,8 @@ public class BatchApiTest {
         final Long getLoanAfterReversal = repayReversalRequestId + 1;
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
         final String loanExternalId = UUID.randomUUID().toString();
 
         // Create an apply loan request
@@ -1714,7 +1712,7 @@ public class BatchApiTest {
         // Because loanExternalId & transactionExternalId are coming from 2 different responses, there is no easy way to
         // use them as reference in 1 batch api call.
         // So we are splitting repayment & reversal into 2 different batch api invocations
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 BatchHelper.toJsonString(batchRequests));
 
         final FromJsonHelper jsonHelper = new FromJsonHelper();
@@ -1736,8 +1734,8 @@ public class BatchApiTest {
 
         final List<BatchRequest> reversalAndGetBatchRequest = Arrays.asList(repaymentReversalRequest, getLoanByIdWithTransactions);
 
-        final List<BatchResponse> reversalResponses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec,
-                this.responseSpec, BatchHelper.toJsonString(reversalAndGetBatchRequest));
+        final List<BatchResponse> reversalResponses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
+                BatchHelper.toJsonString(reversalAndGetBatchRequest));
 
         final JsonObject repayment = jsonHelper.parse(reversalResponses.get(1).getBody()).getAsJsonObject().get("transactions")
                 .getAsJsonArray().get(2).getAsJsonObject();
@@ -1774,7 +1772,7 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         final Long applyLoanRequestId = 5730L;
         final Long approveLoanRequestId = 5731L;
@@ -1784,8 +1782,8 @@ public class BatchApiTest {
         final Long getLoanRequestId = 5735L;
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
 
         // Create an apply loan request
         final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
@@ -1810,7 +1808,7 @@ public class BatchApiTest {
         final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequest, approveLoanRequest, disburseLoanRequest, repaymentRequest,
                 repaymentChargebackRequest, getLoanTransactionsRequest);
 
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 BatchHelper.toJsonString(batchRequests));
 
         final FromJsonHelper jsonHelper = new FromJsonHelper();
@@ -1845,7 +1843,7 @@ public class BatchApiTest {
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails("0", "100").build(null);
 
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         final LocalDate date = LocalDate.now(Utils.getZoneIdOfTenant());
         final Long applyLoanRequestId = 5730L;
@@ -1856,8 +1854,8 @@ public class BatchApiTest {
         final Long getLoanRequestId = 5735L;
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
 
         // Create an apply loan request
         final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
@@ -1882,7 +1880,7 @@ public class BatchApiTest {
         final List<BatchRequest> batchRequests = Arrays.asList(applyLoanRequest, approveLoanRequest, disburseLoanRequest,
                 goodwillCreditRequest, goodwillCreditReversalRequest, getLoanTransactionsRequest);
 
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 BatchHelper.toJsonString(batchRequests));
 
         final FromJsonHelper jsonHelper = new FromJsonHelper();
@@ -1929,11 +1927,11 @@ public class BatchApiTest {
         final Long getLoanRequestId = 5737L;
 
         // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
 
         // Create an apply loan request
         final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
@@ -1968,7 +1966,7 @@ public class BatchApiTest {
                 merchantIssuedRefundRequest, payoutRefundRequest, merchantIssuedRefundReversalRequest, payoutRefundReversalRequest,
                 getLoanTransactionsRequest);
 
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec,
                 BatchHelper.toJsonString(batchRequests));
 
         final FromJsonHelper jsonHelper = new FromJsonHelper();
@@ -1998,7 +1996,7 @@ public class BatchApiTest {
     public void shouldReturnOkStatusOnModifyingSavingAccount() {
         final String startDate = "10 April 2022";
         final SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
-        final SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        final SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
         final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         final String savingsProductJSON = savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
@@ -2019,7 +2017,7 @@ public class BatchApiTest {
 
         final List<BatchRequest> batchRequests1 = Arrays.asList(getSavingAccountRequest, depositSavingAccountRequest,
                 holdAmountOnSavingAccountRequest);
-        final List<BatchResponse> responses1 = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> responses1 = BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec,
                 BatchHelper.toJsonString(batchRequests1));
 
         Assertions.assertEquals(HttpStatus.SC_OK, responses1.get(1).getStatusCode(), "Verify Status Code 200 for deposit saving account");
@@ -2033,7 +2031,7 @@ public class BatchApiTest {
 
         final List<BatchRequest> batchRequests2 = Arrays.asList(getSavingAccountRequest, releaseAmountOnSavingAccountRequest,
                 withdrawSavingAccountRequest);
-        final List<BatchResponse> responses2 = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> responses2 = BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec,
                 BatchHelper.toJsonString(batchRequests2));
 
         Assertions.assertEquals(HttpStatus.SC_OK, responses2.get(1).getStatusCode(),
@@ -2092,7 +2090,7 @@ public class BatchApiTest {
         LOG.info("Batch Request : {}", BatchHelper.toJsonString(batchRequestsToQueryAndUpdateDatatableEntries));
 
         final List<BatchResponse> responseOfQuertAndUpdateDatatableBatch = BatchHelper.postBatchRequestsWithEnclosingTransaction(
-                this.requestSpec, this.responseSpec, BatchHelper.toJsonString(batchRequestsToQueryAndUpdateDatatableEntries));
+                requestSpec, responseSpec, BatchHelper.toJsonString(batchRequestsToQueryAndUpdateDatatableEntries));
 
         LOG.info("Batch Response : {}", new Gson().toJson(responseOfQuertAndUpdateDatatableBatch));
 
@@ -2143,7 +2141,7 @@ public class BatchApiTest {
         LOG.info("Batch Request : {}", BatchHelper.toJsonString(batchRequestsToQueryAndUpdateDatatableEntries));
 
         final List<BatchResponse> responseOfQueryAndUpdateDatatableBatch = BatchHelper.postBatchRequestsWithEnclosingTransaction(
-                this.requestSpec, this.responseSpec, BatchHelper.toJsonString(batchRequestsToQueryAndUpdateDatatableEntries));
+                requestSpec, responseSpec, BatchHelper.toJsonString(batchRequestsToQueryAndUpdateDatatableEntries));
 
         LOG.info("Batch Response : {}", new Gson().toJson(responseOfQueryAndUpdateDatatableBatch));
 
@@ -2207,8 +2205,8 @@ public class BatchApiTest {
         final List<BatchRequest> batchRequestsDatatableEntries = Arrays.asList(createDatatableEntryRequest, getDatatableEntriesRequest);
         LOG.info("Batch Request : {}", BatchHelper.toJsonString(batchRequestsDatatableEntries));
 
-        final List<BatchResponse> responseDatatableBatch = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec,
-                this.responseSpec, BatchHelper.toJsonString(batchRequestsDatatableEntries));
+        final List<BatchResponse> responseDatatableBatch = BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec,
+                BatchHelper.toJsonString(batchRequestsDatatableEntries));
 
         LOG.info("Batch Response : {}", new Gson().toJson(responseDatatableBatch));
 
@@ -2239,7 +2237,7 @@ public class BatchApiTest {
         LOG.info("Batch Request : {}", BatchHelper.toJsonString(batchRequestsToQueryAndUpdateDatatableEntries));
 
         final List<BatchResponse> responseOfQuertAndUpdateDatatableBatch = BatchHelper.postBatchRequestsWithEnclosingTransaction(
-                this.requestSpec, this.responseSpec, BatchHelper.toJsonString(batchRequestsToQueryAndUpdateDatatableEntries));
+                requestSpec, responseSpec, BatchHelper.toJsonString(batchRequestsToQueryAndUpdateDatatableEntries));
 
         LOG.info("Batch Response : {}", new Gson().toJson(responseOfQuertAndUpdateDatatableBatch));
 
@@ -2282,11 +2280,11 @@ public class BatchApiTest {
         final Long updateLoanRequestId = disburseLoanRequestId + 1;
 
         // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
 
         final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
 
@@ -2302,7 +2300,7 @@ public class BatchApiTest {
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 jsonifiedRequest);
 
         // Get the changes parameter from updateLoan Response
@@ -2340,11 +2338,11 @@ public class BatchApiTest {
         final Long getLoanRequestId = updateLoanRequestId + 1;
 
         // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
 
         final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
 
@@ -2365,7 +2363,7 @@ public class BatchApiTest {
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 jsonifiedRequest);
 
         Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
@@ -2388,7 +2386,7 @@ public class BatchApiTest {
     @Test
     public void shoulRetrieveTheProperErrorDuringLockedLoan_OldRelativePath() {
         ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(202).build();
-        LoanAccountLockHelper loanAccountLockHelper = new LoanAccountLockHelper(this.requestSpec, responseSpec);
+        LoanAccountLockHelper loanAccountLockHelper = new LoanAccountLockHelper(requestSpec, responseSpec);
         final String loanProductJSON = new LoanProductTestBuilder() //
                 .withPrincipal("1000.00") //
                 .withNumberOfRepayments("24") //
@@ -2406,11 +2404,11 @@ public class BatchApiTest {
         final Long getLoanRequestId = disburseLoanRequestId + 1;
 
         // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
 
         final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
 
@@ -2428,7 +2426,7 @@ public class BatchApiTest {
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 jsonifiedRequest);
 
         Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
@@ -2448,7 +2446,7 @@ public class BatchApiTest {
         br.setRequestId(1L);
         br.setRelativeUrl(String.format("loans/" + loanId + "/transactions?command=repayment"));
         br.setMethod("POST");
-        String dateString = LocalDate.now(Utils.getZoneIdOfTenant()).format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        String dateString = LocalDate.now(Utils.getZoneIdOfTenant()).format(DateTimeFormatter.ofPattern(CommonConstants.DATE_FORMAT));
         br.setBody(String.format(
                 "{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", " + "\"transactionDate\": \"%s\",  \"transactionAmount\": \"500\"}",
                 dateString));
@@ -2470,7 +2468,7 @@ public class BatchApiTest {
     @Test
     public void shoulRetrieveTheProperErrorDuringLockedLoan() {
         ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(202).build();
-        LoanAccountLockHelper loanAccountLockHelper = new LoanAccountLockHelper(this.requestSpec, responseSpec);
+        LoanAccountLockHelper loanAccountLockHelper = new LoanAccountLockHelper(requestSpec, responseSpec);
         final String loanProductJSON = new LoanProductTestBuilder() //
                 .withPrincipal("1000.00") //
                 .withNumberOfRepayments("24") //
@@ -2488,11 +2486,11 @@ public class BatchApiTest {
         final Long getLoanRequestId = disburseLoanRequestId + 1;
 
         // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
 
         final BatchRequest applyLoanRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
 
@@ -2510,7 +2508,7 @@ public class BatchApiTest {
 
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 jsonifiedRequest);
 
         Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");
@@ -2530,7 +2528,7 @@ public class BatchApiTest {
         br.setRequestId(1L);
         br.setRelativeUrl(String.format("v1/loans/" + loanId + "/transactions?command=repayment"));
         br.setMethod("POST");
-        String dateString = LocalDate.now(Utils.getZoneIdOfTenant()).format(DateTimeFormatter.ofPattern("dd MMMM yyyy"));
+        String dateString = LocalDate.now(Utils.getZoneIdOfTenant()).format(DateTimeFormatter.ofPattern(CommonConstants.DATE_FORMAT));
         br.setBody(String.format(
                 "{\"locale\": \"en\", \"dateFormat\": \"dd MMMM yyyy\", " + "\"transactionDate\": \"%s\",  \"transactionAmount\": \"500\"}",
                 dateString));
@@ -2547,7 +2545,7 @@ public class BatchApiTest {
     @Test
     public void verifyCalculatingRunningBalanceAfterBatchWithReleaseAmount() {
         final SavingsProductHelper savingsProductHelper = new SavingsProductHelper();
-        final SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        final SavingsAccountHelper savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
         final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientID);
         final String savingsProductJSON = savingsProductHelper.withInterestCompoundingPeriodTypeAsDaily()
@@ -2570,7 +2568,7 @@ public class BatchApiTest {
 
         final List<BatchRequest> batchRequests1 = Arrays.asList(getSavingAccountRequest, depositSavingAccountRequest,
                 holdAmountOnSavingAccountRequest);
-        final List<BatchResponse> responses1 = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> responses1 = BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec,
                 BatchHelper.toJsonString(batchRequests1));
 
         Assertions.assertEquals(HttpStatus.SC_OK, responses1.get(1).getStatusCode(), "Verify Status Code 200 for deposit saving account");
@@ -2589,7 +2587,7 @@ public class BatchApiTest {
 
         final List<BatchRequest> batchRequests2 = Arrays.asList(getSavingAccountRequest, releaseAmountOnSavingAccountRequest,
                 withdrawSavingAccountRequest1, withdrawSavingAccountRequest2);
-        final List<BatchResponse> responses2 = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> responses2 = BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec,
                 BatchHelper.toJsonString(batchRequests2));
 
         Assertions.assertEquals(HttpStatus.SC_OK, responses2.get(0).getStatusCode(),
@@ -2646,11 +2644,11 @@ public class BatchApiTest {
         final Long repayLoanRequestId = 5735L;
 
         // Create product
-        final Integer productId = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+        final Integer productId = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
 
         // Create client
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientId);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
 
         // Create an ApplyLoan Request
         final BatchRequest applyLoanBatchRequest = BatchHelper.applyLoanRequestWithClientId(applyLoanRequestId, clientId, productId);
@@ -2667,7 +2665,7 @@ public class BatchApiTest {
         final List<BatchRequest> batchRequests = Arrays.asList(applyLoanBatchRequest, approveLoanBatchRequest, disburseLoanBatchRequest,
                 repaymentBatchRequest);
 
-        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> responses = BatchHelper.postBatchRequestsWithEnclosingTransaction(requestSpec, responseSpec,
                 BatchHelper.toJsonString(batchRequests));
 
         Assertions.assertEquals(HttpStatus.SC_OK, responses.get(0).getStatusCode(), "Verify Status Code 200 for Apply Loan");

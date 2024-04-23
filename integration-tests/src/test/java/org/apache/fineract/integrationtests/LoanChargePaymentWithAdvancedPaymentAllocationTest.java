@@ -77,9 +77,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Slf4j
 public class LoanChargePaymentWithAdvancedPaymentAllocationTest {
 
-    private static final String DATETIME_PATTERN = "dd MMMM yyyy";
     private static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
-    private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern(DATETIME_PATTERN).toFormatter();
+    private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern(CommonConstants.DATE_FORMAT)
+            .toFormatter();
     private static RequestSpecification requestSpec;
     private static ResponseSpecification responseSpec;
     private static LoanTransactionHelper loanTransactionHelper;
@@ -186,11 +186,11 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest {
                     updateLoanJson(client.getClientId().intValue(), commonLoanProductId, savingsId.toString()));
 
             loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
-                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN)
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(CommonConstants.DATE_FORMAT)
                             .approvedOnDate("01 January 2023").locale("en"));
 
             loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
-                    new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2023").dateFormat(DATETIME_PATTERN)
+                    new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2023").dateFormat(CommonConstants.DATE_FORMAT)
                             .transactionAmount(BigDecimal.valueOf(1000.00)).locale("en"));
 
             final double feePortion = 50.0d;
@@ -285,7 +285,7 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest {
             final String expectedDisbursementDate, final String submittedOnDate) {
         log.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         return loanTransactionHelper.applyLoan(new PostLoansRequest().clientId(clientId).productId(loanProductId.longValue())
-                .expectedDisbursementDate(expectedDisbursementDate).dateFormat(DATETIME_PATTERN)
+                .expectedDisbursementDate(expectedDisbursementDate).dateFormat(CommonConstants.DATE_FORMAT)
                 .transactionProcessingStrategyCode(AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
                 .loanScheduleProcessingType(LoanScheduleProcessingType.HORIZONTAL.toString()).locale("en").submittedOnDate(submittedOnDate)
                 .amortizationType(1).interestRatePerPeriod(interestRate).interestCalculationPeriodType(1).interestType(0)
@@ -297,10 +297,10 @@ public class LoanChargePaymentWithAdvancedPaymentAllocationTest {
     private String updateLoanJson(final Integer clientID, final Integer loanProductID, String savingsId) {
         log.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID.toString(),
+                collateralId);
         Assertions.assertNotNull(clientCollateralId);
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
 

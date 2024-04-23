@@ -38,6 +38,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdTransactionsTransactionId
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
@@ -53,23 +54,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 public class LoanTransactionReverseReplayRelationTest {
 
     private ResponseSpecification responseSpec;
-    private ResponseSpecification responseSpecErr400;
-    private ResponseSpecification responseSpecErr503;
     private RequestSpecification requestSpec;
     private ClientHelper clientHelper;
     private LoanTransactionHelper loanTransactionHelper;
-    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
+    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern(CommonConstants.DATE_FORMAT).toFormatter();
 
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseSpecErr400 = new ResponseSpecBuilder().expectStatusCode(400).build();
-        this.responseSpecErr503 = new ResponseSpecBuilder().expectStatusCode(503).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
     }
 
     @Test
@@ -98,7 +95,7 @@ public class LoanTransactionReverseReplayRelationTest {
         LocalDate targetDate = LocalDate.of(2022, 9, 7);
         final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-        Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+        Integer penalty1LoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
 
         // make repayment
@@ -107,13 +104,13 @@ public class LoanTransactionReverseReplayRelationTest {
         String loanTransactionExternalIdStr = UUID.randomUUID().toString();
 
         final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("15 September 2022").locale("en")
-                        .transactionAmount(11.0).externalId(loanTransactionExternalIdStr));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("15 September 2022")
+                        .locale("en").transactionAmount(11.0).externalId(loanTransactionExternalIdStr));
 
         // make backdated repayment for reverse replay
         final PostLoansLoanIdTransactionsResponse backDatedRepaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("10 September 2022").locale("en")
-                        .transactionAmount(5.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("10 September 2022")
+                        .locale("en").transactionAmount(5.0));
 
         // get transaction relationship for new transaction using externalId of reversed loan transaction
 

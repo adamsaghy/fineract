@@ -56,10 +56,10 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
         this.savingsProductHelper = new SavingsProductHelper();
     }
 
@@ -67,7 +67,7 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
     public void testSavingsInterestPostingAtPeriodEnd() {
         // client activation, savings activation and 1st transaction date
         final String startDate = "01 December 2013";
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, startDate);
         Assertions.assertNotNull(clientID);
 
         // Configuring global config flags
@@ -109,21 +109,21 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
     }
 
     private void configureInterestPosting(final Boolean periodEndEnable, final Integer financialYearBeginningMonth) {
-        final ArrayList<HashMap> globalConfig = GlobalConfigurationHelper.getAllGlobalConfigurations(this.requestSpec, this.responseSpec);
+        final ArrayList<HashMap> globalConfig = GlobalConfigurationHelper.getAllGlobalConfigurations(requestSpec, responseSpec);
         Assertions.assertNotNull(globalConfig);
 
         // Updating flag for interest posting at period end
         Integer periodEndConfigId = (Integer) globalConfig.get(10).get("id");
         Assertions.assertNotNull(periodEndConfigId);
 
-        HashMap periodEndConfigData = GlobalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
+        HashMap periodEndConfigData = GlobalConfigurationHelper.getGlobalConfigurationById(requestSpec, responseSpec,
                 periodEndConfigId.toString());
         Assertions.assertNotNull(periodEndConfigData);
 
         Boolean enabled = (Boolean) globalConfig.get(10).get("enabled");
 
         if (!enabled.equals(periodEndEnable)) {
-            periodEndConfigId = GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(this.requestSpec, this.responseSpec,
+            periodEndConfigId = GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(requestSpec, responseSpec,
                     periodEndConfigId.toString(), periodEndEnable);
         }
 
@@ -131,11 +131,11 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
         Integer financialYearBeginningConfigId = (Integer) globalConfig.get(11).get("id");
         Assertions.assertNotNull(financialYearBeginningConfigId);
 
-        HashMap financialYearBeginningConfigData = GlobalConfigurationHelper.getGlobalConfigurationById(this.requestSpec, this.responseSpec,
+        HashMap financialYearBeginningConfigData = GlobalConfigurationHelper.getGlobalConfigurationById(requestSpec, responseSpec,
                 financialYearBeginningConfigId.toString());
         Assertions.assertNotNull(financialYearBeginningConfigData);
 
-        financialYearBeginningConfigId = GlobalConfigurationHelper.updateValueForGlobalConfiguration(this.requestSpec, this.responseSpec,
+        financialYearBeginningConfigId = GlobalConfigurationHelper.updateValueForGlobalConfiguration(requestSpec, responseSpec,
                 financialYearBeginningConfigId.toString(), financialYearBeginningMonth.toString());
         Assertions.assertNotNull(financialYearBeginningConfigId);
     }
@@ -149,8 +149,8 @@ public class FlexibleSavingsInterestPostingIntegrationTest {
     // Reset configuration fields
     @AfterEach
     public void tearDown() {
-        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
-        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(requestSpec, responseSpec);
+        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(requestSpec, responseSpec);
     }
 
 }

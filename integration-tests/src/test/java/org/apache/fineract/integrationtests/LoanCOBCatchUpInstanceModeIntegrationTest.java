@@ -56,9 +56,9 @@ public class LoanCOBCatchUpInstanceModeIntegrationTest {
     public void setup() throws InterruptedException {
         Utils.initializeRESTAssured();
         loanCOBCatchUpHelper = new LoanCOBCatchUpHelper();
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         schedulerJobHelper = new SchedulerJobHelper(requestSpec);
         originalSchedulerStatus = schedulerJobHelper.getSchedulerStatus();
         final LocalDate todaysDate = Utils.getLocalDateOfTenant();

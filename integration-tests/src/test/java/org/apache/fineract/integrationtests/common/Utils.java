@@ -83,9 +83,10 @@ public final class Utils {
     public static final String TENANT_IDENTIFIER = TENANT_PARAM_NAME + '=' + DEFAULT_TENANT;
     private static final String LOGIN_URL = "/fineract-provider/api/v1/authentication?" + TENANT_IDENTIFIER;
     public static final String TENANT_TIME_ZONE = "Asia/Kolkata";
-    public static final String DATE_FORMAT = "dd MMMM yyyy";
+    public static final String DATE_FORMAT = CommonConstants.DATE_FORMAT;
     public static final String DATE_TIME_FORMAT = "dd MMMM yyyy HH:mm";
-    public static final DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern(DATE_FORMAT).toFormatter();
+    public static final DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern(CommonConstants.DATE_FORMAT)
+            .toFormatter();
     public static final DateTimeFormatter dateTimeFormatter = new DateTimeFormatterBuilder().appendPattern(DATE_TIME_FORMAT).toFormatter();
     private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
     private static final SecureRandom random = new SecureRandom();

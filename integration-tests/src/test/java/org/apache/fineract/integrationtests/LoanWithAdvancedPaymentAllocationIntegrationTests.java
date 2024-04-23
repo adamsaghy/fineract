@@ -37,6 +37,7 @@ import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.client.models.PutLoanProductsProductIdRequest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
@@ -92,7 +93,7 @@ public class LoanWithAdvancedPaymentAllocationIntegrationTests {
         Assertions.assertNotNull(loanProductId);
         GetLoanProductsProductIdResponse loanProduct = LOAN_TRANSACTION_HELPER.getLoanProduct(loanProductId);
         final PostClientsResponse clientResponse = CLIENT_HELPER.createClient(new PostClientsRequest().activationDate("01 January 2022")
-                .active(true).dateFormat("dd MMMM yyyy").fullname("fullName").locale("en").legalFormId(1L).officeId(1L));
+                .active(true).dateFormat(CommonConstants.DATE_FORMAT).fullname("fullName").locale("en").legalFormId(1L).officeId(1L));
         Integer loanId = createLoanAccount(LOAN_TRANSACTION_HELPER, clientResponse.getClientId().toString(), loanProductId.toString(),
                 "02 January 2022");
         // then

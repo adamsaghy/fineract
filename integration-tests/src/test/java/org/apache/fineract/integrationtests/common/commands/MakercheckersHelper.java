@@ -50,13 +50,13 @@ public class MakercheckersHelper {
                 url.append("&").append(entry.getKey()).append("=").append(entry.getValue());
             }
         }
-        final String response = Utils.performServerGet(this.requestSpec, this.responseSpec, url.toString());
+        final String response = Utils.performServerGet(requestSpec, responseSpec, url.toString());
         Type makerCheckerList = new TypeToken<List<Map<String, Object>>>() {}.getType();
         return GSON.fromJson(response, makerCheckerList);
     }
 
     public void approveMakerCheckerEntry(Long auditId) {
-        approveMakerCheckerEntry(this.requestSpec, this.responseSpec, auditId);
+        approveMakerCheckerEntry(requestSpec, responseSpec, auditId);
     }
 
     public static HashMap<?, ?> approveMakerCheckerEntry(RequestSpecification requestSpec, ResponseSpecification responseSpec,

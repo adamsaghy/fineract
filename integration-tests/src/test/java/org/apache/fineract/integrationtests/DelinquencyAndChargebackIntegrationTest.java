@@ -86,7 +86,7 @@ public class DelinquencyAndChargebackIntegrationTest {
         requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
 
-        loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
     }
 
     @ParameterizedTest
@@ -107,7 +107,7 @@ public class DelinquencyAndChargebackIntegrationTest {
                     delinquencyBucketId);
 
             // Client and Loan account creation
-            final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
+            final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2012");
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
                     Math.toIntExact(delinquencyBucket.getId()), loanProductTestBuilder);
             assertNotNull(getLoanProductsProductResponse);
@@ -228,7 +228,7 @@ public class DelinquencyAndChargebackIntegrationTest {
                     delinquencyBucketId);
 
             // Client and Loan account creation
-            final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2012");
+            final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2012");
             final GetLoanProductsProductIdResponse getLoanProductsProductResponse = createLoanProduct(loanTransactionHelper,
                     Math.toIntExact(delinquencyBucket.getId()), loanProductTestBuilder);
             assertNotNull(getLoanProductsProductResponse);

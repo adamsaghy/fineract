@@ -46,6 +46,7 @@ import org.apache.fineract.client.models.PostPaymentTypesResponse;
 import org.apache.fineract.infrastructure.bulkimport.constants.LoanConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GroupHelper;
 import org.apache.fineract.integrationtests.common.OfficeDomain;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
@@ -73,7 +74,6 @@ public class LoanImportHandlerTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoanImportHandlerTest.class);
     private static final String CREATE_CLIENT_URL = "/fineract-provider/api/v1/clients?" + Utils.TENANT_IDENTIFIER;
-    public static final String DATE_FORMAT = "dd MMMM yyyy";
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
@@ -82,9 +82,9 @@ public class LoanImportHandlerTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.paymentTypeHelper = new PaymentTypeHelper();
     }
 
@@ -109,7 +109,7 @@ public class LoanImportHandlerTest {
         clientMap.put("firstname", firstName);
         clientMap.put("lastname", lastName);
         clientMap.put("externalId", externalId);
-        clientMap.put("dateFormat", DATE_FORMAT);
+        clientMap.put("dateFormat", CommonConstants.DATE_FORMAT);
         clientMap.put("legalFormId", 1);
         clientMap.put("locale", "en");
         clientMap.put("active", "true");
@@ -121,9 +121,9 @@ public class LoanImportHandlerTest {
 
         List<HashMap> collaterals = new ArrayList<>();
         HashMap<String, String> collateralHashMap = new HashMap<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec,
                 String.valueOf(outcome_client_creation), collateralId);
         Assertions.assertNotNull(clientCollateralId);
         collateralHashMap.put("clientCollateralId", collateralId.toString());
@@ -132,7 +132,7 @@ public class LoanImportHandlerTest {
 
         final String disbursementChargeJsonString = ChargesHelper.getLoanDisbursementJSON();
 
-        final Integer disbursementChargeId = ChargesHelper.createCharges(this.requestSpec, this.responseSpec, disbursementChargeJsonString);
+        final Integer disbursementChargeId = ChargesHelper.createCharges(requestSpec, responseSpec, disbursementChargeJsonString);
 
         final JsonPath disbursementChargeJSON = JsonPath.from(disbursementChargeJsonString);
 
@@ -174,7 +174,7 @@ public class LoanImportHandlerTest {
         Assertions.assertNotNull(outcome_payment_creation, "Could not create payment type");
 
         LoanTransactionHelper loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
-        Workbook workbook = loanTransactionHelper.getLoanWorkbook(DATE_FORMAT);
+        Workbook workbook = loanTransactionHelper.getLoanWorkbook(CommonConstants.DATE_FORMAT);
 
         // insert dummy data into loan Sheet
         Sheet loanSheet = workbook.getSheet(TemplatePopulateImportConstants.LOANS_SHEET_NAME);
@@ -187,7 +187,7 @@ public class LoanImportHandlerTest {
         firstLoanRow.createCell(LoanConstants.PRODUCT_COL).setCellValue(loanProductJson.getString("name"));
         firstLoanRow.createCell(LoanConstants.LOAN_OFFICER_NAME_COL).setCellValue((String) staffMap.get("displayName"));
 
-        final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern(DATE_FORMAT, Locale.US);
+        final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern(CommonConstants.DATE_FORMAT, Locale.US);
         final LocalDate localDate = LocalDate.parse("17 May 2017", dateFormat);
 
         firstLoanRow.createCell(LoanConstants.SUBMITTED_ON_DATE_COL).setCellValue(localDate);

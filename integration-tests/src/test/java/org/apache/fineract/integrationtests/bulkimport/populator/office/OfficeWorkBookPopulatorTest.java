@@ -25,6 +25,7 @@ import io.restassured.specification.ResponseSpecification;
 import java.io.IOException;
 import org.apache.fineract.infrastructure.bulkimport.constants.OfficeConstants;
 import org.apache.fineract.infrastructure.bulkimport.constants.TemplatePopulateImportConstants;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.OfficeHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.poi.ss.usermodel.Row;
@@ -42,15 +43,15 @@ public class OfficeWorkBookPopulatorTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        requestSpec = new RequestSpecBuilder().build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     @Test
     public void testOfficeWorkbookPopulate() throws IOException {
         OfficeHelper officeHelper = new OfficeHelper(requestSpec, responseSpec);
-        Workbook workbook = officeHelper.getOfficeWorkBook("dd MMMM yyyy");
+        Workbook workbook = officeHelper.getOfficeWorkBook(CommonConstants.DATE_FORMAT);
         Sheet sheet = workbook.getSheet(TemplatePopulateImportConstants.OFFICE_SHEET_NAME);
         Row firstRow = sheet.getRow(1);
         Assertions.assertNotNull("No parent offices found", firstRow.getCell(OfficeConstants.LOOKUP_OFFICE_COL).getStringCellValue());

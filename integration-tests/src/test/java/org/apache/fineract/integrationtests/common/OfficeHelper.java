@@ -69,20 +69,20 @@ public class OfficeHelper extends IntegrationTest {
 
     public Integer createOffice(final String openingDate) {
         String json = getAsJSON(openingDate);
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, OFFICE_URL + "?" + Utils.TENANT_IDENTIFIER, json,
+        return Utils.performServerPost(requestSpec, responseSpec, OFFICE_URL + "?" + Utils.TENANT_IDENTIFIER, json,
                 CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
     public Integer createOfficeWithExternalId(String externalId, final String openingDate) {
         String json = getAsJSON(externalId, openingDate);
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, OFFICE_URL + "?" + Utils.TENANT_IDENTIFIER, json,
+        return Utils.performServerPost(requestSpec, responseSpec, OFFICE_URL + "?" + Utils.TENANT_IDENTIFIER, json,
                 CommonConstants.RESPONSE_RESOURCE_ID);
     }
 
     public Integer updateOffice(int id, String name, String openingDate) {
         final HashMap<String, String> map = new HashMap<String, String>();
         map.put("name", name);
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("locale", "en");
         map.put("openingDate", openingDate);
 
@@ -98,9 +98,8 @@ public class OfficeHelper extends IntegrationTest {
 
     public Response<PutOfficesOfficeIdResponse> updateOfficeUsingExternalId(String externalId, String name, String openingDate)
             throws IOException {
-        return fineract().offices
-                .updateOfficeWithExternalId(externalId,
-                        new PutOfficesOfficeIdRequest().name(name).openingDate(openingDate).dateFormat("dd MMMM yyyy").locale("en"))
+        return fineract().offices.updateOfficeWithExternalId(externalId,
+                new PutOfficesOfficeIdRequest().name(name).openingDate(openingDate).dateFormat(CommonConstants.DATE_FORMAT).locale("en"))
                 .execute();
     }
 
@@ -112,7 +111,7 @@ public class OfficeHelper extends IntegrationTest {
         final HashMap<String, String> map = new HashMap<>();
         map.put("parentId", "1");
         map.put("name", Utils.uniqueRandomStringGenerator("Office_", 4));
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("locale", "en");
         map.put("openingDate", openingDate);
         if (externalId != null) {
@@ -124,7 +123,7 @@ public class OfficeHelper extends IntegrationTest {
 
     public String importOfficeTemplate(File file) {
         String locale = "en";
-        String dateFormat = "dd MMMM yyyy";
+        String dateFormat = CommonConstants.DATE_FORMAT;
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA);
         return Utils.performServerTemplatePost(requestSpec, responseSpec, OFFICE_URL + "/uploadtemplate" + "?" + Utils.TENANT_IDENTIFIER,
                 null, file, locale, dateFormat);

@@ -46,7 +46,7 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
     public void test_LoanReAmortizeTransaction_Works() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
             int numberOfRepayments = 2;
             int repaymentEvery = 1;
@@ -57,7 +57,7 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
                     .repaymentEvery(repaymentEvery) //
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue()); //
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(product);
             Long loanProductId = loanProductResponse.getResourceId();
 
             // Apply and Approve Loan
@@ -70,10 +70,10 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
                     .loanTermFrequencyType(RepaymentFrequencyType.MONTHS);
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansResponse postLoansResponse = LOAN_TRANSACTION_HELPER.applyLoan(applicationRequest);
             loanId.set(postLoansResponse.getLoanId());
 
-            loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(), approveLoanRequest(amount, "01 January 2023"));
+            LOAN_TRANSACTION_HELPER.approveLoan(postLoansResponse.getResourceId(), approveLoanRequest(amount, "01 January 2023"));
 
             // disburse Loan
             disburseLoan(loanId.get(), BigDecimal.valueOf(1250.0), "01 January 2023");
@@ -113,7 +113,7 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
     public void test_LoanUndoReAmortizeTransaction_Works() {
         runAt("01 January 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
 
             int numberOfRepayments = 2;
             int repaymentEvery = 1;
@@ -124,7 +124,7 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
                     .repaymentEvery(repaymentEvery) //
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS.longValue()); //
 
-            PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
+            PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(product);
             Long loanProductId = loanProductResponse.getResourceId();
 
             // Apply and Approve Loan
@@ -137,10 +137,10 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
                     .repaymentFrequencyType(RepaymentFrequencyType.MONTHS)//
                     .loanTermFrequencyType(RepaymentFrequencyType.MONTHS);
 
-            PostLoansResponse postLoansResponse = loanTransactionHelper.applyLoan(applicationRequest);
+            PostLoansResponse postLoansResponse = LOAN_TRANSACTION_HELPER.applyLoan(applicationRequest);
             loanId.set(postLoansResponse.getLoanId());
 
-            loanTransactionHelper.approveLoan(postLoansResponse.getResourceId(), approveLoanRequest(amount, "01 January 2023"));
+            LOAN_TRANSACTION_HELPER.approveLoan(postLoansResponse.getResourceId(), approveLoanRequest(amount, "01 January 2023"));
 
             // disburse Loan
             disburseLoan(loanId.get(), BigDecimal.valueOf(1250.0), "01 January 2023");
@@ -190,7 +190,7 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
     @Test
     public void reAmortizeLoanRepaymentScheduleTest() {
         runAt("01 January 2023", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepaymentsWithEnableDownPayment(3, 15);
 
             loanId.set(applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 500.0, 3, req -> {
@@ -245,7 +245,7 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
     @Test
     public void completePastDueReAmortizationTest() {
         runAt("01 January 2023", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepaymentsWithEnableDownPayment(3, 15);
 
             loanId.set(applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 500.0, 3, req -> {
@@ -290,7 +290,7 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
     @Test
     public void partiallyPaidReAmortizationTest() {
         runAt("01 January 2023", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepaymentsWithEnableDownPayment(3, 15);
 
             loanId.set(applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 500.0, 3, req -> {
@@ -345,7 +345,7 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
     @Test
     public void reAmortizationOnSameDayOfInstallmentTest() {
         runAt("01 January 2023", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepaymentsWithEnableDownPayment(3, 15);
 
             loanId.set(applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 500.0, 3, req -> {
@@ -400,7 +400,7 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
     @Test
     public void reAmortizationNPlusOneInstallmentTest() {
         runAt("01 January 2023", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepaymentsWithEnableDownPayment(3, 15);
 
             loanId.set(applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 500.0, 3, req -> {
@@ -447,7 +447,7 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
     @Test
     public void reAmortizationBackdatedRepaymentAndReplayTest() {
         runAt("01 January 2023", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepaymentsWithEnableDownPayment(3, 15);
 
             loanId.set(applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 500.0, 3, req -> {
@@ -511,7 +511,7 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
     @Test
     public void reAmortizationUndoRepaymentAndReplayTest() {
         runAt("01 January 2023", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepaymentsWithEnableDownPayment(3, 15);
 
             loanId.set(applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 500.0, 3, req -> {
@@ -570,7 +570,7 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
                     transaction(125.0, "Re-amortize", "01 February 2023") //
             );
 
-            loanTransactionHelper.reverseRepayment(loanId.intValue(), repaymentTransactionId.intValue(), "01 February 2023");
+            LOAN_TRANSACTION_HELPER.reverseRepayment(loanId.intValue(), repaymentTransactionId.intValue(), "01 February 2023");
 
             verifyRepaymentSchedule(loanId.get(), //
                     installment(0, null, "01 January 2023"), //
@@ -593,7 +593,7 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
     @Test
     public void reverseReAmortizationTest() {
         runAt("01 January 2023", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepaymentsWithEnableDownPayment(3, 15);
 
             loanId.set(applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 500.0, 3, req -> {
@@ -657,7 +657,7 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
     @Test
     public void reAmortizationDivisionTest() {
         runAt("01 January 2023", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepaymentsWithEnableDownPayment(4, 15, BigDecimal.valueOf(20));
 
             loanId.set(applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 500.0, 4, req -> {
@@ -703,7 +703,7 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
     @Test
     public void secondDisbursementAfterReAmortizationTest() {
         runAt("01 January 2023", () -> {
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepaymentsWithEnableDownPayment(3, 15);
 
             loanId.set(applyAndApproveLoan(clientId, loanProductId, "01 January 2023", 1000.0, 3, req -> {
@@ -814,8 +814,8 @@ public class LoanReAmortizationIntegrationTest extends BaseLoanIntegrationTest {
         product.setEnableAutoRepaymentForDownPayment(true);
         product.setInstallmentAmountInMultiplesOf(null);
 
-        PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = loanProductHelper
+        PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(product);
+        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = LOAN_PRODUCT_HELPER
                 .retrieveLoanProductById(loanProductResponse.getResourceId());
         assertNotNull(getLoanProductsProductIdResponse);
         return loanProductResponse.getResourceId();

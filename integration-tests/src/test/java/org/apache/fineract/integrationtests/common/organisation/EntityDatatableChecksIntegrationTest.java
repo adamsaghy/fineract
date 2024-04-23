@@ -80,18 +80,18 @@ public class EntityDatatableChecksIntegrationTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.entityDatatableChecksHelper = new EntityDatatableChecksHelper(this.requestSpec, this.responseSpec);
-        this.datatableHelper = new DatatableHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.entityDatatableChecksHelper = new EntityDatatableChecksHelper(requestSpec, responseSpec);
+        this.datatableHelper = new DatatableHelper(requestSpec, responseSpec);
     }
 
     @Test
     public void validateCreateDeleteDatatableCheck() {
         // creating datatable
         String datatableName = this.datatableHelper.createDatatable(CLIENT_APP_TABLE_NAME, false);
-        DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, datatableName);
+        DatatableHelper.verifyDatatableCreatedOnServer(requestSpec, responseSpec, datatableName);
 
         // creating new entity datatable check
         Integer entityDatatableCheckId = this.entityDatatableChecksHelper.createEntityDatatableCheck(CLIENT_APP_TABLE_NAME, datatableName,
@@ -111,7 +111,7 @@ public class EntityDatatableChecksIntegrationTest {
     public void validateCreateDeleteEntityDatatableCheck() {
         // creating datatable
         String datatableName = this.datatableHelper.createDatatable(CLIENT_APP_TABLE_NAME, false);
-        DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, datatableName);
+        DatatableHelper.verifyDatatableCreatedOnServer(requestSpec, responseSpec, datatableName);
 
         // creating new entity datatable check
         Integer entityDatatableCheckId = this.entityDatatableChecksHelper.createEntityDatatableCheck(CLIENT_APP_TABLE_NAME, datatableName,
@@ -139,7 +139,7 @@ public class EntityDatatableChecksIntegrationTest {
 
         // creating datatable
         String registeredTableName = this.datatableHelper.createDatatable(CLIENT_APP_TABLE_NAME, false);
-        DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, registeredTableName);
+        DatatableHelper.verifyDatatableCreatedOnServer(requestSpec, responseSpec, registeredTableName);
 
         // creating new entity datatable check
         Integer entityDatatableCheckId = this.entityDatatableChecksHelper.createEntityDatatableCheck(CLIENT_APP_TABLE_NAME,
@@ -148,7 +148,7 @@ public class EntityDatatableChecksIntegrationTest {
 
         // creating client with datatables
         final Integer clientID = ClientHelper.createClientPendingWithDatatable(requestSpec, responseSpec, registeredTableName);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
         // deleting entity datatable check
         entityDatatableCheckId = this.entityDatatableChecksHelper.deleteEntityDatatableCheck(entityDatatableCheckId);
@@ -168,11 +168,11 @@ public class EntityDatatableChecksIntegrationTest {
     public void validateCreateClientWithEntityDatatableCheckWithFailure() {
         // building error response with status code 403
         final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
-        final ClientHelper validationErrorHelper = new ClientHelper(this.requestSpec, errorResponse);
+        final ClientHelper validationErrorHelper = new ClientHelper(requestSpec, errorResponse);
 
         // creating datatable
         String registeredTableName = this.datatableHelper.createDatatable(CLIENT_APP_TABLE_NAME, false);
-        DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, registeredTableName);
+        DatatableHelper.verifyDatatableCreatedOnServer(requestSpec, responseSpec, registeredTableName);
 
         // creating new entity datatable check
         Integer entityDatatableCheckId = this.entityDatatableChecksHelper.createEntityDatatableCheck(CLIENT_APP_TABLE_NAME,
@@ -199,7 +199,7 @@ public class EntityDatatableChecksIntegrationTest {
 
         // creating datatable
         String registeredTableName = this.datatableHelper.createDatatable(GROUP_APP_TABLE_NAME, false);
-        DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, registeredTableName);
+        DatatableHelper.verifyDatatableCreatedOnServer(requestSpec, responseSpec, registeredTableName);
 
         // creating new entity datatable check
         Integer entityDatatableCheckId = this.entityDatatableChecksHelper.createEntityDatatableCheck(GROUP_APP_TABLE_NAME,
@@ -207,8 +207,8 @@ public class EntityDatatableChecksIntegrationTest {
         assertNotNull(entityDatatableCheckId, "ERROR IN CREATING THE ENTITY DATATABLE CHECK");
 
         // creating group with datatables
-        final Integer groupId = GroupHelper.createGroupPendingWithDatatable(this.requestSpec, this.responseSpec, registeredTableName);
-        GroupHelper.verifyGroupCreatedOnServer(this.requestSpec, this.responseSpec, groupId);
+        final Integer groupId = GroupHelper.createGroupPendingWithDatatable(requestSpec, responseSpec, registeredTableName);
+        GroupHelper.verifyGroupCreatedOnServer(requestSpec, responseSpec, groupId);
 
         // deleting entity datatable check
         entityDatatableCheckId = this.entityDatatableChecksHelper.deleteEntityDatatableCheck(entityDatatableCheckId);
@@ -228,11 +228,11 @@ public class EntityDatatableChecksIntegrationTest {
     public void validateCreateGroupWithEntityDatatableCheckWithFailure() {
         // building error response with status code 403
         final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
-        final GroupHelper validationErrorHelper = new GroupHelper(this.requestSpec, errorResponse);
+        final GroupHelper validationErrorHelper = new GroupHelper(requestSpec, errorResponse);
 
         // creating datatable
         String registeredTableName = this.datatableHelper.createDatatable(GROUP_APP_TABLE_NAME, false);
-        DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, registeredTableName);
+        DatatableHelper.verifyDatatableCreatedOnServer(requestSpec, responseSpec, registeredTableName);
 
         // creating new entity datatable check
         Integer entityDatatableCheckId = this.entityDatatableChecksHelper.createEntityDatatableCheck(GROUP_APP_TABLE_NAME,
@@ -257,7 +257,7 @@ public class EntityDatatableChecksIntegrationTest {
     @Test
     public void validateCreateSavingsWithEntityDatatableCheck() {
 
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
 
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = null;
@@ -266,17 +266,17 @@ public class EntityDatatableChecksIntegrationTest {
 
         // creating datatable
         String registeredTableName = this.datatableHelper.createDatatable(SAVINGS_APP_TABLE_NAME, false);
-        DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, registeredTableName);
+        DatatableHelper.verifyDatatableCreatedOnServer(requestSpec, responseSpec, registeredTableName);
 
         // creating new entity datatable check
         Integer entityDatatableCheckId = this.entityDatatableChecksHelper.createEntityDatatableCheck(SAVINGS_APP_TABLE_NAME,
                 registeredTableName, 100, null);
         assertNotNull(entityDatatableCheckId, "ERROR IN CREATING THE ENTITY DATATABLE CHECK");
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
-        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
         Assertions.assertNotNull(savingsProductID);
 
@@ -303,7 +303,7 @@ public class EntityDatatableChecksIntegrationTest {
     public void validateCreateSavingsWithEntityDatatableCheckWithFailure() {
         // building error response with status code 403
         final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
-        final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(this.requestSpec, errorResponse);
+        final SavingsAccountHelper validationErrorHelper = new SavingsAccountHelper(requestSpec, errorResponse);
 
         final String minBalanceForInterestCalculation = null;
         final String minRequiredBalance = null;
@@ -312,17 +312,17 @@ public class EntityDatatableChecksIntegrationTest {
 
         // creating datatable
         String registeredTableName = this.datatableHelper.createDatatable(SAVINGS_APP_TABLE_NAME, false);
-        DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, registeredTableName);
+        DatatableHelper.verifyDatatableCreatedOnServer(requestSpec, responseSpec, registeredTableName);
 
         // creating new entity datatable check
         Integer entityDatatableCheckId = this.entityDatatableChecksHelper.createEntityDatatableCheck(SAVINGS_APP_TABLE_NAME,
                 registeredTableName, 100, null);
         assertNotNull(entityDatatableCheckId, "ERROR IN CREATING THE ENTITY DATATABLE CHECK");
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
-        final Integer savingsProductID = createSavingsProduct(this.requestSpec, this.responseSpec, MINIMUM_OPENING_BALANCE,
+        final Integer savingsProductID = createSavingsProduct(requestSpec, responseSpec, MINIMUM_OPENING_BALANCE,
                 minBalanceForInterestCalculation, minRequiredBalance, enforceMinRequiredBalance, allowOverdraft);
         Assertions.assertNotNull(savingsProductID);
 
@@ -344,11 +344,11 @@ public class EntityDatatableChecksIntegrationTest {
 
     @Test
     public void validateCreateLoanWithEntityDatatableCheck() {
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
         // creating client
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
         // creating loan product
         final Integer loanProductID = createLoanProduct("100", "0", LoanProductTestBuilder.DEFAULT_STRATEGY);
@@ -356,7 +356,7 @@ public class EntityDatatableChecksIntegrationTest {
 
         // creating datatable
         String registeredTableName = this.datatableHelper.createDatatable(LOAN_APP_TABLE_NAME, false);
-        DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, registeredTableName);
+        DatatableHelper.verifyDatatableCreatedOnServer(requestSpec, responseSpec, registeredTableName);
 
         // creating new entity datatable check
         Integer entityDatatableCheckId = this.entityDatatableChecksHelper.createEntityDatatableCheck(LOAN_APP_TABLE_NAME,
@@ -383,15 +383,15 @@ public class EntityDatatableChecksIntegrationTest {
     @SuppressWarnings("unchecked")
     @Test
     public void validateCreateLoanWithEntityDatatableCheckWithFailure() {
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
         // building error response with status code 403
         final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
-        this.validationErrorHelper = new LoanTransactionHelper(this.requestSpec, errorResponse);
+        this.validationErrorHelper = new LoanTransactionHelper(requestSpec, errorResponse);
 
         // creating client
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
         // creating loan product
         final Integer loanProductID = createLoanProduct("100", "0", LoanProductTestBuilder.DEFAULT_STRATEGY);
@@ -399,7 +399,7 @@ public class EntityDatatableChecksIntegrationTest {
 
         // creating datatable
         String registeredTableName = this.datatableHelper.createDatatable(LOAN_APP_TABLE_NAME, false);
-        DatatableHelper.verifyDatatableCreatedOnServer(this.requestSpec, this.responseSpec, registeredTableName);
+        DatatableHelper.verifyDatatableCreatedOnServer(requestSpec, responseSpec, registeredTableName);
 
         // creating new entity datatable check
         Integer entityDatatableCheckId = this.entityDatatableChecksHelper.createEntityDatatableCheck(LOAN_APP_TABLE_NAME,
@@ -470,17 +470,17 @@ public class EntityDatatableChecksIntegrationTest {
                 .withAmortizationTypeAsEqualPrincipalPayment() //
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails(digitsAfterDecimal, inMultiplesOf).build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        return loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, String graceOnPrincipalPayment,
             final String registeredTableName) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID.toString(),
+                collateralId);
         Assertions.assertNotNull(clientCollateralId);
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
 
@@ -499,17 +499,17 @@ public class EntityDatatableChecksIntegrationTest {
                 .withSubmittedOnDate("02 June 2014") //
                 .withDatatables(getTestDatatableAsJson(registeredTableName)) //
                 .withCollaterals(collaterals).build(clientID.toString(), loanProductID.toString(), null);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        return loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
     private Object applyForLoanApplicationWithError(final Integer clientID, final Integer loanProductID, String graceOnPrincipalPayment,
             final String responseAttribute) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID.toString(),
+                collateralId);
         Assertions.assertNotNull(clientCollateralId);
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //

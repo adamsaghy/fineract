@@ -51,8 +51,8 @@ public class FundsIntegrationTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         this.statusOkResponseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
@@ -61,7 +61,7 @@ public class FundsIntegrationTest {
         FundsHelper fh = FundsHelper.create(Utils.uniqueRandomStringGenerator("", 10)).externalId(UUID.randomUUID().toString()).build();
         String jsonData = fh.toJSON();
 
-        final Long fundID = createFund(jsonData, this.requestSpec, this.statusOkResponseSpec);
+        final Long fundID = createFund(jsonData, requestSpec, this.statusOkResponseSpec);
         Assertions.assertNotNull(fundID);
     }
 
@@ -71,7 +71,7 @@ public class FundsIntegrationTest {
         String jsonData = fh.toJSON();
 
         ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(400).build();
-        final Long fundID = createFund(jsonData, this.requestSpec, responseSpec);
+        final Long fundID = createFund(jsonData, requestSpec, responseSpec);
         Assertions.assertNull(fundID);
     }
 
@@ -80,7 +80,7 @@ public class FundsIntegrationTest {
         FundsHelper fh = FundsHelper.create(Utils.uniqueRandomStringGenerator("", 10)).externalId(null).build();
         String jsonData = fh.toJSON();
 
-        final Long fundID = createFund(jsonData, this.requestSpec, this.statusOkResponseSpec);
+        final Long fundID = createFund(jsonData, requestSpec, this.statusOkResponseSpec);
         Assertions.assertNotNull(fundID);
     }
 
@@ -89,14 +89,14 @@ public class FundsIntegrationTest {
         FundsHelper fh = FundsHelper.create(Utils.uniqueRandomStringGenerator("", 10)).externalId(UUID.randomUUID().toString()).build();
         String jsonData = fh.toJSON();
 
-        final Long fundID = createFund(jsonData, this.requestSpec, this.statusOkResponseSpec);
+        final Long fundID = createFund(jsonData, requestSpec, this.statusOkResponseSpec);
         Assertions.assertNotNull(fundID);
 
         FundsHelper fh2 = FundsHelper.create(fh.getName()).externalId(UUID.randomUUID().toString()).build();
         jsonData = fh2.toJSON();
 
         ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(403).build();
-        final Long fundID2 = createFund(jsonData, this.requestSpec, responseSpec);
+        final Long fundID2 = createFund(jsonData, requestSpec, responseSpec);
         Assertions.assertNull(fundID2);
     }
 
@@ -105,14 +105,14 @@ public class FundsIntegrationTest {
         FundsHelper fh = FundsHelper.create(Utils.uniqueRandomStringGenerator("", 10)).externalId(UUID.randomUUID().toString()).build();
         String jsonData = fh.toJSON();
 
-        final Long fundID = createFund(jsonData, this.requestSpec, this.statusOkResponseSpec);
+        final Long fundID = createFund(jsonData, requestSpec, this.statusOkResponseSpec);
         Assertions.assertNotNull(fundID);
 
         FundsHelper fh2 = FundsHelper.create(Utils.uniqueRandomStringGenerator("", 10)).externalId(fh.getExternalId()).build();
         jsonData = fh2.toJSON();
 
         ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(403).build();
-        final Long fundID2 = createFund(jsonData, this.requestSpec, responseSpec);
+        final Long fundID2 = createFund(jsonData, requestSpec, responseSpec);
         Assertions.assertNull(fundID2);
     }
 
@@ -122,7 +122,7 @@ public class FundsIntegrationTest {
         String jsonData = fh.toJSON();
 
         ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(400).build();
-        final Long fundID = createFund(jsonData, this.requestSpec, responseSpec);
+        final Long fundID = createFund(jsonData, requestSpec, responseSpec);
         Assertions.assertNull(fundID);
     }
 
@@ -133,7 +133,7 @@ public class FundsIntegrationTest {
         String jsonData = fh.toJSON();
 
         ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(400).build();
-        final Long fundID = createFund(jsonData, this.requestSpec, responseSpec);
+        final Long fundID = createFund(jsonData, requestSpec, responseSpec);
         Assertions.assertNull(fundID);
     }
 
@@ -142,10 +142,10 @@ public class FundsIntegrationTest {
         FundsHelper fh = FundsHelper.create(Utils.uniqueRandomStringGenerator("", 10)).externalId(UUID.randomUUID().toString()).build();
         String jsonData = fh.toJSON();
 
-        final Long fundID = createFund(jsonData, this.requestSpec, this.statusOkResponseSpec);
+        final Long fundID = createFund(jsonData, requestSpec, this.statusOkResponseSpec);
         Assertions.assertNotNull(fundID);
 
-        jsonData = FundsResourceHandler.retrieveFund(fundID, this.requestSpec, this.statusOkResponseSpec);
+        jsonData = FundsResourceHandler.retrieveFund(fundID, requestSpec, this.statusOkResponseSpec);
         FundsHelper fh2 = FundsHelper.fromJSON(jsonData);
 
         assertEquals(fh.getName(), fh2.getName());
@@ -156,10 +156,10 @@ public class FundsIntegrationTest {
         FundsHelper fh = FundsHelper.create(Utils.uniqueRandomStringGenerator("", 10)).externalId(UUID.randomUUID().toString()).build();
         String jsonData = fh.toJSON();
 
-        final Long fundID = createFund(jsonData, this.requestSpec, this.statusOkResponseSpec);
+        final Long fundID = createFund(jsonData, requestSpec, this.statusOkResponseSpec);
         Assertions.assertNotNull(fundID);
 
-        List<FundsHelper> fhList = FundsResourceHandler.retrieveAllFunds(this.requestSpec, this.statusOkResponseSpec);
+        List<FundsHelper> fhList = FundsResourceHandler.retrieveAllFunds(requestSpec, this.statusOkResponseSpec);
 
         Assertions.assertNotNull(fhList);
         assertThat(fhList.size(), greaterThanOrEqualTo(1));
@@ -169,7 +169,7 @@ public class FundsIntegrationTest {
     @Test
     public void testRetrieveUnknownFund() {
         ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(404).build();
-        String jsonData = FundsResourceHandler.retrieveFund(Long.MAX_VALUE, this.requestSpec, responseSpec);
+        String jsonData = FundsResourceHandler.retrieveFund(Long.MAX_VALUE, requestSpec, responseSpec);
         HashMap<String, Object> map = new Gson().fromJson(jsonData, new TypeToken<HashMap<String, Object>>() {}.getType());
         assertEquals("error.msg.resource.not.found", map.get("userMessageGlobalisationCode"));
     }
@@ -179,12 +179,12 @@ public class FundsIntegrationTest {
         FundsHelper fh = FundsHelper.create(Utils.uniqueRandomStringGenerator("", 10)).externalId(UUID.randomUUID().toString()).build();
         String jsonData = fh.toJSON();
 
-        final Long fundID = createFund(jsonData, this.requestSpec, this.statusOkResponseSpec);
+        final Long fundID = createFund(jsonData, requestSpec, this.statusOkResponseSpec);
         Assertions.assertNotNull(fundID);
 
         String newName = Utils.uniqueRandomStringGenerator("", 10);
         String newExternalId = UUID.randomUUID().toString();
-        FundsHelper fh2 = FundsResourceHandler.updateFund(fundID, newName, newExternalId, this.requestSpec, this.statusOkResponseSpec);
+        FundsHelper fh2 = FundsResourceHandler.updateFund(fundID, newName, newExternalId, requestSpec, this.statusOkResponseSpec);
 
         Assertions.assertEquals(newName, fh2.getName());
         Assertions.assertEquals(newExternalId, fh2.getExternalId());
@@ -195,7 +195,7 @@ public class FundsIntegrationTest {
         String newName = Utils.uniqueRandomStringGenerator("", 10);
         String newExternalId = UUID.randomUUID().toString();
         ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(404).build();
-        FundsHelper fh = FundsResourceHandler.updateFund(Long.MAX_VALUE, newName, newExternalId, this.requestSpec, responseSpec);
+        FundsHelper fh = FundsResourceHandler.updateFund(Long.MAX_VALUE, newName, newExternalId, requestSpec, responseSpec);
         Assertions.assertNull(fh);
     }
 
@@ -204,13 +204,13 @@ public class FundsIntegrationTest {
         FundsHelper fh = FundsHelper.create(Utils.uniqueRandomStringGenerator("", 10)).externalId(UUID.randomUUID().toString()).build();
         String jsonData = fh.toJSON();
 
-        final Long fundID = createFund(jsonData, this.requestSpec, this.statusOkResponseSpec);
+        final Long fundID = createFund(jsonData, requestSpec, this.statusOkResponseSpec);
         Assertions.assertNotNull(fundID);
 
         String newName = Utils.randomStringGenerator("", 120);
         String newExternalId = UUID.randomUUID().toString();
         ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(400).build();
-        FundsHelper fh2 = FundsResourceHandler.updateFund(fundID, newName, newExternalId, this.requestSpec, responseSpec);
+        FundsHelper fh2 = FundsResourceHandler.updateFund(fundID, newName, newExternalId, requestSpec, responseSpec);
 
         Assertions.assertNull(fh2);
     }
@@ -220,11 +220,11 @@ public class FundsIntegrationTest {
         FundsHelper fh = FundsHelper.create(Utils.uniqueRandomStringGenerator("", 10)).externalId(UUID.randomUUID().toString()).build();
         String jsonData = fh.toJSON();
 
-        final Long fundID = createFund(jsonData, this.requestSpec, this.statusOkResponseSpec);
+        final Long fundID = createFund(jsonData, requestSpec, this.statusOkResponseSpec);
         Assertions.assertNotNull(fundID);
 
         String newExternalId = UUID.randomUUID().toString();
-        FundsHelper fh2 = FundsResourceHandler.updateFund(fundID, null, newExternalId, this.requestSpec, this.statusOkResponseSpec);
+        FundsHelper fh2 = FundsResourceHandler.updateFund(fundID, null, newExternalId, requestSpec, this.statusOkResponseSpec);
 
         Assertions.assertEquals(newExternalId, fh2.getExternalId());
     }
@@ -234,13 +234,13 @@ public class FundsIntegrationTest {
         FundsHelper fh = FundsHelper.create(Utils.uniqueRandomStringGenerator("", 10)).externalId(UUID.randomUUID().toString()).build();
         String jsonData = fh.toJSON();
 
-        final Long fundID = createFund(jsonData, this.requestSpec, this.statusOkResponseSpec);
+        final Long fundID = createFund(jsonData, requestSpec, this.statusOkResponseSpec);
         Assertions.assertNotNull(fundID);
 
         String newName = Utils.uniqueRandomStringGenerator("", 10);
         String newExternalId = Utils.randomStringGenerator("fund-", 120);
         ResponseSpecification responseSpec = new ResponseSpecBuilder().expectStatusCode(400).build();
-        FundsHelper fh2 = FundsResourceHandler.updateFund(fundID, newName, newExternalId, this.requestSpec, responseSpec);
+        FundsHelper fh2 = FundsResourceHandler.updateFund(fundID, newName, newExternalId, requestSpec, responseSpec);
 
         Assertions.assertNull(fh2);
     }
@@ -250,11 +250,11 @@ public class FundsIntegrationTest {
         FundsHelper fh = FundsHelper.create(Utils.uniqueRandomStringGenerator("", 10)).externalId(UUID.randomUUID().toString()).build();
         String jsonData = fh.toJSON();
 
-        final Long fundID = createFund(jsonData, this.requestSpec, this.statusOkResponseSpec);
+        final Long fundID = createFund(jsonData, requestSpec, this.statusOkResponseSpec);
         Assertions.assertNotNull(fundID);
 
         String newName = Utils.uniqueRandomStringGenerator("", 10);
-        FundsHelper fh2 = FundsResourceHandler.updateFund(fundID, newName, null, this.requestSpec, this.statusOkResponseSpec);
+        FundsHelper fh2 = FundsResourceHandler.updateFund(fundID, newName, null, requestSpec, this.statusOkResponseSpec);
 
         Assertions.assertEquals(newName, fh2.getName());
     }
@@ -264,17 +264,17 @@ public class FundsIntegrationTest {
         FundsHelper fh = FundsHelper.create(Utils.uniqueRandomStringGenerator("", 10)).externalId(UUID.randomUUID().toString()).build();
         String jsonData = fh.toJSON();
 
-        final Long fundID = createFund(jsonData, this.requestSpec, this.statusOkResponseSpec);
+        final Long fundID = createFund(jsonData, requestSpec, this.statusOkResponseSpec);
         Assertions.assertNotNull(fundID);
 
-        FundsHelper fh2 = FundsResourceHandler.updateFund(fundID, null, null, this.requestSpec, this.statusOkResponseSpec);
+        FundsHelper fh2 = FundsResourceHandler.updateFund(fundID, null, null, requestSpec, this.statusOkResponseSpec);
 
         Assertions.assertNull(fh2.getName());
         Assertions.assertNull(fh2.getExternalId());
 
         // assert that there was no change in
         // the name and external ID of the fund
-        jsonData = FundsResourceHandler.retrieveFund(fundID, this.requestSpec, this.statusOkResponseSpec);
+        jsonData = FundsResourceHandler.retrieveFund(fundID, requestSpec, this.statusOkResponseSpec);
         FundsHelper fh3 = new Gson().fromJson(jsonData, FundsHelper.class);
 
         Assertions.assertEquals(fh.getName(), fh3.getName());

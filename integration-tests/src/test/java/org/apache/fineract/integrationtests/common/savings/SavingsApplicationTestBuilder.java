@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +47,7 @@ public class SavingsApplicationTestBuilder {
     public String build(final String clientOrGroupId, final String savingsProductId, final String accountType) {
 
         final HashMap<String, Object> map = new HashMap<>();
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         if (accountType.equals("GROUP")) {
             map.put("groupId", clientOrGroupId);
         } else {

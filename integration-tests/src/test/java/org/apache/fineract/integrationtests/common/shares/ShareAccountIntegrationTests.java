@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
@@ -53,10 +54,10 @@ public class ShareAccountIntegrationTests {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.requestSpec.header("Fineract-Platform-TenantId", "default");
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        requestSpec.header("Fineract-Platform-TenantId", "default");
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     @Test
@@ -104,7 +105,7 @@ public class ShareAccountIntegrationTests {
         shareProductHelper = new ShareProductHelper();
         final Integer productId = createShareProduct();
         Assertions.assertNotNull(productId);
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientId);
         Integer savingsAccountId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientId, "1000");
         Assertions.assertNotNull(savingsAccountId);
@@ -117,7 +118,7 @@ public class ShareAccountIntegrationTests {
         Map<String, Object> shareAccountDataForUpdate = new HashMap<>();
         shareAccountDataForUpdate.put("requestedShares", 30);
         shareAccountDataForUpdate.put("applicationDate", "02 March 2016");
-        shareAccountDataForUpdate.put("dateFormat", "dd MMMM yyyy");
+        shareAccountDataForUpdate.put("dateFormat", CommonConstants.DATE_FORMAT);
         shareAccountDataForUpdate.put("locale", "en_GB");
         String updateShareAccountJsonString = new Gson().toJson(shareAccountDataForUpdate);
         ShareAccountTransactionHelper.updateShareAccount(shareAccountId, updateShareAccountJsonString, requestSpec, responseSpec);
@@ -133,7 +134,7 @@ public class ShareAccountIntegrationTests {
         Calendar cal = Calendar.getInstance();
         cal.set(dateList.get(0), dateList.get(1) - 1, dateList.get(2));
         Date date = cal.getTime();
-        DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
+        DateFormat simple = new SimpleDateFormat(CommonConstants.DATE_FORMAT);
         Assertions.assertEquals("02 March 2016", simple.format(date));
     }
 
@@ -143,7 +144,7 @@ public class ShareAccountIntegrationTests {
         shareProductHelper = new ShareProductHelper();
         final Integer productId = createShareProduct();
         Assertions.assertNotNull(productId);
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientId);
         Integer savingsAccountId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientId, "1000");
         Assertions.assertNotNull(savingsAccountId);
@@ -166,7 +167,7 @@ public class ShareAccountIntegrationTests {
         // Approve share Account
         Map<String, Object> approveMap = new HashMap<>();
         approveMap.put("note", "Share Account Approval Note");
-        approveMap.put("dateFormat", "dd MMMM yyyy");
+        approveMap.put("dateFormat", CommonConstants.DATE_FORMAT);
         approveMap.put("approvedDate", "01 January 2016");
         approveMap.put("locale", "en");
         String approve = new Gson().toJson(approveMap);
@@ -212,7 +213,7 @@ public class ShareAccountIntegrationTests {
         shareProductHelper = new ShareProductHelper();
         final Integer productId = createShareProduct();
         Assertions.assertNotNull(productId);
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientId);
         Integer savingsAccountId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientId, "1000");
         Assertions.assertNotNull(savingsAccountId);
@@ -280,7 +281,7 @@ public class ShareAccountIntegrationTests {
         shareProductHelper = new ShareProductHelper();
         final Integer productId = createShareProduct();
         Assertions.assertNotNull(productId);
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientId);
         Integer savingsAccountId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientId, "1000");
         Assertions.assertNotNull(savingsAccountId);
@@ -303,7 +304,7 @@ public class ShareAccountIntegrationTests {
         // Approve share Account
         Map<String, Object> approveMap = new HashMap<>();
         approveMap.put("note", "Share Account Approval Note");
-        approveMap.put("dateFormat", "dd MMMM yyyy");
+        approveMap.put("dateFormat", CommonConstants.DATE_FORMAT);
         approveMap.put("approvedDate", "01 January 2016");
         approveMap.put("locale", "en");
         String approve = new Gson().toJson(approveMap);
@@ -361,7 +362,7 @@ public class ShareAccountIntegrationTests {
         shareProductHelper = new ShareProductHelper();
         final Integer productId = createShareProduct();
         Assertions.assertNotNull(productId);
-        final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
         Assertions.assertNotNull(clientId);
         Integer savingsAccountId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientId, "1000");
         Assertions.assertNotNull(savingsAccountId);
@@ -384,7 +385,7 @@ public class ShareAccountIntegrationTests {
         Map<String, Object> shareAccountDataForUpdate = new HashMap<>();
         shareAccountDataForUpdate.put("requestedShares", 30);
         shareAccountDataForUpdate.put("applicationDate", "02 March 2016");
-        shareAccountDataForUpdate.put("dateFormat", "dd MMMM yyyy");
+        shareAccountDataForUpdate.put("dateFormat", CommonConstants.DATE_FORMAT);
         shareAccountDataForUpdate.put("locale", "en_GB");
         shareAccountDataForUpdate.put("charges", charges);
 
@@ -394,7 +395,7 @@ public class ShareAccountIntegrationTests {
         List<Map<String, Object>> transactions = (List<Map<String, Object>>) shareAccountData.get("purchasedShares");
         Assertions.assertNotNull(transactions);
         Assertions.assertEquals(2, transactions.size());
-        DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
+        DateFormat simple = new SimpleDateFormat(CommonConstants.DATE_FORMAT);
         for (int i = 0; i < transactions.size(); i++) {
             Map<String, Object> transaction = transactions.get(i);
             Map<String, Object> transactionTypeMap = (Map<String, Object>) transaction.get("type");
@@ -443,7 +444,7 @@ public class ShareAccountIntegrationTests {
         // Approve share Account
         Map<String, Object> approveMap = new HashMap<>();
         approveMap.put("note", "Share Account Approval Note");
-        approveMap.put("dateFormat", "dd MMMM yyyy");
+        approveMap.put("dateFormat", CommonConstants.DATE_FORMAT);
         approveMap.put("approvedDate", "01 January 2016");
         approveMap.put("locale", "en");
         String approve = new Gson().toJson(approveMap);
@@ -482,7 +483,7 @@ public class ShareAccountIntegrationTests {
         }
 
         Map<String, Object> activateMap = new HashMap<>();
-        activateMap.put("dateFormat", "dd MMMM yyyy");
+        activateMap.put("dateFormat", CommonConstants.DATE_FORMAT);
         activateMap.put("activatedDate", "01 January 2016");
         activateMap.put("locale", "en");
         String activateJson = new Gson().toJson(activateMap);
@@ -553,7 +554,7 @@ public class ShareAccountIntegrationTests {
         // apply additional shares
         Map<String, Object> additionalSharesRequestMap = new HashMap<>();
         additionalSharesRequestMap.put("requestedDate", "01 April 2016");
-        additionalSharesRequestMap.put("dateFormat", "dd MMMM yyyy");
+        additionalSharesRequestMap.put("dateFormat", CommonConstants.DATE_FORMAT);
         additionalSharesRequestMap.put("locale", "en");
         additionalSharesRequestMap.put("requestedShares", "15");
         String additionalSharesRequestJson = new Gson().toJson(additionalSharesRequestMap);
@@ -701,7 +702,7 @@ public class ShareAccountIntegrationTests {
         // apply aditional shres and reject it
         additionalSharesRequestMap = new HashMap<>();
         additionalSharesRequestMap.put("requestedDate", "01 May 2016");
-        additionalSharesRequestMap.put("dateFormat", "dd MMMM yyyy");
+        additionalSharesRequestMap.put("dateFormat", CommonConstants.DATE_FORMAT);
         additionalSharesRequestMap.put("locale", "en");
         additionalSharesRequestMap.put("requestedShares", "20");
         additionalSharesRequestJson = new Gson().toJson(additionalSharesRequestMap);
@@ -825,7 +826,7 @@ public class ShareAccountIntegrationTests {
         // redeem shares
         Map<String, Object> redeemRequestMap = new HashMap<>();
         redeemRequestMap.put("requestedDate", "05 May 2016");
-        redeemRequestMap.put("dateFormat", "dd MMMM yyyy");
+        redeemRequestMap.put("dateFormat", CommonConstants.DATE_FORMAT);
         redeemRequestMap.put("locale", "en");
         redeemRequestMap.put("requestedShares", "15");
         String redeemRequestJson = new Gson().toJson(redeemRequestMap);
@@ -901,7 +902,7 @@ public class ShareAccountIntegrationTests {
         // Close Share Account
         Map<String, Object> closeAccountMap = new HashMap<>();
         closeAccountMap.put("note", "Share Account Close Note");
-        closeAccountMap.put("dateFormat", "dd MMMM yyyy");
+        closeAccountMap.put("dateFormat", CommonConstants.DATE_FORMAT);
         closeAccountMap.put("closedDate", "10 May 2016");
         closeAccountMap.put("locale", "en");
         String closeJson = new Gson().toJson(closeAccountMap);

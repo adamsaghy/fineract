@@ -26,8 +26,6 @@ import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.util.HashMap;
 import java.util.UUID;
 import org.apache.fineract.client.models.GetDelinquencyBucketsResponse;
@@ -37,6 +35,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
@@ -51,23 +50,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 public class LoanAccountCreditRefundPayoutWithChargebackTest {
 
     private ResponseSpecification responseSpec;
-    private ResponseSpecification responseSpecErr400;
-    private ResponseSpecification responseSpecErr503;
     private RequestSpecification requestSpec;
     private ClientHelper clientHelper;
     private LoanTransactionHelper loanTransactionHelper;
-    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
 
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseSpecErr400 = new ResponseSpecBuilder().expectStatusCode(400).build();
-        this.responseSpecErr503 = new ResponseSpecBuilder().expectStatusCode(503).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
     }
 
     @Test
@@ -91,8 +85,8 @@ public class LoanAccountCreditRefundPayoutWithChargebackTest {
 
         // make Repayment with full amount, Loan balance becomes zero, Loan closes
         final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("5 September 2022").locale("en")
-                        .transactionAmount(1000.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("5 September 2022")
+                        .locale("en").transactionAmount(1000.0));
 
         // Chargeback full repayment amount to add to principal balance
         PostLoansLoanIdTransactionsResponse chargebackResponse = loanTransactionHelper.chargebackLoanTransaction(loanExternalIdStr,
@@ -105,29 +99,29 @@ public class LoanAccountCreditRefundPayoutWithChargebackTest {
 
         // Verify Goodwill Credit can be created with full amount
         final PostLoansLoanIdTransactionsResponse goodwillCredit_1 = loanTransactionHelper.makeGoodwillCredit((long) loanId,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("8 September 2022").locale("en")
-                        .transactionAmount(1000.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("8 September 2022")
+                        .locale("en").transactionAmount(1000.0));
         assertNotNull(goodwillCredit_1);
         assertEquals(goodwillCredit_1.getLoanId(), (long) loanId);
 
         // Verify Goodwill Credit can be created after balance is zero again
         final PostLoansLoanIdTransactionsResponse goodwillCredit_2 = loanTransactionHelper.makeGoodwillCredit((long) loanId,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("9 September 2022").locale("en")
-                        .transactionAmount(10.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("9 September 2022")
+                        .locale("en").transactionAmount(10.0));
         assertNotNull(goodwillCredit_2);
         assertEquals(goodwillCredit_2.getLoanId(), (long) loanId);
 
         // Verify Payout refund can be created after balance is zero again
         final PostLoansLoanIdTransactionsResponse payoutRefund_1 = loanTransactionHelper.makePayoutRefund((long) loanId,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("9 September 2022").locale("en")
-                        .transactionAmount(10.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("9 September 2022")
+                        .locale("en").transactionAmount(10.0));
         assertNotNull(payoutRefund_1);
         assertEquals(payoutRefund_1.getLoanId(), (long) loanId);
 
         // Verify Merchant refund can be created after balance is zero again
         final PostLoansLoanIdTransactionsResponse merchantIssuedRefund_1 = loanTransactionHelper.makeMerchantIssuedRefund((long) loanId,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("10 September 2022").locale("en")
-                        .transactionAmount(10.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("10 September 2022")
+                        .locale("en").transactionAmount(10.0));
         assertNotNull(merchantIssuedRefund_1);
         assertEquals(merchantIssuedRefund_1.getLoanId(), (long) loanId);
 

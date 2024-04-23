@@ -45,6 +45,7 @@ import org.apache.fineract.client.models.PostLoansResponse;
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -65,8 +66,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @Slf4j
 public class RefundForActiveLoansWithAdvancedPaymentAllocationTest {
 
-    private static final String DATETIME_PATTERN = "dd MMMM yyyy";
-    private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern(DATETIME_PATTERN).toFormatter();
+    private static final DateTimeFormatter DATE_FORMATTER = new DateTimeFormatterBuilder().appendPattern(CommonConstants.DATE_FORMAT)
+            .toFormatter();
     private static RequestSpecification requestSpec;
     private static ResponseSpecification responseSpec;
     private static LoanTransactionHelper loanTransactionHelper;
@@ -110,11 +111,11 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest {
             int loanId = loanResponse.getLoanId().intValue();
 
             loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
-                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN)
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(CommonConstants.DATE_FORMAT)
                             .approvedOnDate("01 January 2023").locale("en"));
 
             loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
-                    new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2023").dateFormat(DATETIME_PATTERN)
+                    new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2023").dateFormat(CommonConstants.DATE_FORMAT)
                             .transactionAmount(BigDecimal.valueOf(1000.00)).locale("en"));
 
             final float feePortion = 50.0f;
@@ -309,11 +310,11 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest {
             int loanId = loanResponse.getLoanId().intValue();
 
             loanTransactionHelper.approveLoan(loanResponse.getLoanId(),
-                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(DATETIME_PATTERN)
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000)).dateFormat(CommonConstants.DATE_FORMAT)
                             .approvedOnDate("01 January 2023").locale("en"));
 
             loanTransactionHelper.disburseLoan(loanResponse.getLoanId(),
-                    new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2023").dateFormat(DATETIME_PATTERN)
+                    new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2023").dateFormat(CommonConstants.DATE_FORMAT)
                             .transactionAmount(BigDecimal.valueOf(1000.00)).locale("en"));
 
             final float feePortion = 50.0f;
@@ -533,7 +534,7 @@ public class RefundForActiveLoansWithAdvancedPaymentAllocationTest {
             final String expectedDisbursementDate, final String submittedOnDate) {
         log.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         return loanTransactionHelper.applyLoan(new PostLoansRequest().clientId(clientId).productId(loanProductId.longValue())
-                .expectedDisbursementDate(expectedDisbursementDate).dateFormat(DATETIME_PATTERN)
+                .expectedDisbursementDate(expectedDisbursementDate).dateFormat(CommonConstants.DATE_FORMAT)
                 .transactionProcessingStrategyCode(AdvancedPaymentScheduleTransactionProcessor.ADVANCED_PAYMENT_ALLOCATION_STRATEGY)
                 .locale("en").submittedOnDate(submittedOnDate).amortizationType(1).interestRatePerPeriod(interestRate)
                 .interestCalculationPeriodType(1).interestType(0).repaymentFrequencyType(0).repaymentEvery(repaymentAfterEvery)

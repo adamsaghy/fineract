@@ -41,13 +41,13 @@ public class ProductMixHelper {
     public ArrayList getProductsMixList() {
         final String GET_PRODUCT_MIX_URL = PRODUCT_MIX_URL + "?" + Utils.TENANT_IDENTIFIER;
         LOG.info("------------------------ RETRIEVING PRODUCT MIX -------------------------");
-        return Utils.performServerGet(this.requestSpec, this.responseSpec, GET_PRODUCT_MIX_URL, "");
+        return Utils.performServerGet(requestSpec, responseSpec, GET_PRODUCT_MIX_URL, "");
     }
 
     public HashMap getProductMixTemplate() {
         final String GET_PRODUCT_MIX_URL = PRODUCT_MIX_URL + "/template?isProductMixTemplate=true&" + Utils.TENANT_IDENTIFIER;
         LOG.info("-------------------- RETRIEVING PRODUCT MIX TEMPLATE ---------------------");
-        return Utils.performServerGet(this.requestSpec, this.responseSpec, GET_PRODUCT_MIX_URL, "");
+        return Utils.performServerGet(requestSpec, responseSpec, GET_PRODUCT_MIX_URL, "");
     }
 
 }

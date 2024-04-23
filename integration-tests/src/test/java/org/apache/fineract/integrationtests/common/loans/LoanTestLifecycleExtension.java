@@ -31,6 +31,7 @@ import java.util.List;
 import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -40,27 +41,28 @@ public class LoanTestLifecycleExtension implements AfterEachCallback {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;
-    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
+    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern(CommonConstants.DATE_FORMAT).toFormatter();
 
     @Override
     public void afterEach(ExtensionContext context) {
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.requestSpec.header("Fineract-Platform-TenantId", "default");
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        requestSpec.header("Fineract-Platform-TenantId", "default");
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
         // Fully repay ACTIVE loans, so it will not be picked up by any jobs
         List<Integer> loanIds = LoanTransactionHelper.getLoanIdsByStatusId(requestSpec, responseSpec, 300);
         loanIds.forEach(loanId -> {
-            HashMap prepayDetail = this.loanTransactionHelper.getPrepayAmount(this.requestSpec, this.responseSpec, loanId);
+            HashMap prepayDetail = loanTransactionHelper.getPrepayAmount(requestSpec, responseSpec, loanId);
             LocalDate transactionDate = LocalDate.of((Integer) ((List) prepayDetail.get("date")).get(0),
                     (Integer) ((List) prepayDetail.get("date")).get(1), (Integer) ((List) prepayDetail.get("date")).get(2));
             Double amount = Double.parseDouble(String.valueOf(prepayDetail.get("amount")));
             Double netDisbursalAmount = Double.parseDouble(String.valueOf(prepayDetail.get("netDisbursalAmount")));
             Double repayAmount = Double.compare(amount, 0.0) > 0 ? amount : netDisbursalAmount;
-            loanTransactionHelper.makeLoanRepayment((long) loanId, new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy")
-                    .transactionDate(dateFormatter.format(transactionDate)).locale("en").transactionAmount(repayAmount));
+            loanTransactionHelper.makeLoanRepayment((long) loanId,
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT)
+                            .transactionDate(dateFormatter.format(transactionDate)).locale("en").transactionAmount(repayAmount));
         });
         // Undo APPROVED loans, so the next step can REJECT them, so it will not be picked up by any jobs
         loanIds = LoanTransactionHelper.getLoanIdsByStatusId(requestSpec, responseSpec, 200);
@@ -73,7 +75,7 @@ public class LoanTestLifecycleExtension implements AfterEachCallback {
             GetLoansLoanIdResponse details = loanTransactionHelper.getLoanDetails((long) loanId);
             loanTransactionHelper.rejectLoan((long) loanId,
                     new PostLoansLoanIdRequest().rejectedOnDate(dateFormatter.format(details.getTimeline().getSubmittedOnDate()))
-                            .locale("en").dateFormat("dd MMMM yyyy"));
+                            .locale("en").dateFormat(CommonConstants.DATE_FORMAT));
         });
     }
 }

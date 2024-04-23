@@ -45,6 +45,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
@@ -72,12 +73,12 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseSpecErr503 = new ResponseSpecBuilder().expectStatusCode(503).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        responseSpecErr503 = new ResponseSpecBuilder().expectStatusCode(503).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
     }
 
     @ParameterizedTest
@@ -103,8 +104,8 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
 
         // make Repayment
         final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("5 September 2022").locale("en")
-                        .transactionAmount(500.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("5 September 2022")
+                        .locale("en").transactionAmount(500.0));
 
         // verify transaction relation and outstanding balance
         reviewLoanTransactionRelations(loanId, repaymentTransaction_1.getResourceId(), 0, Double.valueOf("500.00"));
@@ -132,8 +133,8 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
 
         // Goodwill Credit
         final PostLoansLoanIdTransactionsResponse goodwillCredit_1 = loanTransactionHelper.makeGoodwillCredit((long) loanId,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("6 September 2022").locale("en")
-                        .transactionAmount(200.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("6 September 2022")
+                        .locale("en").transactionAmount(200.0));
 
         // verify transaction relation and outstanding balance
         reviewLoanTransactionRelations(loanId, goodwillCredit_1.getResourceId(), 0, Double.valueOf("300.00"));
@@ -156,8 +157,8 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
         // Payout Refund
 
         final PostLoansLoanIdTransactionsResponse payoutRefund_1 = loanTransactionHelper.makePayoutRefund((long) loanId,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 September 2022").locale("en")
-                        .transactionAmount(300.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("7 September 2022")
+                        .locale("en").transactionAmount(300.0));
 
         // verify transaction relation and outstanding balance
         reviewLoanTransactionRelations(loanId, payoutRefund_1.getResourceId(), 0, Double.valueOf("0.00"));
@@ -186,8 +187,8 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
         // Merchant Issued Refund
 
         final PostLoansLoanIdTransactionsResponse merchantIssuedRefund_1 = loanTransactionHelper.makeMerchantIssuedRefund((long) loanId,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("8 September 2022").locale("en")
-                        .transactionAmount(100.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("8 September 2022")
+                        .locale("en").transactionAmount(100.0));
 
         // verify transaction relation and outstanding balance
         reviewLoanTransactionRelations(loanId, merchantIssuedRefund_1.getResourceId(), 0, Double.valueOf("0.00"));
@@ -239,8 +240,8 @@ public class LoanChargebackOnPaymentTypeRepaymentTransactionsTest {
 
         // Merchant Refund
         final PostLoansLoanIdTransactionsResponse merchantIssuedRefund_2 = loanTransactionHelper.makeMerchantIssuedRefund((long) loanId,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("8 September 2022").locale("en")
-                        .transactionAmount(50.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("8 September 2022")
+                        .locale("en").transactionAmount(50.0));
 
         // reverse Merchant Refund
         loanTransactionHelper.reverseRepayment(loanId, merchantIssuedRefund_2.getResourceId().intValue(), "8 September 2022");

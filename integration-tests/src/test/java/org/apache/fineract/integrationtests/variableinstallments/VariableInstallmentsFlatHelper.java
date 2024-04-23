@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
@@ -79,7 +80,7 @@ public class VariableInstallmentsFlatHelper {
     public static String createDeleteVariations(ArrayList<Map> deletedInstallments) {
         Map<String, Object> toReturn = new HashMap<>();
         toReturn.put("locale", "en");
-        toReturn.put("dateFormat", "dd MMMM yyyy");
+        toReturn.put("dateFormat", CommonConstants.DATE_FORMAT);
         Map exceptions = new HashMap<>();
         exceptions.put("deletedinstallments", createDeletedMap(deletedInstallments));
         toReturn.put("exceptions", exceptions);
@@ -101,7 +102,7 @@ public class VariableInstallmentsFlatHelper {
     public static String createAddVariations() {
         Map<String, Object> toReturn = new HashMap<>();
         toReturn.put("locale", "en");
-        toReturn.put("dateFormat", "dd MMMM yyyy");
+        toReturn.put("dateFormat", CommonConstants.DATE_FORMAT);
         Map exceptions = new HashMap<>();
         exceptions.put("newinstallments", createNewInstallments());
         toReturn.put("exceptions", exceptions);
@@ -121,7 +122,7 @@ public class VariableInstallmentsFlatHelper {
     public static String createModifiyVariations(Map firstSchedule) {
         Map<String, Object> toReturn = new HashMap<>();
         toReturn.put("locale", "en");
-        toReturn.put("dateFormat", "dd MMMM yyyy");
+        toReturn.put("dateFormat", CommonConstants.DATE_FORMAT);
         Map exceptions = new HashMap<>();
         exceptions.put("modifiedinstallments", createModifyMap(firstSchedule));
         toReturn.put("exceptions", exceptions);
@@ -141,7 +142,7 @@ public class VariableInstallmentsFlatHelper {
     public static String createModifiyDateVariations(String[] date, String[] newdate, String[] principal) {
         Map<String, Object> toReturn = new HashMap<>();
         toReturn.put("locale", "en");
-        toReturn.put("dateFormat", "dd MMMM yyyy");
+        toReturn.put("dateFormat", CommonConstants.DATE_FORMAT);
         Map exceptions = new HashMap<>();
         exceptions.put("modifiedinstallments", createDateModifyMap(date, newdate, principal));
         toReturn.put("exceptions", exceptions);
@@ -176,7 +177,7 @@ public class VariableInstallmentsFlatHelper {
     public static String createAllVariations() {
         Map<String, Object> toReturn = new HashMap<>();
         toReturn.put("locale", "en");
-        toReturn.put("dateFormat", "dd MMMM yyyy");
+        toReturn.put("dateFormat", CommonConstants.DATE_FORMAT);
         Map exceptions = new HashMap<>();
         exceptions.put("modifiedinstallments", createModifyMap("20 November 2011"));
         exceptions.put("newinstallments", createNewInstallments("25 December 2011"));
@@ -209,7 +210,7 @@ public class VariableInstallmentsFlatHelper {
         cal.set(Calendar.MONTH, (int) list.get(1) - 1);
         cal.set(Calendar.DAY_OF_MONTH, (int) list.get(2));
         Date date = cal.getTime();
-        DateFormat requiredFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        DateFormat requiredFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         return requiredFormat.format(date);
     }
 

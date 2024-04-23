@@ -38,6 +38,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionIdRequest;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.apache.fineract.integrationtests.common.loans.LoanProductTestBuilder;
@@ -59,17 +60,17 @@ public class LoanDownPaymentTransactionTypeTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
     }
 
     @Test
     public void loanDownPaymentTransactionTypeTest() {
 
-        DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
+        DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern(CommonConstants.DATE_FORMAT).toFormatter();
 
         String loanExternalIdStr = UUID.randomUUID().toString();
 
@@ -89,8 +90,8 @@ public class LoanDownPaymentTransactionTypeTest {
 
         // make down payment for loan
         final PostLoansLoanIdTransactionsResponse downPaymentTransaction_1 = loanTransactionHelper.makeLoanDownPayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("5 September 2022").locale("en")
-                        .transactionAmount(100.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("5 September 2022")
+                        .locale("en").transactionAmount(100.0));
         assertNotNull(downPaymentTransaction_1);
 
         // verify details for down payment transaction
@@ -108,7 +109,7 @@ public class LoanDownPaymentTransactionTypeTest {
         String formattedDate = dateFormatter.format(adjustmentDate);
         PostLoansLoanIdTransactionsResponse adjustmentResult = loanTransactionHelper.reverseLoanTransaction(loanExternalIdStr,
                 loanDownPaymentTransaction.getId(), new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate(formattedDate)
-                        .locale("en").dateFormat("dd MMMM yyyy").transactionAmount(0.0));
+                        .locale("en").dateFormat(CommonConstants.DATE_FORMAT).transactionAmount(0.0));
 
         assertNotNull(adjustmentResult);
         assertEquals(loanDownPaymentTransaction.getId(), adjustmentResult.getResourceId());
@@ -119,8 +120,8 @@ public class LoanDownPaymentTransactionTypeTest {
         String downPaymentExternalIdStr = UUID.randomUUID().toString();
 
         final PostLoansLoanIdTransactionsResponse downPaymentTransaction_2 = loanTransactionHelper.makeLoanDownPayment(loanId.longValue(),
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("9 September 2022").locale("en")
-                        .transactionAmount(200.0).externalId(downPaymentExternalIdStr));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("9 September 2022")
+                        .locale("en").transactionAmount(200.0).externalId(downPaymentExternalIdStr));
         assertNotNull(downPaymentTransaction_2);
         assertEquals(downPaymentExternalIdStr, downPaymentTransaction_2.getResourceExternalId());
 
@@ -139,7 +140,7 @@ public class LoanDownPaymentTransactionTypeTest {
         formattedDate = dateFormatter.format(adjustmentDate);
         PostLoansLoanIdTransactionsResponse adjustmentResult_1 = loanTransactionHelper.reverseLoanTransaction(loanExternalIdStr,
                 downPaymentExternalIdStr, new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate(formattedDate).locale("en")
-                        .dateFormat("dd MMMM yyyy").transactionAmount(0.0));
+                        .dateFormat(CommonConstants.DATE_FORMAT).transactionAmount(0.0));
 
         assertNotNull(adjustmentResult_1);
         assertEquals(loanDownPaymentTransaction_1.getId(), adjustmentResult_1.getResourceId());

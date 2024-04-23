@@ -65,12 +65,12 @@ public class ProvisioningIntegrationTest {
     @BeforeEach
     public void setup() throws ParseException {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.requestSpec.header("Fineract-Platform-TenantId", "default");
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        requestSpec.header("Fineract-Platform-TenantId", "default");
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
         Assumptions.assumeTrue(!isAlreadyProvisioningEntriesCreated());
     }
 
@@ -78,29 +78,29 @@ public class ProvisioningIntegrationTest {
     public void testCreateProvisioningCriteria() {
         ProvisioningTransactionHelper transactionHelper = new ProvisioningTransactionHelper(requestSpec, responseSpec);
         ArrayList<Integer> loanProducts = new ArrayList<>(LOANPRODUCTS_SIZE);
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
         for (int i = 0; i < LOANPRODUCTS_SIZE; i++) {
             final Integer loanProductID = createLoanProduct(false, NONE);
             loanProducts.add(loanProductID);
             Assertions.assertNotNull(loanProductID);
             List<HashMap> collaterals = new ArrayList<>();
-            final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+            final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
             Assertions.assertNotNull(collateralId);
-            final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+            final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec,
                     String.valueOf(clientID), collateralId);
             Assertions.assertNotNull(clientCollateralId);
             addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
             final Integer loanID = applyForLoanApplication(clientID, loanProductID, null, null, "1,00,000.00", collaterals);
-            HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+            HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
             LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
-            loanStatusHashMap = this.loanTransactionHelper.approveLoan("20 September 2011", loanID);
+            loanStatusHashMap = loanTransactionHelper.approveLoan("20 September 2011", loanID);
             LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
             LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
             LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
-            String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-            loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("20 September 2011", loanID,
+            String loanDetails = loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
+            loanStatusHashMap = loanTransactionHelper.disburseLoanWithNetDisbursalAmount("20 September 2011", loanID,
                     JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
             LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
             Assertions.assertNotNull(loanID);
@@ -226,7 +226,7 @@ public class ProvisioningIntegrationTest {
         }
         final String loanProductJSON = builder.build(null);
 
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        return loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, List<HashMap> charges,
@@ -246,7 +246,7 @@ public class ProvisioningIntegrationTest {
                 .withExpectedDisbursementDate("20 September 2011") //
                 .withSubmittedOnDate("20 September 2011") //
                 .withCollaterals(collaterals).withCharges(charges).build(clientID.toString(), loanProductID.toString(), savingsId);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        return loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
     private boolean isAlreadyProvisioningEntriesCreated() throws ParseException {

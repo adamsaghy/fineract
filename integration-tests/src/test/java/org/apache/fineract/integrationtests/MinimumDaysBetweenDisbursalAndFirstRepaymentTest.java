@@ -79,10 +79,10 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
     @Test
     public void createLoanEntity_WITH_DAY_BETWEEN_DISB_DATE_AND_REPAY_START_DATE_GREATER_THAN_MIN_DAY_CRITERIA() {
 
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
         // create all required entities
         this.createRequiredEntities();
@@ -91,9 +91,9 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
         final String firstRepaymentDate = "11 September 2014";
 
         List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec,
                 this.clientId.toString(), collateralId);
         Assertions.assertNotNull(clientCollateralId);
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
@@ -106,23 +106,23 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
                 .withPrincipalGrace("2").withInterestGrace("2").withFirstRepaymentDate(firstRepaymentDate).withCollaterals(collaterals)
                 .build(this.clientId.toString(), this.loanProductId.toString(), null);
 
-        this.loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        this.loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
 
         // Test for loan account is created
         Assertions.assertNotNull(this.loanId);
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, this.loanId);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, this.loanId);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         // Test for loan account is created, can be approved
-        this.loanTransactionHelper.approveLoan(disbursalDate, this.loanId);
-        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, this.loanId);
+        loanTransactionHelper.approveLoan(disbursalDate, this.loanId);
+        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, this.loanId);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
 
         // Test for loan account approved can be disbursed
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, this.loanId);
-        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(disbursalDate, this.loanId,
+        String loanDetails = loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, this.loanId);
+        loanTransactionHelper.disburseLoanWithNetDisbursalAmount(disbursalDate, this.loanId,
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, this.loanId);
+        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, this.loanId);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
     }
@@ -146,25 +146,25 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
     @Test
     public void createLoanEntity_WITH_DAY_BETWEEN_DISB_DATE_AND_REPAY_START_DATE_LESS_THAN_MIN_DAY_CRITERIA() {
 
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseSpecForStatusCode403 = new ResponseSpecBuilder().expectStatusCode(403).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        responseSpecForStatusCode403 = new ResponseSpecBuilder().expectStatusCode(403).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
         // create all required entities
         this.createRequiredEntities();
 
         // loanTransactionHelper is reassigned to accept 403 status code from
         // server
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpecForStatusCode403);
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpecForStatusCode403);
 
         final String disbursalDate = "04 September 2014";
         final String firstRepaymentDate = "05 September 2014";
 
         List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec,
                 this.clientId.toString(), collateralId);
         Assertions.assertNotNull(clientCollateralId);
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
@@ -177,8 +177,7 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
                 .withPrincipalGrace("2").withInterestGrace("2").withFirstRepaymentDate(firstRepaymentDate).withCollaterals(collaterals)
                 .build(this.clientId.toString(), this.loanProductId.toString(), null);
 
-        List<HashMap> error = (List<HashMap>) this.loanTransactionHelper.createLoanAccount(loanApplicationJSON,
-                CommonConstants.RESPONSE_ERROR);
+        List<HashMap> error = (List<HashMap>) loanTransactionHelper.createLoanAccount(loanApplicationJSON, CommonConstants.RESPONSE_ERROR);
         assertEquals("error.msg.loan.days.between.first.repayment.and.disbursal.are.less.than.minimum.allowed",
                 error.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
 
@@ -202,8 +201,8 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
      */
 
     private void associateClientToGroup(final Integer groupId, final Integer clientId) {
-        GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupId.toString(), clientId.toString());
-        GroupHelper.verifyGroupMembers(this.requestSpec, this.responseSpec, groupId, clientId);
+        GroupHelper.associateClient(requestSpec, responseSpec, groupId.toString(), clientId.toString());
+        GroupHelper.verifyGroupMembers(requestSpec, responseSpec, groupId, clientId);
     }
 
     /*
@@ -211,24 +210,24 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
      */
 
     private void createGroupEntityWithCalendar() {
-        this.groupId = GroupHelper.createGroup(this.requestSpec, this.responseSpec, this.groupActivationDate);
-        GroupHelper.verifyGroupCreatedOnServer(this.requestSpec, this.responseSpec, this.groupId);
+        this.groupId = GroupHelper.createGroup(requestSpec, responseSpec, this.groupActivationDate);
+        GroupHelper.verifyGroupCreatedOnServer(requestSpec, responseSpec, this.groupId);
 
         final String startDate = this.groupActivationDate;
         final String frequency = "2"; // 2:Weekly
         final String interval = "1"; // Every one week
         final String repeatsOnDay = "1"; // 1:Monday
 
-        this.setGroupCalendarId(CalendarHelper.createMeetingCalendarForGroup(this.requestSpec, this.responseSpec, this.groupId, startDate,
-                frequency, interval, repeatsOnDay));
+        this.setGroupCalendarId(CalendarHelper.createMeetingCalendarForGroup(requestSpec, responseSpec, this.groupId, startDate, frequency,
+                interval, repeatsOnDay));
     }
 
     /**
      * create a new client
      **/
     private void createClientEntity() {
-        this.clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, this.clientId);
+        this.clientId = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, this.clientId);
     }
 
     /**
@@ -239,7 +238,7 @@ public class MinimumDaysBetweenDisbursalAndFirstRepaymentTest {
                 .withNumberOfRepayments(numberOfRepayments).withinterestRatePerPeriod(interestRatePerPeriod)
                 .withInterestRateFrequencyTypeAsYear()
                 .withMinimumDaysBetweenDisbursalAndFirstRepayment(minimumDaysBetweenDisbursalAndFirstRepayment).build(null);
-        this.loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        this.loanProductId = loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
     public Integer getGroupCalendarId() {

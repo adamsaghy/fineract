@@ -38,6 +38,7 @@ import org.apache.fineract.client.models.GetLoansLoanIdResponse;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsRequest;
 import org.apache.fineract.client.models.PostLoansLoanIdTransactionsResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.charges.ChargesHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanApplicationTestBuilder;
@@ -58,18 +59,18 @@ public class LoanPayOffAddChargeWithRefundTest {
     private RequestSpecification requestSpec;
     private ClientHelper clientHelper;
     private LoanTransactionHelper loanTransactionHelper;
-    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
+    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern(CommonConstants.DATE_FORMAT).toFormatter();
 
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseSpecErr400 = new ResponseSpecBuilder().expectStatusCode(400).build();
-        this.responseSpecErr503 = new ResponseSpecBuilder().expectStatusCode(503).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        responseSpecErr400 = new ResponseSpecBuilder().expectStatusCode(400).build();
+        responseSpecErr503 = new ResponseSpecBuilder().expectStatusCode(503).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
     }
 
     @Test
@@ -93,19 +94,19 @@ public class LoanPayOffAddChargeWithRefundTest {
 
         // make Repayments
         final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("4 September 2022").locale("en")
-                        .transactionAmount(1000.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("4 September 2022")
+                        .locale("en").transactionAmount(1000.0));
 
-        GetLoansLoanIdResponse loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+        GetLoansLoanIdResponse loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         final Integer loanRepaymentScheduleSize = loanDetails.getRepaymentSchedule().getPeriods().size();
         assertTrue(loanDetails.getStatus().getClosedObligationsMet());
 
         // make payout refund
         final PostLoansLoanIdTransactionsResponse payoutRefund_1 = loanTransactionHelper.makePayoutRefund((long) loanId,
-                new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("4 September 2022").locale("en")
-                        .transactionAmount(100.0));
+                new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("4 September 2022")
+                        .locale("en").transactionAmount(100.0));
 
-        loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+        loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertTrue(loanDetails.getStatus().getOverpaid());
 
         // apply charges on date before maturity date
@@ -114,11 +115,11 @@ public class LoanPayOffAddChargeWithRefundTest {
 
         LocalDate targetDate = LocalDate.of(2022, 9, 4);
         final String feeChargeAddedDate = dateFormatter.format(targetDate);
-        Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+        Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeChargeAddedDate, "10"));
 
         assertNotNull(feeLoanChargeId);
-        loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+        loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertEquals(loanDetails.getRepaymentSchedule().getPeriods().size(), loanRepaymentScheduleSize);
 
         // apply charges on date after maturity date
@@ -127,11 +128,11 @@ public class LoanPayOffAddChargeWithRefundTest {
 
         LocalDate targetDate_1 = LocalDate.of(2022, 10, 4);
         final String feeCharge1AddedDate = dateFormatter.format(targetDate_1);
-        Integer feeLoanChargeId_1 = this.loanTransactionHelper.addChargesForLoan(loanId,
+        Integer feeLoanChargeId_1 = loanTransactionHelper.addChargesForLoan(loanId,
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge_1), feeCharge1AddedDate, "10"));
 
         assertNotNull(feeLoanChargeId_1);
-        loanDetails = this.loanTransactionHelper.getLoanDetails((long) loanId);
+        loanDetails = loanTransactionHelper.getLoanDetails((long) loanId);
         assertEquals(loanDetails.getRepaymentSchedule().getPeriods().size(), loanRepaymentScheduleSize + 1);
 
     }

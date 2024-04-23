@@ -44,6 +44,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionI
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
@@ -63,9 +64,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(LoanTestLifecycleExtension.class)
 public class LoanTransactionReverseReplayTest {
 
-    private static final String DATE_PATTERN = "dd MMMM yyyy";
     private final BusinessDateHelper businessDateHelper = new BusinessDateHelper();
-    private final DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern(DATE_PATTERN).toFormatter();
+    private final DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern(CommonConstants.DATE_FORMAT).toFormatter();
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private ClientHelper clientHelper;
@@ -79,7 +79,7 @@ public class LoanTransactionReverseReplayTest {
         Utils.initializeRESTAssured();
         requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.requestSpec.header("Fineract-Platform-TenantId", "default");
+        requestSpec.header("Fineract-Platform-TenantId", "default");
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
         clientHelper = new ClientHelper(requestSpec, responseSpec);
@@ -99,7 +99,7 @@ public class LoanTransactionReverseReplayTest {
         try {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
-                    .date("04 October 2022").dateFormat(DATE_PATTERN).locale("en"));
+                    .date("04 October 2022").dateFormat(CommonConstants.DATE_FORMAT).locale("en"));
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
@@ -116,26 +116,26 @@ public class LoanTransactionReverseReplayTest {
                     ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", true));
 
             final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATE_PATTERN).transactionDate("03 October 2022").locale("en")
-                            .transactionAmount(1000.0));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("03 October 2022")
+                            .locale("en").transactionAmount(1000.0));
 
             loanTransactionHelper.makeMerchantIssuedRefund(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest()
-                    .dateFormat(DATE_PATTERN).transactionDate("04 October 2022").locale("en").transactionAmount(500.0));
+                    .dateFormat(CommonConstants.DATE_FORMAT).transactionDate("04 October 2022").locale("en").transactionAmount(500.0));
 
             inlineLoanCOBHelper.executeInlineCOB(List.of(loanId.longValue()));
 
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
-                    .date("05 October 2022").dateFormat(DATE_PATTERN).locale("en"));
+                    .date("05 October 2022").dateFormat(CommonConstants.DATE_FORMAT).locale("en"));
 
             loanTransactionHelper.makeCreditBalanceRefund(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest()
-                    .dateFormat(DATE_PATTERN).transactionDate("05 October 2022").locale("en").transactionAmount(500.0));
+                    .dateFormat(CommonConstants.DATE_FORMAT).transactionDate("05 October 2022").locale("en").transactionAmount(500.0));
 
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
-                    .date("06 October 2022").dateFormat(DATE_PATTERN).locale("en"));
+                    .date("06 October 2022").dateFormat(CommonConstants.DATE_FORMAT).locale("en"));
 
             loanTransactionHelper.reverseLoanTransaction(loanExternalIdStr, repaymentTransaction.getResourceId(),
                     new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate("06 October 2022").locale("en")
-                            .dateFormat(DATE_PATTERN).transactionAmount(0.0));
+                            .dateFormat(CommonConstants.DATE_FORMAT).transactionAmount(0.0));
 
             LocalDate targetDate = LocalDate.of(2022, 10, 6);
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
@@ -162,7 +162,7 @@ public class LoanTransactionReverseReplayTest {
         try {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
-                    .date("04 October 2022").dateFormat(DATE_PATTERN).locale("en"));
+                    .date("04 October 2022").dateFormat(CommonConstants.DATE_FORMAT).locale("en"));
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
@@ -180,8 +180,9 @@ public class LoanTransactionReverseReplayTest {
 
             // make repayment
             String loanTransactionExternalIdStr = UUID.randomUUID().toString();
-            loanTransactionHelper.makeLoanRepayment(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest().dateFormat(DATE_PATTERN)
-                    .transactionDate("03 October 2022").locale("en").transactionAmount(1000.0).externalId(loanTransactionExternalIdStr));
+            loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("03 October 2022")
+                            .locale("en").transactionAmount(1000.0).externalId(loanTransactionExternalIdStr));
 
             LocalDate targetDate = LocalDate.of(2022, 10, 10);
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
@@ -198,18 +199,18 @@ public class LoanTransactionReverseReplayTest {
                     loansLoanIdResponse.getRepaymentSchedule().getPeriods().get(lastPeriodIndex).getDueDate());
 
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
-                    .date("06 October 2022").dateFormat(DATE_PATTERN).locale("en"));
+                    .date("06 October 2022").dateFormat(CommonConstants.DATE_FORMAT).locale("en"));
 
             final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATE_PATTERN).transactionDate("06 October 2022").locale("en")
-                            .transactionAmount(500.0));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("06 October 2022")
+                            .locale("en").transactionAmount(500.0));
 
             loanTransactionHelper.makeCreditBalanceRefund(loanExternalIdStr, new PostLoansLoanIdTransactionsRequest()
-                    .dateFormat(DATE_PATTERN).transactionDate("06 October 2022").locale("en").transactionAmount(490.0));
+                    .dateFormat(CommonConstants.DATE_FORMAT).transactionDate("06 October 2022").locale("en").transactionAmount(490.0));
 
             loanTransactionHelper.reverseLoanTransaction(loanExternalIdStr, repaymentTransaction.getResourceId(),
                     new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate("06 October 2022").locale("en")
-                            .dateFormat(DATE_PATTERN).transactionAmount(0.0));
+                            .dateFormat(CommonConstants.DATE_FORMAT).transactionAmount(0.0));
 
             loansLoanIdResponse = loanTransactionHelper.getLoanDetails(loanExternalIdStr);
             lastPeriodIndex = loansLoanIdResponse.getRepaymentSchedule().getPeriods().size() - 1;
@@ -217,7 +218,7 @@ public class LoanTransactionReverseReplayTest {
                     loansLoanIdResponse.getRepaymentSchedule().getPeriods().get(lastPeriodIndex).getDueDate());
 
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
-                    .date("11 October 2022").dateFormat(DATE_PATTERN).locale("en"));
+                    .date("11 October 2022").dateFormat(CommonConstants.DATE_FORMAT).locale("en"));
             loanTransactionHelper.chargebackLoanTransaction(loanExternalIdStr, loanTransactionExternalIdStr,
                     new PostLoansLoanIdTransactionsTransactionIdRequest().locale("en").transactionAmount(100.0).paymentTypeId(1L));
 
@@ -235,7 +236,7 @@ public class LoanTransactionReverseReplayTest {
         try {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
-                    .date("04 October 2022").dateFormat(DATE_PATTERN).locale("en"));
+                    .date("04 October 2022").dateFormat(CommonConstants.DATE_FORMAT).locale("en"));
 
             final Account assetAccount = accountHelper.createAssetAccount();
             final Account assetFeeAndPenaltyAccount = accountHelper.createAssetAccount();
@@ -265,21 +266,22 @@ public class LoanTransactionReverseReplayTest {
             Integer chargeOffReasonId = CodeHelper.createChargeOffCodeValue(requestSpec, responseSpec, randomText, 1);
             String transactionExternalId = UUID.randomUUID().toString();
             PostLoansLoanIdTransactionsResponse chargeOffResponse = loanTransactionHelper.chargeOffLoan(loanId.longValue(),
-                    new PostLoansLoanIdTransactionsRequest().transactionDate("03 October 2022").locale("en").dateFormat("dd MMMM yyyy")
-                            .externalId(transactionExternalId).chargeOffReasonId((long) chargeOffReasonId));
+                    new PostLoansLoanIdTransactionsRequest().transactionDate("03 October 2022").locale("en")
+                            .dateFormat(CommonConstants.DATE_FORMAT).externalId(transactionExternalId)
+                            .chargeOffReasonId((long) chargeOffReasonId));
 
             final PostLoansLoanIdTransactionsResponse repaymentTransaction = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATE_PATTERN).transactionDate("03 October 2022").locale("en")
-                            .transactionAmount(1500.0));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("03 October 2022")
+                            .locale("en").transactionAmount(1500.0));
 
             inlineLoanCOBHelper.executeInlineCOB(List.of(loanId.longValue()));
 
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
-                    .date("05 October 2022").dateFormat(DATE_PATTERN).locale("en"));
+                    .date("05 October 2022").dateFormat(CommonConstants.DATE_FORMAT).locale("en"));
 
             PostLoansLoanIdTransactionsResponse cbrTransactionResponse = loanTransactionHelper.makeCreditBalanceRefund(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATE_PATTERN).transactionDate("05 October 2022").locale("en")
-                            .transactionAmount(500.0));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("05 October 2022")
+                            .locale("en").transactionAmount(500.0));
 
             GetLoansLoanIdResponse loansLoanIdResponse = loanTransactionHelper.getLoanDetails(loanExternalIdStr);
             int lastTransactionIndex = loansLoanIdResponse.getTransactions().size() - 1;
@@ -300,11 +302,11 @@ public class LoanTransactionReverseReplayTest {
             assertEquals(1, cbrAssetJournalEntries.size());
 
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
-                    .date("06 October 2022").dateFormat(DATE_PATTERN).locale("en"));
+                    .date("06 October 2022").dateFormat(CommonConstants.DATE_FORMAT).locale("en"));
 
             loanTransactionHelper.reverseLoanTransaction(loanExternalIdStr, repaymentTransaction.getResourceId(),
                     new PostLoansLoanIdTransactionsTransactionIdRequest().transactionDate("06 October 2022").locale("en")
-                            .dateFormat(DATE_PATTERN).transactionAmount(0.0));
+                            .dateFormat(CommonConstants.DATE_FORMAT).transactionAmount(0.0));
 
             // check if the original CBR got reversed
             journalEntriesForCBR = journalEntryHelper

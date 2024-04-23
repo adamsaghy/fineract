@@ -72,11 +72,11 @@ public class LoanRescheduleRequestTest {
     @BeforeEach
     public void initialize() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        this.loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(requestSpec, responseSpec);
 
         this.generalResponseSpec = new ResponseSpecBuilder().build();
 
@@ -97,9 +97,9 @@ public class LoanRescheduleRequestTest {
      * create a new client
      **/
     private void createClientEntity() {
-        this.clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+        this.clientId = ClientHelper.createClient(requestSpec, responseSpec);
 
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, this.clientId);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, this.clientId);
     }
 
     /**
@@ -112,7 +112,7 @@ public class LoanRescheduleRequestTest {
                 .withNumberOfRepayments(numberOfRepayments).withinterestRatePerPeriod(interestRatePerPeriod)
                 .withInterestRateFrequencyTypeAsYear().build(null);
 
-        this.loanProductId = this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        this.loanProductId = loanTransactionHelper.getLoanProductId(loanProductJSON);
         LOG.info("Successfully created loan product  (ID:{}) ", this.loanProductId);
     }
 
@@ -122,9 +122,9 @@ public class LoanRescheduleRequestTest {
     private void createLoanEntity() {
         LOG.info("---------------------------------NEW LOAN APPLICATION------------------------------------------");
         List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec,
                 this.clientId.toString(), collateralId);
         Assertions.assertNotNull(clientCollateralId);
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
@@ -135,7 +135,7 @@ public class LoanRescheduleRequestTest {
                 .withSubmittedOnDate(dateString).withExpectedDisbursementDate(dateString).withPrincipalGrace("2").withInterestGrace("2")
                 .withCollaterals(collaterals).build(this.clientId.toString(), this.loanProductId.toString(), null);
 
-        this.loanId = this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        this.loanId = loanTransactionHelper.getLoanId(loanApplicationJSON);
 
         LOG.info("Sucessfully created loan (ID: {} )", this.loanId);
 
@@ -160,7 +160,7 @@ public class LoanRescheduleRequestTest {
     private void approveLoanApplication() {
 
         if (this.loanId != null) {
-            this.loanTransactionHelper.approveLoan(this.dateString, this.loanId);
+            loanTransactionHelper.approveLoan(this.dateString, this.loanId);
             LOG.info("Successfully approved loan (ID: {} )", this.loanId);
         }
     }
@@ -171,8 +171,8 @@ public class LoanRescheduleRequestTest {
     private void disburseLoan() {
 
         if (this.loanId != null) {
-            String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, this.loanId);
-            this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(this.dateString, this.loanId,
+            String loanDetails = loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, this.loanId);
+            loanTransactionHelper.disburseLoanWithNetDisbursalAmount(this.dateString, this.loanId,
                     JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
             LOG.info("Successfully disbursed loan (ID: {} )", this.loanId);
         }
@@ -224,9 +224,9 @@ public class LoanRescheduleRequestTest {
         final HashMap response = (HashMap) this.loanRescheduleRequestHelper.getLoanRescheduleRequest(loanRescheduleRequestId, "statusEnum");
         assertTrue((Boolean) response.get("approved"));
 
-        final Integer numberOfRepayments = (Integer) this.loanTransactionHelper.getLoanDetail(requestSpec, generalResponseSpec, loanId,
+        final Integer numberOfRepayments = (Integer) loanTransactionHelper.getLoanDetail(requestSpec, generalResponseSpec, loanId,
                 "numberOfRepayments");
-        final HashMap loanSummary = this.loanTransactionHelper.getLoanSummary(requestSpec, generalResponseSpec, loanId);
+        final HashMap loanSummary = loanTransactionHelper.getLoanSummary(requestSpec, generalResponseSpec, loanId);
         final Float totalExpectedRepayment = (Float) loanSummary.get("totalExpectedRepayment");
 
         assertEquals(12, numberOfRepayments, "NUMBER OF REPAYMENTS is NOK");

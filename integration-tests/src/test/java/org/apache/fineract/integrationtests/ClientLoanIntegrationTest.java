@@ -92,6 +92,7 @@ import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -172,8 +173,8 @@ public class ClientLoanIntegrationTest {
     private static final SavingsAccountHelper SAVINGS_ACCOUNT_HELPER = new SavingsAccountHelper(REQUEST_SPEC, RESPONSE_SPEC);
     private static final AccountTransferHelper ACCOUNT_TRANSFER_HELPER = new AccountTransferHelper(REQUEST_SPEC, RESPONSE_SPEC);
     private static final LoanProductHelper LOAN_PRODUCT_HELPER = new LoanProductHelper();
-    private static final String DATETIME_PATTERN = "dd MMMM yyyy";
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = new DateTimeFormatterBuilder().appendPattern(DATETIME_PATTERN)
+
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = new DateTimeFormatterBuilder().appendPattern(CommonConstants.DATE_FORMAT)
             .toFormatter();
     private static final BusinessDateHelper BUSINESS_DATE_HELPER = new BusinessDateHelper();
     private static final ChargesHelper CHARGES_HELPER = new ChargesHelper();
@@ -443,7 +444,7 @@ public class ClientLoanIntegrationTest {
         HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(REQUEST_SPEC, RESPONSE_SPEC, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
-        DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN, Locale.US);
+        DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         final String LOAN_DISBURSEMENT_DATE = dateFormat.format(todaysDate.getTime());
 
@@ -3124,7 +3125,7 @@ public class ClientLoanIntegrationTest {
     @Test
     public void testLoanScheduleWithInterestRecalculation_WITH_REST_SAME_AS_REPAYMENT_INTEREST_COMPOUND_NONE_STRATEGY_REDUCE_EMI() {
 
-        DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN, Locale.US);
+        DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -3234,7 +3235,7 @@ public class ClientLoanIntegrationTest {
     @Test
     public void testLoanScheduleWithInterestRecalculation_WITH_REST_SAME_AS_REPAYMENT_INTEREST_COMPOUND_NONE_STRATEGY_REDUCE_EMI_WITH_INSTALLMENT_CHARGE() {
 
-        DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN, Locale.US);
+        DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -3331,7 +3332,7 @@ public class ClientLoanIntegrationTest {
     @Test
     public void testLoanScheduleWithInterestRecalculation_WITH_REST_DAILY_INTEREST_COMPOUND_INTEREST_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS() {
 
-        DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN, Locale.US);
+        DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -3444,7 +3445,7 @@ public class ClientLoanIntegrationTest {
     @Test
     public void testInteroperationLoanRepaymentAPI() {
         try {
-            DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN, Locale.US);
+            DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
             dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
             GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(REQUEST_SPEC, RESPONSE_SPEC, "42", true);
             Calendar startDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -3502,7 +3503,7 @@ public class ClientLoanIntegrationTest {
     @Test
     public void testLoanScheduleWithInterestRecalculation_WITH_REST_WEEKLY_INTEREST_COMPOUND_INTEREST_FEE_STRATEGY_REDUCE_NEXT_INSTALLMENTS() {
 
-        DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN, Locale.US);
+        DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -3639,7 +3640,7 @@ public class ClientLoanIntegrationTest {
     public void testLoanScheduleWithInterestRecalculation_WITH_REST_DAILY_INTEREST_COMPOUND_INTEREST_FEE_STRATEGY_WITH_OVERDUE_CHARGE()
             throws InterruptedException {
 
-        DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN, Locale.US);
+        DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -3750,7 +3751,7 @@ public class ClientLoanIntegrationTest {
     @Test
     public void testLoanScheduleWithInterestRecalculation_WITH_PERIODIC_ACCOUNTING() {
 
-        DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN, Locale.US);
+        DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         final Account assetAccount = ACCOUNT_HELPER.createAssetAccount();
@@ -3855,7 +3856,7 @@ public class ClientLoanIntegrationTest {
     @Test
     public void testLoanScheduleWithInterestRecalculation_WITH_CURRENT_REPAYMENT_BASED_ARREARS_AGEING() {
 
-        DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN, Locale.US);
+        DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -3936,7 +3937,7 @@ public class ClientLoanIntegrationTest {
     @Test
     public void testLoanScheduleWithInterestRecalculation_WITH_ORIGINAL_REPAYMENT_BASED_ARREARS_AGEING() {
 
-        DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN, Locale.US);
+        DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -4706,7 +4707,7 @@ public class ClientLoanIntegrationTest {
     @Test
     public void testLoanScheduleWithInterestRecalculation_WITH_INTEREST_FIRST_STRATEGY_AND_REST_DAILY_INTEREST_COMPOUND_INTEREST_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS() {
 
-        DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN, Locale.US);
+        DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -4820,7 +4821,7 @@ public class ClientLoanIntegrationTest {
     @Test
     public void testLoanScheduleWithInterestRecalculation_WITH_INTEREST_FIRST_STRATEGY_AND_REST_DAILY_INTEREST_COMPOUND_INTEREST_STRATEGY_REDUCE_NUMBER_OF_INSTALLMENTS_EARLY_REPAYMENT() {
 
-        DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN, Locale.US);
+        DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -4931,7 +4932,7 @@ public class ClientLoanIntegrationTest {
     @Test
     public void testLoanScheduleWithInterestRecalculationMakePrepaymentAfterRepayment() {
         try {
-            DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN, Locale.US);
+            DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
             dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
             GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(REQUEST_SPEC, RESPONSE_SPEC, "42", true);
             Calendar startDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -4996,7 +4997,7 @@ public class ClientLoanIntegrationTest {
         try {
             final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
             final LoanTransactionHelper validationErrorHelper = new LoanTransactionHelper(REQUEST_SPEC, errorResponse);
-            DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN, Locale.US);
+            DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
             dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
             GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(REQUEST_SPEC, RESPONSE_SPEC, "42", true);
             Calendar startDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -5184,7 +5185,7 @@ public class ClientLoanIntegrationTest {
         try {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.TRUE);
             BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
-                    .date("01 November 2022").dateFormat(DATETIME_PATTERN).locale("en"));
+                    .date("01 November 2022").dateFormat(CommonConstants.DATE_FORMAT).locale("en"));
             final Account assetAccount = ACCOUNT_HELPER.createAssetAccount();
             final Account incomeAccount = ACCOUNT_HELPER.createIncomeAccount();
             final Account expenseAccount = ACCOUNT_HELPER.createExpenseAccount();
@@ -5270,8 +5271,8 @@ public class ClientLoanIntegrationTest {
             assertEquals(1L, chargeAdjustmentTransaction.getPaymentDetailData().getPaymentType().getId());
 
             PostLoansLoanIdTransactionsResponse repaymentResult = LOAN_TRANSACTION_HELPER.makeLoanRepayment((long) loanID,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("06 September 2022").locale("en")
-                            .transactionAmount(5.0));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("06 September 2022")
+                            .locale("en").transactionAmount(5.0));
 
             loanSchedule = LOAN_TRANSACTION_HELPER.getLoanRepaymentSchedule(REQUEST_SPEC, RESPONSE_SPEC, loanID);
             assertEquals(2, loanSchedule.size());
@@ -5314,13 +5315,13 @@ public class ClientLoanIntegrationTest {
 
             String uuid = UUID.randomUUID().toString();
             LOAN_TRANSACTION_HELPER.reverseLoanTransaction((long) loanID, replayedTransaction.getId(),
-                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN).transactionDate("08 September 2022")
-                            .transactionAmount(0.0).locale("en").reversalExternalId(uuid));
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(CommonConstants.DATE_FORMAT)
+                            .transactionDate("08 September 2022").transactionAmount(0.0).locale("en").reversalExternalId(uuid));
 
             // Should fail due to external id collusion
             assertThrows(CallFailedRuntimeException.class,
                     () -> LOAN_TRANSACTION_HELPER.reverseLoanTransaction((long) loanID, repaymentResult.getResourceId(),
-                            new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN)
+                            new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(CommonConstants.DATE_FORMAT)
                                     .transactionDate("08 September 2022").transactionAmount(0.0).locale("en").reversalExternalId(uuid)));
 
             loanSchedule = LOAN_TRANSACTION_HELPER.getLoanRepaymentSchedule(REQUEST_SPEC, RESPONSE_SPEC, loanID);
@@ -5353,7 +5354,7 @@ public class ClientLoanIntegrationTest {
         try {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.TRUE);
             BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
-                    .date("01 November 2022").dateFormat(DATETIME_PATTERN).locale("en"));
+                    .date("01 November 2022").dateFormat(CommonConstants.DATE_FORMAT).locale("en"));
             final Account assetAccount = ACCOUNT_HELPER.createAssetAccount();
             final Account assetFeeAndPenaltyAccount = ACCOUNT_HELPER.createAssetAccount();
             final Account incomeAccount = ACCOUNT_HELPER.createIncomeAccount();
@@ -5487,8 +5488,8 @@ public class ClientLoanIntegrationTest {
 
             String uuid = UUID.randomUUID().toString();
             LOAN_TRANSACTION_HELPER.reverseLoanTransaction((long) loanID, chargeAdjustmentTransactionId,
-                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN).transactionDate("08 September 2022")
-                            .transactionAmount(0.0).locale("en").reversalExternalId(uuid));
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(CommonConstants.DATE_FORMAT)
+                            .transactionDate("08 September 2022").transactionAmount(0.0).locale("en").reversalExternalId(uuid));
 
             journalEntries = JOURNAL_ENTRY_HELPER.getJournalEntriesByTransactionId("L" + chargeAdjustmentTransactionId);
             assertEquals(10.0f, (float) journalEntries.get(0).get("amount"));
@@ -5546,8 +5547,8 @@ public class ClientLoanIntegrationTest {
             assertEquals(3.0, loanSummary.getFeeChargesOutstanding());
             assertEquals(1013.0, loanSummary.getTotalOutstanding());
 
-            LOAN_TRANSACTION_HELPER.makeLoanRepayment((long) loanID, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
-                    .transactionDate("11 September 2022").locale("en").transactionAmount(5.0));
+            LOAN_TRANSACTION_HELPER.makeLoanRepayment((long) loanID, new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(CommonConstants.DATE_FORMAT).transactionDate("11 September 2022").locale("en").transactionAmount(5.0));
 
             externalId = UUID.randomUUID().toString();
             chargeAdjustmentResponse = LOAN_TRANSACTION_HELPER.chargeAdjustment((long) loanID, (long) feeLoanChargeId,
@@ -5661,8 +5662,8 @@ public class ClientLoanIntegrationTest {
                 assertEquals("CREDIT", ((HashMap) journalEntries.get(1).get("entryType")).get("value"));
             }
 
-            LOAN_TRANSACTION_HELPER.makeLoanRepayment((long) loanID, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
-                    .transactionDate("13 September 2022").locale("en").transactionAmount(998.0));
+            LOAN_TRANSACTION_HELPER.makeLoanRepayment((long) loanID, new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(CommonConstants.DATE_FORMAT).transactionDate("13 September 2022").locale("en").transactionAmount(998.0));
 
             externalId = UUID.randomUUID().toString();
             chargeAdjustmentResponse = LOAN_TRANSACTION_HELPER.chargeAdjustment((long) loanID, (long) feeLoanChargeId,
@@ -6033,7 +6034,7 @@ public class ClientLoanIntegrationTest {
             GlobalConfigurationHelper.updateIsAutomaticExternalIdGenerationEnabled(REQUEST_SPEC, RESPONSE_SPEC, true);
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, true);
             BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
-                    .date("30 September 2022").dateFormat(DATETIME_PATTERN).locale("en"));
+                    .date("30 September 2022").dateFormat(CommonConstants.DATE_FORMAT).locale("en"));
             final Account assetAccount = ACCOUNT_HELPER.createAssetAccount();
             final Account incomeAccount = ACCOUNT_HELPER.createIncomeAccount();
             final Account expenseAccount = ACCOUNT_HELPER.createExpenseAccount();
@@ -6056,7 +6057,7 @@ public class ClientLoanIntegrationTest {
             CallFailedRuntimeException exception = assertThrows(CallFailedRuntimeException.class, () -> {
                 errorLoanTransactionHelper.chargeOffLoan((long) loanID,
                         new PostLoansLoanIdTransactionsRequest().transactionDate("4 September 2022").locale("en")
-                                .dateFormat(DATETIME_PATTERN).externalId(UUID.randomUUID().toString())
+                                .dateFormat(CommonConstants.DATE_FORMAT).externalId(UUID.randomUUID().toString())
                                 .chargeOffReasonId((long) chargeOffReasonId));
             });
 
@@ -6079,8 +6080,8 @@ public class ClientLoanIntegrationTest {
 
             exception = assertThrows(CallFailedRuntimeException.class, () -> {
                 LOAN_TRANSACTION_HELPER.chargeOffLoan((long) loanID,
-                        new PostLoansLoanIdTransactionsRequest().transactionDate("1 October 2022").locale("en").dateFormat(DATETIME_PATTERN)
-                                .chargeOffReasonId((long) chargeOffReasonId));
+                        new PostLoansLoanIdTransactionsRequest().transactionDate("1 October 2022").locale("en")
+                                .dateFormat(CommonConstants.DATE_FORMAT).chargeOffReasonId((long) chargeOffReasonId));
             });
             assertEquals(403, exception.getResponse().code());
             assertTrue(exception.getMessage().contains("error.msg.loan.transaction.cannot.be.a.future.date"));
@@ -6108,8 +6109,9 @@ public class ClientLoanIntegrationTest {
 
             String transactionExternalId = UUID.randomUUID().toString();
             LOAN_TRANSACTION_HELPER.chargeOffLoan((long) loanID,
-                    new PostLoansLoanIdTransactionsRequest().transactionDate("4 September 2022").locale("en").dateFormat(DATETIME_PATTERN)
-                            .externalId(transactionExternalId).chargeOffReasonId((long) chargeOffReasonId));
+                    new PostLoansLoanIdTransactionsRequest().transactionDate("4 September 2022").locale("en")
+                            .dateFormat(CommonConstants.DATE_FORMAT).externalId(transactionExternalId)
+                            .chargeOffReasonId((long) chargeOffReasonId));
 
             loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails((long) loanID);
             assertTrue(loanDetails.getStatus().getActive());
@@ -6131,7 +6133,7 @@ public class ClientLoanIntegrationTest {
             exception = assertThrows(CallFailedRuntimeException.class, () -> {
                 errorLoanTransactionHelper.chargeOffLoan((long) loanID,
                         new PostLoansLoanIdTransactionsRequest().transactionDate("4 September 2022").locale("en")
-                                .dateFormat(DATETIME_PATTERN).externalId(UUID.randomUUID().toString())
+                                .dateFormat(CommonConstants.DATE_FORMAT).externalId(UUID.randomUUID().toString())
                                 .chargeOffReasonId((long) chargeOffReasonId));
             });
             assertEquals(403, exception.getResponse().code());
@@ -6170,13 +6172,13 @@ public class ClientLoanIntegrationTest {
             assertTrue(exception.getMessage().contains("error.msg.loan.is.not.charged.off"));
 
             PostLoansLoanIdTransactionsResponse loanRepaymentResponse = LOAN_TRANSACTION_HELPER.makeLoanRepayment((long) loanID,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("05 September 2022").locale("en")
-                            .transactionAmount(5.0));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("05 September 2022")
+                            .locale("en").transactionAmount(5.0));
 
             exception = assertThrows(CallFailedRuntimeException.class, () -> {
                 errorLoanTransactionHelper.chargeOffLoan((long) loanID,
                         new PostLoansLoanIdTransactionsRequest().transactionDate("04 September 2022").locale("en")
-                                .dateFormat(DATETIME_PATTERN).externalId(UUID.randomUUID().toString())
+                                .dateFormat(CommonConstants.DATE_FORMAT).externalId(UUID.randomUUID().toString())
                                 .chargeOffReasonId((long) chargeOffReasonId));
             });
 
@@ -6184,8 +6186,9 @@ public class ClientLoanIntegrationTest {
             assertTrue(exception.getMessage().contains("error.msg.loan.charge.off.is.before.than.the.last.user.transaction"));
 
             LOAN_TRANSACTION_HELPER.chargeOffLoan((long) loanID,
-                    new PostLoansLoanIdTransactionsRequest().transactionDate("06 September 2022").locale("en").dateFormat(DATETIME_PATTERN)
-                            .externalId(UUID.randomUUID().toString()).chargeOffReasonId((long) chargeOffReasonId));
+                    new PostLoansLoanIdTransactionsRequest().transactionDate("06 September 2022").locale("en")
+                            .dateFormat(CommonConstants.DATE_FORMAT).externalId(UUID.randomUUID().toString())
+                            .chargeOffReasonId((long) chargeOffReasonId));
 
             loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails((long) loanID);
             chargeOffTransaction = loanDetails.getTransactions().get(loanDetails.getTransactions().size() - 1);
@@ -6193,8 +6196,8 @@ public class ClientLoanIntegrationTest {
             assertEquals(1998.0, chargeOffTransaction.getAmount());
             assertEquals(1998.0, chargeOffTransaction.getPrincipalPortion());
 
-            LOAN_TRANSACTION_HELPER.makeLoanRepayment((long) loanID, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
-                    .transactionDate("07 September 2022").locale("en").transactionAmount(5.0));
+            LOAN_TRANSACTION_HELPER.makeLoanRepayment((long) loanID, new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(CommonConstants.DATE_FORMAT).transactionDate("07 September 2022").locale("en").transactionAmount(5.0));
 
             exception = assertThrows(CallFailedRuntimeException.class, () -> {
                 errorLoanTransactionHelper.undoChargeOffLoan((long) loanID, new PostLoansLoanIdTransactionsRequest());
@@ -6203,29 +6206,29 @@ public class ClientLoanIntegrationTest {
             assertTrue(exception.getMessage().contains("error.msg.loan.charge.off.is.not.the.last.user.transaction"));
 
             exception = assertThrows(CallFailedRuntimeException.class, () -> {
-                errorLoanTransactionHelper.makeWriteoff((long) loanID, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
-                        .transactionDate("05 September 2022").locale("en"));
+                errorLoanTransactionHelper.makeWriteoff((long) loanID, new PostLoansLoanIdTransactionsRequest()
+                        .dateFormat(CommonConstants.DATE_FORMAT).transactionDate("05 September 2022").locale("en"));
             });
             assertEquals(403, exception.getResponse().code());
             assertTrue(exception.getMessage().contains("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date"));
 
             exception = assertThrows(CallFailedRuntimeException.class, () -> {
-                errorLoanTransactionHelper.closeLoan((long) loanID, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
-                        .transactionDate("05 September 2022").locale("en"));
+                errorLoanTransactionHelper.closeLoan((long) loanID, new PostLoansLoanIdTransactionsRequest()
+                        .dateFormat(CommonConstants.DATE_FORMAT).transactionDate("05 September 2022").locale("en"));
             });
             assertEquals(403, exception.getResponse().code());
             assertTrue(exception.getMessage().contains("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date"));
 
             exception = assertThrows(CallFailedRuntimeException.class, () -> {
                 errorLoanTransactionHelper.forecloseLoan((long) loanID, new PostLoansLoanIdTransactionsRequest()
-                        .dateFormat(DATETIME_PATTERN).transactionDate("05 September 2022").locale("en"));
+                        .dateFormat(CommonConstants.DATE_FORMAT).transactionDate("05 September 2022").locale("en"));
             });
             assertEquals(403, exception.getResponse().code());
             assertTrue(exception.getMessage().contains("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date"));
 
             exception = assertThrows(CallFailedRuntimeException.class, () -> {
                 errorLoanTransactionHelper.closeRescheduledLoan((long) loanID, new PostLoansLoanIdTransactionsRequest()
-                        .dateFormat(DATETIME_PATTERN).transactionDate("05 September 2022").locale("en"));
+                        .dateFormat(CommonConstants.DATE_FORMAT).transactionDate("05 September 2022").locale("en"));
             });
             assertEquals(403, exception.getResponse().code());
             assertTrue(exception.getMessage().contains("error.msg.loan.is.charged.off"));
@@ -6250,7 +6253,7 @@ public class ClientLoanIntegrationTest {
 
             exception = assertThrows(CallFailedRuntimeException.class, () -> {
                 errorLoanTransactionHelper.makeCreditBalanceRefund((long) loanID, new PostLoansLoanIdTransactionsRequest()
-                        .dateFormat(DATETIME_PATTERN).transactionDate("05 September 2022").locale("en").transactionAmount(5.0));
+                        .dateFormat(CommonConstants.DATE_FORMAT).transactionDate("05 September 2022").locale("en").transactionAmount(5.0));
             });
             assertEquals(403, exception.getResponse().code());
             assertTrue(exception.getMessage().contains("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date"));
@@ -6258,23 +6261,23 @@ public class ClientLoanIntegrationTest {
             exception = assertThrows(CallFailedRuntimeException.class, () -> {
                 errorLoanTransactionHelper.disburseLoan((long) loanID,
                         new PostLoansLoanIdRequest().actualDisbursementDate("4 September 2022").transactionAmount(new BigDecimal("10"))
-                                .locale("en").dateFormat(DATETIME_PATTERN));
+                                .locale("en").dateFormat(CommonConstants.DATE_FORMAT));
             });
             assertEquals(403, exception.getResponse().code());
             assertTrue(exception.getMessage().contains("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date"));
 
-            LOAN_TRANSACTION_HELPER.makeLoanRepayment((long) loanID, new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN)
-                    .transactionDate("07 September 2022").locale("en").transactionAmount(5000.0));
+            LOAN_TRANSACTION_HELPER.makeLoanRepayment((long) loanID, new PostLoansLoanIdTransactionsRequest()
+                    .dateFormat(CommonConstants.DATE_FORMAT).transactionDate("07 September 2022").locale("en").transactionAmount(5000.0));
 
             exception = assertThrows(CallFailedRuntimeException.class, () -> {
                 errorLoanTransactionHelper.makeRefundByCash((long) loanID, new PostLoansLoanIdTransactionsRequest()
-                        .dateFormat(DATETIME_PATTERN).transactionDate("05 September 2022").locale("en").transactionAmount(5.0));
+                        .dateFormat(CommonConstants.DATE_FORMAT).transactionDate("05 September 2022").locale("en").transactionAmount(5.0));
             });
             assertEquals(403, exception.getResponse().code());
             assertTrue(exception.getMessage().contains("error.msg.transaction.date.cannot.be.earlier.than.charge.off.date"));
 
             LOAN_TRANSACTION_HELPER.makeCreditBalanceRefund((long) loanID, new PostLoansLoanIdTransactionsRequest()
-                    .dateFormat(DATETIME_PATTERN).transactionDate("08 September 2022").locale("en").transactionAmount(3007.0));
+                    .dateFormat(CommonConstants.DATE_FORMAT).transactionDate("08 September 2022").locale("en").transactionAmount(3007.0));
         } finally {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.FALSE);
             GlobalConfigurationHelper.updateIsAutomaticExternalIdGenerationEnabled(REQUEST_SPEC, RESPONSE_SPEC, false);
@@ -6325,8 +6328,8 @@ public class ClientLoanIntegrationTest {
             assertNull(actualMaturityDate);
 
             LOAN_TRANSACTION_HELPER.reverseLoanTransaction((long) loanID, loanDetails.getTransactions().get(1).getId(),
-                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN).transactionDate("04 September 2022")
-                            .transactionAmount(0.0).locale("en"));
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(CommonConstants.DATE_FORMAT)
+                            .transactionDate("04 September 2022").transactionAmount(0.0).locale("en"));
 
             loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails((long) loanID);
 
@@ -6395,8 +6398,8 @@ public class ClientLoanIntegrationTest {
             assertEquals(LocalDate.of(2022, 9, 7), loanDetails.getTransactions().get(4).getDate());
 
             LOAN_TRANSACTION_HELPER.reverseLoanTransaction((long) loanID, loanDetails.getTransactions().get(2).getId(),
-                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN).transactionDate("05 September 2022")
-                            .transactionAmount(0.0).locale("en"));
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(CommonConstants.DATE_FORMAT)
+                            .transactionDate("05 September 2022").transactionAmount(0.0).locale("en"));
 
             loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails((long) loanID);
 
@@ -6421,8 +6424,8 @@ public class ClientLoanIntegrationTest {
             assertEquals(LocalDate.of(2022, 9, 7), loanDetails.getTransactions().get(4).getDate());
 
             LOAN_TRANSACTION_HELPER.reverseLoanTransaction((long) loanID, loanDetails.getTransactions().get(1).getId(),
-                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN).transactionDate("05 September 2022")
-                            .transactionAmount(0.0).locale("en"));
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(CommonConstants.DATE_FORMAT)
+                            .transactionDate("05 September 2022").transactionAmount(0.0).locale("en"));
 
             loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails((long) loanID);
 
@@ -6485,7 +6488,7 @@ public class ClientLoanIntegrationTest {
             GlobalConfigurationHelper.updateIsAutomaticExternalIdGenerationEnabled(REQUEST_SPEC, RESPONSE_SPEC, true);
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, true);
             BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
-                    .date("10 October 2022").dateFormat(DATETIME_PATTERN).locale("en"));
+                    .date("10 October 2022").dateFormat(CommonConstants.DATE_FORMAT).locale("en"));
 
             final Account assetAccount = ACCOUNT_HELPER.createAssetAccount();
             final Account incomeAccount = ACCOUNT_HELPER.createIncomeAccount();
@@ -6517,7 +6520,7 @@ public class ClientLoanIntegrationTest {
             assertTrue(loanDetails.getStatus().getOverpaid());
 
             LOAN_TRANSACTION_HELPER.makeCreditBalanceRefund((long) loanID, new PostLoansLoanIdTransactionsRequest().transactionAmount(200.0)
-                    .transactionDate("10 October 2022").dateFormat(DATETIME_PATTERN).locale("en").paymentTypeId(1L));
+                    .transactionDate("10 October 2022").dateFormat(CommonConstants.DATE_FORMAT).locale("en").paymentTypeId(1L));
 
             loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails((long) loanID);
             assertTrue(loanDetails.getStatus().getClosedObligationsMet());
@@ -6552,7 +6555,7 @@ public class ClientLoanIntegrationTest {
                     && j.getGlAccountId().equals(assetAccount.getAccountID().longValue())).findFirst().get().getAmount());
 
             LOAN_TRANSACTION_HELPER.reverseLoanTransaction(loanDetails.getId(), loanDetails.getTransactions().get(1).getId(),
-                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN).transactionAmount(0.0)
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionAmount(0.0)
                             .transactionDate("10 October 2022").locale("en"));
 
             loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails((long) loanID);
@@ -6617,7 +6620,7 @@ public class ClientLoanIntegrationTest {
             GlobalConfigurationHelper.updateIsAutomaticExternalIdGenerationEnabled(REQUEST_SPEC, RESPONSE_SPEC, true);
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, true);
             BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
-                    .date("10 October 2022").dateFormat(DATETIME_PATTERN).locale("en"));
+                    .date("10 October 2022").dateFormat(CommonConstants.DATE_FORMAT).locale("en"));
 
             final Account assetAccount = ACCOUNT_HELPER.createAssetAccount();
             final Account incomeAccount = ACCOUNT_HELPER.createIncomeAccount();
@@ -6649,13 +6652,13 @@ public class ClientLoanIntegrationTest {
             assertTrue(loanDetails.getStatus().getOverpaid());
 
             LOAN_TRANSACTION_HELPER.makeCreditBalanceRefund((long) loanID, new PostLoansLoanIdTransactionsRequest().transactionAmount(200.0)
-                    .transactionDate("06 September 2022").dateFormat(DATETIME_PATTERN).locale("en"));
+                    .transactionDate("06 September 2022").dateFormat(CommonConstants.DATE_FORMAT).locale("en"));
 
             LOAN_TRANSACTION_HELPER.makeMerchantIssuedRefund((long) loanID, new PostLoansLoanIdTransactionsRequest().locale("en")
-                    .dateFormat(DATETIME_PATTERN).transactionDate("07 September 2022").transactionAmount(500.0));
+                    .dateFormat(CommonConstants.DATE_FORMAT).transactionDate("07 September 2022").transactionAmount(500.0));
 
             LOAN_TRANSACTION_HELPER.makeCreditBalanceRefund((long) loanID, new PostLoansLoanIdTransactionsRequest().transactionAmount(500.0)
-                    .transactionDate("08 September 2022").dateFormat(DATETIME_PATTERN).locale("en"));
+                    .transactionDate("08 September 2022").dateFormat(CommonConstants.DATE_FORMAT).locale("en"));
 
             loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails((long) loanID);
             assertTrue(loanDetails.getStatus().getClosedObligationsMet());
@@ -6690,7 +6693,7 @@ public class ClientLoanIntegrationTest {
             assertEquals(0.0, loanDetails.getTransactions().get(5).getOutstandingLoanBalance());
 
             LOAN_TRANSACTION_HELPER.reverseLoanTransaction(loanDetails.getId(), loanDetails.getTransactions().get(2).getId(),
-                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN).transactionAmount(0.0)
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionAmount(0.0)
                             .transactionDate("07 September 2022").locale("en"));
 
             loanDetails = LOAN_TRANSACTION_HELPER.getLoanDetails((long) loanID);
@@ -6745,7 +6748,7 @@ public class ClientLoanIntegrationTest {
             GlobalConfigurationHelper.updateIsAutomaticExternalIdGenerationEnabled(REQUEST_SPEC, RESPONSE_SPEC, true);
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, true);
             BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
-                    .date("10 October 2022").dateFormat(DATETIME_PATTERN).locale("en"));
+                    .date("10 October 2022").dateFormat(CommonConstants.DATE_FORMAT).locale("en"));
 
             final Account assetAccount = ACCOUNT_HELPER.createAssetAccount();
             final Account incomeAccount = ACCOUNT_HELPER.createIncomeAccount();
@@ -6822,7 +6825,7 @@ public class ClientLoanIntegrationTest {
             GlobalConfigurationHelper.updateEnabledFlagForGlobalConfiguration(REQUEST_SPEC, RESPONSE_SPEC, "42", true);
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.TRUE);
             BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
-                    .date("01 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+                    .date("01 January 2023").dateFormat(CommonConstants.DATE_FORMAT).locale("en"));
             LOG.info("-----------------------------------NEW CLIENT-----------------------------------------");
             final PostClientsRequest newClient = createRandomClientWithDate("01 January 2023");
             final PostClientsResponse clientResponse = CLIENT_HELPER.createClient(newClient);
@@ -6841,45 +6844,45 @@ public class ClientLoanIntegrationTest {
                     LoanApplicationTestBuilder.DUE_PENALTY_INTEREST_PRINCIPAL_FEE_IN_ADVANCE_PENALTY_INTEREST_PRINCIPAL_FEE_STRATEGY);
             LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
             PostLoansLoanIdResponse approvedLoanResult = LOAN_TRANSACTION_HELPER.approveLoan(loanApplicationResult.getResourceId(),
-                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000.0)).dateFormat(DATETIME_PATTERN)
+                    new PostLoansLoanIdRequest().approvedLoanAmount(BigDecimal.valueOf(1000.0)).dateFormat(CommonConstants.DATE_FORMAT)
                             .approvedOnDate("01 January 2023").locale("en"));
             LOG.info("-------------------------------DISBURSE LOAN-------------------------------------------");
             String loanDisbursementUUID = UUID.randomUUID().toString();
             PostLoansLoanIdResponse disbursedLoanResult = LOAN_TRANSACTION_HELPER.disburseLoan(loanApplicationResult.getResourceId(),
-                    new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2023").dateFormat(DATETIME_PATTERN)
+                    new PostLoansLoanIdRequest().actualDisbursementDate("01 January 2023").dateFormat(CommonConstants.DATE_FORMAT)
                             .transactionAmount(BigDecimal.valueOf(1000.00)).locale("en").externalId(loanDisbursementUUID));
             Long loanId = disbursedLoanResult.getResourceId();
             LOG.info("-------------------------------ADD CHARGES-------------------------------------------");
             PostLoansLoanIdChargesResponse penaltyLoanChargeResult = LOAN_TRANSACTION_HELPER.addChargesForLoan(loanId,
-                    new PostLoansLoanIdChargesRequest().chargeId(penaltyCharge.getResourceId()).dateFormat(DATETIME_PATTERN).locale("en")
-                            .amount(10.0).dueDate("10 January 2023"));
+                    new PostLoansLoanIdChargesRequest().chargeId(penaltyCharge.getResourceId()).dateFormat(CommonConstants.DATE_FORMAT)
+                            .locale("en").amount(10.0).dueDate("10 January 2023"));
             LOG.info("-------------------------------DO SOME PARTIAL REPAYMENTS-------------------------------------------");
             BUSINESS_DATE_HELPER.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
-                    .date("07 January 2023").dateFormat(DATETIME_PATTERN).locale("en"));
+                    .date("07 January 2023").dateFormat(CommonConstants.DATE_FORMAT).locale("en"));
             String firstRepaymentUUID = UUID.randomUUID().toString();
             PostLoansLoanIdTransactionsResponse firstRepaymentResult = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("07 January 2023").locale("en")
-                            .transactionAmount(9.0).externalId(firstRepaymentUUID));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("07 January 2023")
+                            .locale("en").transactionAmount(9.0).externalId(firstRepaymentUUID));
             String secondRepaymentUUID = UUID.randomUUID().toString();
             PostLoansLoanIdTransactionsResponse secondRepaymentResult = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("07 January 2023").locale("en")
-                            .transactionAmount(8.0).externalId(secondRepaymentUUID));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("07 January 2023")
+                            .locale("en").transactionAmount(8.0).externalId(secondRepaymentUUID));
             String thirdRepaymentUUID = UUID.randomUUID().toString();
             PostLoansLoanIdTransactionsResponse thirdRepaymentResult = LOAN_TRANSACTION_HELPER.makeLoanRepayment(loanId,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat(DATETIME_PATTERN).transactionDate("07 January 2023").locale("en")
-                            .transactionAmount(7.0).externalId(thirdRepaymentUUID));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("07 January 2023")
+                            .locale("en").transactionAmount(7.0).externalId(thirdRepaymentUUID));
             LOG.info("-------------------------------CHECK LOAN TRANSACTION ORDER-------------------------------------------");
             checkLoanTransactionOrder(loanId, loanDisbursementUUID, firstRepaymentUUID, secondRepaymentUUID, thirdRepaymentUUID);
             LOG.info(
                     "-------------------------------REVERT FIRST REPAYMENT AND CHECK LOAN TRANSACTION ORDER-------------------------------------------");
             LOAN_TRANSACTION_HELPER.reverseLoanTransaction(loanId, firstRepaymentUUID, new PostLoansLoanIdTransactionsTransactionIdRequest()
-                    .dateFormat(DATETIME_PATTERN).transactionDate("07 January 2023").transactionAmount(0.0).locale("en"));
+                    .dateFormat(CommonConstants.DATE_FORMAT).transactionDate("07 January 2023").transactionAmount(0.0).locale("en"));
             checkLoanTransactionOrder(loanId, loanDisbursementUUID, firstRepaymentUUID, secondRepaymentUUID, thirdRepaymentUUID);
             LOG.info(
                     "-------------------------------REVERT SECOND REPAYMENT AND CHECK LOAN TRANSACTION ORDER-------------------------------------------");
             LOAN_TRANSACTION_HELPER.reverseLoanTransaction(loanId, secondRepaymentUUID,
-                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(DATETIME_PATTERN).transactionDate("07 January 2023")
-                            .transactionAmount(0.0).locale("en"));
+                    new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(CommonConstants.DATE_FORMAT)
+                            .transactionDate("07 January 2023").transactionAmount(0.0).locale("en"));
             checkLoanTransactionOrder(loanId, loanDisbursementUUID, firstRepaymentUUID, secondRepaymentUUID, thirdRepaymentUUID);
         } finally {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(REQUEST_SPEC, RESPONSE_SPEC, Boolean.FALSE);
@@ -6897,7 +6900,8 @@ public class ClientLoanIntegrationTest {
 
     private PostClientsRequest createRandomClientWithDate(String date) {
         return new PostClientsRequest().officeId(1L).legalFormId(1L).firstname(Utils.randomStringGenerator("", 5))
-                .lastname(Utils.randomStringGenerator("", 5)).active(true).locale("en").activationDate(date).dateFormat(DATETIME_PATTERN);
+                .lastname(Utils.randomStringGenerator("", 5)).active(true).locale("en").activationDate(date)
+                .dateFormat(CommonConstants.DATE_FORMAT);
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, final List<HashMap> charges) {
@@ -7271,7 +7275,7 @@ public class ClientLoanIntegrationTest {
 
         Calendar fourMonthsfromNowCalendar = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         fourMonthsfromNowCalendar.add(Calendar.MONTH, month);
-        DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN);
+        DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
         String fourMonthsfromNow = dateFormat.format(fourMonthsfromNowCalendar.getTime());
         final String loanApplicationJSON = new LoanApplicationTestBuilder() //
@@ -7496,7 +7500,7 @@ public class ClientLoanIntegrationTest {
     private void testLoanScheduleWithInterestRecalculation_FOR_PRE_CLOSE_WITH_MORATORIUM(final String preCloseStrategy,
             final String preCloseAmount) {
 
-        DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN, Locale.US);
+        DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -7845,7 +7849,7 @@ public class ClientLoanIntegrationTest {
     private void testLoanScheduleWithInterestRecalculation_WITH_REST_SAME_AS_REPAYMENT_INTEREST_COMPOUND_NONE_STRATEGY_REDUCE_EMI_PRE_CLOSE_INTEREST(
             String preCloseInterestStrategy, String preCloseAmount) {
 
-        DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN, Locale.US);
+        DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -7925,7 +7929,7 @@ public class ClientLoanIntegrationTest {
     private void testLoanScheduleWithInterestRecalculation_WITH_REST_WEEKLY_INTEREST_COMPOUND_INTEREST_FEE_STRATEGY_REDUCE_NEXT_INSTALLMENTS_PRE_CLOSE_INTEREST(
             String preCloseInterestStrategy, String preCloseAmount) {
 
-        DateFormat dateFormat = new SimpleDateFormat(DATETIME_PATTERN, Locale.US);
+        DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
 
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
@@ -8041,7 +8045,7 @@ public class ClientLoanIntegrationTest {
     private PostLoansResponse applyForLoanApplicationForOnePeriod30DaysLongNoInterestPeriodicAccrual(Long clientId, Long loanProductId,
             String loanDisbursementDate, String repaymentStrategyCode) {
         return LOAN_TRANSACTION_HELPER.applyLoan(new PostLoansRequest().clientId(clientId.longValue()).productId(loanProductId)
-                .expectedDisbursementDate(loanDisbursementDate).dateFormat(DATETIME_PATTERN)
+                .expectedDisbursementDate(loanDisbursementDate).dateFormat(CommonConstants.DATE_FORMAT)
                 .transactionProcessingStrategyCode(repaymentStrategyCode).locale("en").submittedOnDate(loanDisbursementDate)
                 .amortizationType(1).interestRatePerPeriod(BigDecimal.ZERO).interestCalculationPeriodType(1).interestType(0)
                 .repaymentFrequencyType(0).repaymentEvery(30).repaymentFrequencyType(0).numberOfRepayments(1).loanTermFrequency(30)
@@ -8115,7 +8119,7 @@ public class ClientLoanIntegrationTest {
                 .receivableInterestAccountId(INTEREST_FEE_RECEIVABLE_ACCOUNT.getAccountID().longValue())//
                 .receivableFeeAccountId(INTEREST_FEE_RECEIVABLE_ACCOUNT.getAccountID().longValue())//
                 .receivablePenaltyAccountId(INTEREST_FEE_RECEIVABLE_ACCOUNT.getAccountID().longValue())//
-                .dateFormat(DATETIME_PATTERN)//
+                .dateFormat(CommonConstants.DATE_FORMAT)//
                 .locale("en_GB")//
                 .disallowExpectedDisbursements(true)//
                 .allowApprovedDisbursedAmountsOverApplied(true)//

@@ -70,9 +70,9 @@ public class BatchRequestsIntegrationTest {
     public void setup() {
 
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     @Test
@@ -89,12 +89,12 @@ public class BatchRequestsIntegrationTest {
         final Integer[] clientIDs = new Integer[clientsCount];
 
         // Create a new group and get its groupId
-        Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
+        Integer groupID = GroupHelper.createGroup(requestSpec, responseSpec, true);
 
         // Create new clients and add those to this group
         for (Integer i = 0; i < clientsCount; i++) {
-            clientIDs[i] = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-            groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientIDs[i].toString());
+            clientIDs[i] = ClientHelper.createClient(requestSpec, responseSpec);
+            groupID = GroupHelper.associateClient(requestSpec, responseSpec, groupID.toString(), clientIDs[i].toString());
             LOG.info("client {} has been added to the group {}", clientIDs[i], groupID);
         }
 
@@ -115,7 +115,7 @@ public class BatchRequestsIntegrationTest {
                     .withInterestTypeAsDecliningBalance() //
                     .currencyDetails("0", "100").build(null);
 
-            loanProducts[i] = new LoanTransactionHelper(this.requestSpec, this.responseSpec).getLoanProductId(loanProductJSON);
+            loanProducts[i] = new LoanTransactionHelper(requestSpec, responseSpec).getLoanProductId(loanProductJSON);
         }
 
         // Select anyone of the loan products at random
@@ -127,9 +127,9 @@ public class BatchRequestsIntegrationTest {
         Integer selClientsCount = (int) Math.ceil(secureRandom.nextDouble() * clientsCount) + 2;
         for (int i = 0; i < selClientsCount; i++) {
 
-            final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+            final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
             Assertions.assertNotNull(collateralId);
-            final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+            final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec,
                     String.valueOf(clientIDs[(int) Math.floor(secureRandom.nextDouble() * (clientsCount - 1))]), collateralId);
             Assertions.assertNotNull(clientCollateralId);
 
@@ -142,7 +142,7 @@ public class BatchRequestsIntegrationTest {
         // Send the request to Batch - API
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 jsonifiedRequest);
 
         // Verify that each loan has been applied successfully
@@ -159,12 +159,12 @@ public class BatchRequestsIntegrationTest {
         final Integer[] clientIDs = new Integer[clientsCount];
 
         // Create a new group and get its groupId
-        Integer groupID = GroupHelper.createGroup(this.requestSpec, this.responseSpec, true);
+        Integer groupID = GroupHelper.createGroup(requestSpec, responseSpec, true);
 
         // Create new clients and add those to this group
         for (Integer i = 0; i < clientsCount; i++) {
-            clientIDs[i] = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-            groupID = GroupHelper.associateClient(this.requestSpec, this.responseSpec, groupID.toString(), clientIDs[i].toString());
+            clientIDs[i] = ClientHelper.createClient(requestSpec, responseSpec);
+            groupID = GroupHelper.associateClient(requestSpec, responseSpec, groupID.toString(), clientIDs[i].toString());
             LOG.info("client {} has been added to the group {}", clientIDs[i], groupID);
         }
 
@@ -173,7 +173,7 @@ public class BatchRequestsIntegrationTest {
         final Integer[] loanProducts = new Integer[loansCount];
 
         // Create new loan Products
-        LoanTransactionHelper helper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        LoanTransactionHelper helper = new LoanTransactionHelper(requestSpec, responseSpec);
         for (Integer i = 0; i < loansCount; i++) {
             final String loanProductJSON = new LoanProductTestBuilder() //
                     .withPrincipal(String.valueOf(10000.00 + Math.ceil(secureRandom.nextDouble() * 1000000.00))) //
@@ -198,9 +198,9 @@ public class BatchRequestsIntegrationTest {
         Integer selClientsCount = (int) Math.ceil(secureRandom.nextDouble() * clientsCount) + 2;
         for (int i = 0; i < selClientsCount; i++) {
 
-            final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+            final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
             Assertions.assertNotNull(collateralId);
-            final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
+            final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec,
                     String.valueOf(clientIDs[(int) Math.floor(secureRandom.nextDouble() * (clientsCount - 1))]), collateralId);
             Assertions.assertNotNull(clientCollateralId);
 
@@ -215,7 +215,7 @@ public class BatchRequestsIntegrationTest {
         // Send the request to Batch - API
         final String jsonifiedRequest = BatchHelper.toJsonString(batchRequests);
 
-        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec, this.responseSpec,
+        final List<BatchResponse> response = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
                 jsonifiedRequest);
 
         // Verify that each loan has been applied successfully
@@ -227,8 +227,8 @@ public class BatchRequestsIntegrationTest {
             Assertions.assertEquals(200L, (long) res.getStatusCode(), "Verify Status Code 200");
         }
 
-        final List<BatchResponse> secondResponse = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(this.requestSpec,
-                this.responseSpec, jsonifiedRequest);
+        final List<BatchResponse> secondResponse = BatchHelper.postBatchRequestsWithoutEnclosingTransaction(requestSpec, responseSpec,
+                jsonifiedRequest);
 
         // Verify that each loan has been applied successfully
         for (BatchResponse res : secondResponse) {

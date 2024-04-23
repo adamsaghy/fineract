@@ -56,14 +56,14 @@ public class FinancialActivityAccountsTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.responseSpecForValidationError = new ResponseSpecBuilder().expectStatusCode(400).build();
-        this.responseSpecForDomainRuleViolation = new ResponseSpecBuilder().expectStatusCode(403).build();
-        this.responseSpecForResourceNotFoundError = new ResponseSpecBuilder().expectStatusCode(404).build();
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-        this.financialActivityAccountHelper = new FinancialActivityAccountHelper(this.requestSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        responseSpecForValidationError = new ResponseSpecBuilder().expectStatusCode(400).build();
+        responseSpecForDomainRuleViolation = new ResponseSpecBuilder().expectStatusCode(403).build();
+        responseSpecForResourceNotFoundError = new ResponseSpecBuilder().expectStatusCode(404).build();
+        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
+        this.financialActivityAccountHelper = new FinancialActivityAccountHelper(requestSpec);
     }
 
     @SuppressWarnings("unchecked")
@@ -148,11 +148,11 @@ public class FinancialActivityAccountsTest {
      */
     @AfterEach
     public void tearDown() {
-        List<HashMap> financialActivities = this.financialActivityAccountHelper.getAllFinancialActivityAccounts(this.responseSpec);
+        List<HashMap> financialActivities = this.financialActivityAccountHelper.getAllFinancialActivityAccounts(responseSpec);
         for (HashMap financialActivity : financialActivities) {
             Integer financialActivityAccountId = (Integer) financialActivity.get("id");
             Integer deletedFinancialActivityAccountId = this.financialActivityAccountHelper
-                    .deleteFinancialActivityAccount(financialActivityAccountId, this.responseSpec, CommonConstants.RESPONSE_RESOURCE_ID);
+                    .deleteFinancialActivityAccount(financialActivityAccountId, responseSpec, CommonConstants.RESPONSE_RESOURCE_ID);
             Assertions.assertNotNull(deletedFinancialActivityAccountId);
             Assertions.assertEquals(financialActivityAccountId, deletedFinancialActivityAccountId);
         }

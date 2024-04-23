@@ -45,15 +45,14 @@ public class EntityDatatableChecksHelper {
 
     public Integer createEntityDatatableCheck(final String apptableName, final String datatableName, final int status,
             final Integer productId) {
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, DATATABLE_CHECK_URL + "?" + Utils.TENANT_IDENTIFIER,
+        return Utils.performServerPost(requestSpec, responseSpec, DATATABLE_CHECK_URL + "?" + Utils.TENANT_IDENTIFIER,
                 getTestEdcAsJSON(apptableName, datatableName, status, productId), "resourceId");
     }
 
     public PostEntityDatatableChecksTemplateResponse addEntityDatatableCheck(final String apptableName, final String datatableName,
             final int status, final Integer productId) {
-        final String response = Utils.performServerPost(this.requestSpec, this.responseSpec,
-                DATATABLE_CHECK_URL + "?" + Utils.TENANT_IDENTIFIER, getTestEdcAsJSON(apptableName, datatableName, status, productId),
-                null);
+        final String response = Utils.performServerPost(requestSpec, responseSpec, DATATABLE_CHECK_URL + "?" + Utils.TENANT_IDENTIFIER,
+                getTestEdcAsJSON(apptableName, datatableName, status, productId), null);
         return GSON.fromJson(response, PostEntityDatatableChecksTemplateResponse.class);
     }
 

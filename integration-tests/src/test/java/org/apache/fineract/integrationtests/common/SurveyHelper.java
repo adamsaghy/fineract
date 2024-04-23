@@ -53,7 +53,7 @@ public final class SurveyHelper {
         map.put("ppi_household_members_cd_q1_householdmembers", "107");
         map.put("ppi_highestschool_cd_q2_highestschool", "112");
         map.put("ppi_businessoccupation_cd_q3_businessoccupation", "116");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("locale", "en");
         map.put("ppi_habitablerooms_cd_q4_habitablerooms", "120");
 

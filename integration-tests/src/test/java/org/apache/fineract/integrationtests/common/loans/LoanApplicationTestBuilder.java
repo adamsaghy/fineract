@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,7 +140,7 @@ public class LoanApplicationTestBuilder {
     }
 
     private String build(final HashMap<String, Object> map, final String loanProductId, final String savingsID) {
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("locale", "en_GB");
         map.put("productId", loanProductId);
         map.put("principal", this.principal);

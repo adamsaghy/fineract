@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.savings.SavingsAccountHelper;
 import org.junit.jupiter.api.Assertions;
@@ -50,19 +51,19 @@ public class DividendsIntegrationTests {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void testCreateDividends() {
-        DateFormat simple = new SimpleDateFormat("dd MMMM yyyy");
+        DateFormat simple = new SimpleDateFormat(CommonConstants.DATE_FORMAT);
         final Integer productId = createShareProduct();
         ArrayList<Integer> shareAccounts = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            final Integer clientId = ClientHelper.createClient(this.requestSpec, this.responseSpec);
+            final Integer clientId = ClientHelper.createClient(requestSpec, responseSpec);
             Assertions.assertNotNull(clientId);
             Integer savingsAccountId = SavingsAccountHelper.openSavingsAccount(requestSpec, responseSpec, clientId, "1000");
             Assertions.assertNotNull(savingsAccountId);
@@ -75,14 +76,14 @@ public class DividendsIntegrationTests {
             // Approve share Account
             Map<String, Object> approveMap = new HashMap<>();
             approveMap.put("note", "Share Account Approval Note");
-            approveMap.put("dateFormat", "dd MMMM yyyy");
+            approveMap.put("dateFormat", CommonConstants.DATE_FORMAT);
             approveMap.put("approvedDate", "01 Jan 2016");
             approveMap.put("locale", "en");
             String approve = new Gson().toJson(approveMap);
             ShareAccountTransactionHelper.postCommand("approve", shareAccountId, approve, requestSpec, responseSpec);
             // Activate Share Account
             Map<String, Object> activateMap = new HashMap<>();
-            activateMap.put("dateFormat", "dd MMMM yyyy");
+            activateMap.put("dateFormat", CommonConstants.DATE_FORMAT);
             activateMap.put("activatedDate", "01 Jan 2016");
             activateMap.put("locale", "en");
             String activateJson = new Gson().toJson(activateMap);
@@ -93,7 +94,7 @@ public class DividendsIntegrationTests {
         dividendsMap.put("dividendPeriodStartDate", "01 Jan 2015");
         dividendsMap.put("dividendPeriodEndDate", "01 Apr 2016");
         dividendsMap.put("dividendAmount", "50000");
-        dividendsMap.put("dateFormat", "dd MMMM yyyy");
+        dividendsMap.put("dateFormat", CommonConstants.DATE_FORMAT);
         dividendsMap.put("locale", "en");
         String createDividendsJson = new Gson().toJson(dividendsMap);
         final Integer dividendId = ShareDividendsTransactionHelper.createShareProductDividends(productId, createDividendsJson, requestSpec,

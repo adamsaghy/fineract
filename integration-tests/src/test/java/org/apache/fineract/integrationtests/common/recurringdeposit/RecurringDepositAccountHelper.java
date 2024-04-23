@@ -115,7 +115,7 @@ public class RecurringDepositAccountHelper {
         map.put("clientId", clientId);
         map.put("interestCalculationDaysInYearType", this.interestCalculationDaysInYearType);
         map.put("locale", LOCALE);
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("monthDayFormat", "dd MMM");
         map.put("interestCalculationType", this.interestCalculationType);
         map.put("interestCompoundingPeriodType", this.interestCompoundingPeriodType);
@@ -217,17 +217,17 @@ public class RecurringDepositAccountHelper {
     public HashMap updateRecurringDepositAccount(final String clientID, final String productID, final String accountID,
             final String validFrom, final String validTo, final String penalInterestType, final String submittedOnDate) {
 
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         Calendar todaysDate = Calendar.getInstance();
         todaysDate.add(Calendar.MONTH, -1);
         todaysDate.add(Calendar.DATE, -1);
         final String SUBMITTED_ON_DATE = dateFormat.format(todaysDate.getTime());
         final String EXPECTED_FIRST_DEPOSIT_ON_ON_DATE = SUBMITTED_ON_DATE;
-        final String recurringDepositApplicationJSON = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec)
+        final String recurringDepositApplicationJSON = new RecurringDepositAccountHelper(requestSpec, responseSpec)
                 .withSubmittedOnDate(SUBMITTED_ON_DATE).withExpectedFirstDepositOnDate(EXPECTED_FIRST_DEPOSIT_ON_ON_DATE)
                 .build(clientID, productID, penalInterestType);
 
-        return Utils.performServerPut(this.requestSpec, this.responseSpec,
+        return Utils.performServerPut(requestSpec, responseSpec,
                 RECURRING_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?" + Utils.TENANT_IDENTIFIER, recurringDepositApplicationJSON,
                 CommonConstants.RESPONSE_CHANGES);
     }
@@ -237,7 +237,7 @@ public class RecurringDepositAccountHelper {
             final String penalInterestType, final String interestCalculationType, final String interestCompoundingPeriodType,
             final String interestPostingPeriodType, final String expectedFirstDepositOnDate) {
 
-        final String recurringDepositApplicationJSON = new RecurringDepositAccountHelper(this.requestSpec, this.responseSpec) //
+        final String recurringDepositApplicationJSON = new RecurringDepositAccountHelper(requestSpec, responseSpec) //
                 .withSubmittedOnDate(submittedOnDate) //
                 .withNumberOfDaysPerYear(numberOfDaysPerYear) //
                 .withInterestCalculationPeriodType(interestCalculationType) //
@@ -246,7 +246,7 @@ public class RecurringDepositAccountHelper {
                 .withExpectedFirstDepositOnDate(expectedFirstDepositOnDate) //
                 .build(clientID, productID, penalInterestType);
 
-        return Utils.performServerPut(this.requestSpec, this.responseSpec,
+        return Utils.performServerPut(requestSpec, responseSpec,
                 RECURRING_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?" + Utils.TENANT_IDENTIFIER, recurringDepositApplicationJSON,
                 CommonConstants.RESPONSE_CHANGES);
     }
@@ -254,7 +254,7 @@ public class RecurringDepositAccountHelper {
     public Integer updateTransactionForRecurringDeposit(final Integer accountID, final Integer transactionId, final String transactionDate,
             final Float transactionAmount) {
         LOG.info("--------------------------------- UPDATE RECURRING DEPOSIT TRANSACTION ------------------------------------");
-        return Utils.performServerPost(this.requestSpec, this.responseSpec,
+        return Utils.performServerPost(requestSpec, responseSpec,
                 RECURRING_DEPOSIT_ACCOUNT_URL + "/" + accountID + "/transactions/" + transactionId + "?command="
                         + MODIFY_TRANSACTION_COMMAND,
                 getUpdateTransactionAsJSON(transactionDate, transactionAmount), CommonConstants.RESPONSE_RESOURCE_ID);
@@ -263,7 +263,7 @@ public class RecurringDepositAccountHelper {
     public Integer undoTransactionForRecurringDeposit(final Integer accountID, final Integer transactionId, final String transactionDate,
             final Float transactionAmount) {
         LOG.info("--------------------------------- UNDO RECURRING DEPOSIT TRANSACTION ------------------------------------");
-        return Utils.performServerPost(this.requestSpec, this.responseSpec,
+        return Utils.performServerPost(requestSpec, responseSpec,
                 RECURRING_DEPOSIT_ACCOUNT_URL + "/" + accountID + "/transactions/" + transactionId + "?command=" + UNDO_TRANSACTION_COMMAND,
                 getUpdateTransactionAsJSON(transactionDate, transactionAmount), CommonConstants.RESPONSE_RESOURCE_ID);
     }
@@ -305,7 +305,7 @@ public class RecurringDepositAccountHelper {
 
     public Object deleteRecurringDepositApplication(final Integer recurringDepositAccountID, final String jsonAttributeToGetBack) {
         LOG.info("---------------------------------- DELETE RECURRING DEPOSIT APPLICATION ----------------------------------");
-        return Utils.performServerDelete(this.requestSpec, this.responseSpec,
+        return Utils.performServerDelete(requestSpec, responseSpec,
                 RECURRING_DEPOSIT_ACCOUNT_URL + "/" + recurringDepositAccountID + "?" + Utils.TENANT_IDENTIFIER, jsonAttributeToGetBack);
 
     }
@@ -451,14 +451,13 @@ public class RecurringDepositAccountHelper {
 
     private Object performRecurringDepositActions(final String postURLForRecurringDeposit, final String jsonToBeSent,
             final String jsonAttributeToGetBack) {
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForRecurringDeposit, jsonToBeSent,
-                jsonAttributeToGetBack);
+        return Utils.performServerPost(requestSpec, responseSpec, postURLForRecurringDeposit, jsonToBeSent, jsonAttributeToGetBack);
     }
 
     private HashMap performRecurringDepositApplicationActions(final String postURLForRecurringDepositAction, final String jsonToBeSent) {
         HashMap status = null;
-        final HashMap response = Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForRecurringDepositAction,
-                jsonToBeSent, CommonConstants.RESPONSE_CHANGES);
+        final HashMap response = Utils.performServerPost(requestSpec, responseSpec, postURLForRecurringDepositAction, jsonToBeSent,
+                CommonConstants.RESPONSE_CHANGES);
         if (response != null) {
             status = (HashMap) response.get("status");
         }

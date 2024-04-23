@@ -42,6 +42,7 @@ import org.apache.fineract.client.models.PostLoansLoanIdTransactionsTransactionI
 import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
 import org.apache.fineract.integrationtests.common.Utils;
@@ -76,14 +77,14 @@ public class DueDateRespectiveLoanRepaymentScheduleTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.requestSpec.header("Fineract-Platform-TenantId", "default");
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        requestSpec.header("Fineract-Platform-TenantId", "default");
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        this.loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(requestSpec, responseSpec);
         this.businessDateHelper = new BusinessDateHelper();
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
         inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
     }
 
@@ -807,7 +808,7 @@ public class DueDateRespectiveLoanRepaymentScheduleTest {
             assertEquals(0, response.getTransactions().get(1).getLoanChargePaidByList().size());
 
             PostLoansLoanIdTransactionsResponse reverseRepayment = loanTransactionHelper.reverseLoanTransaction((long) loanID,
-                    (long) firstRepaymentId, new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat("dd MMMM yyyy")
+                    (long) firstRepaymentId, new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(CommonConstants.DATE_FORMAT)
                             .transactionDate("28 January 2023").transactionAmount(0.0).locale("en"));
 
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
@@ -921,7 +922,7 @@ public class DueDateRespectiveLoanRepaymentScheduleTest {
                     .updateGraceOnInterest(null).updateExtraTerms(null).build(loanID.toString());
             final HashMap<String, String> map = new HashMap<>();
             map.put("locale", "en");
-            map.put("dateFormat", "dd MMMM yyyy");
+            map.put("dateFormat", CommonConstants.DATE_FORMAT);
             map.put("approvedOnDate", "25 January 2023");
             final String aproveRequestJSON = new Gson().toJson(map);
 
@@ -959,7 +960,7 @@ public class DueDateRespectiveLoanRepaymentScheduleTest {
             assertEquals(1, response.getTransactions().get(1).getLoanChargePaidByList().size());
 
             PostLoansLoanIdTransactionsResponse reverseRepayment = loanTransactionHelper.reverseLoanTransaction((long) loanID,
-                    (long) firstRepaymentId, new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat("dd MMMM yyyy")
+                    (long) firstRepaymentId, new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(CommonConstants.DATE_FORMAT)
                             .transactionDate("15 February 2023").transactionAmount(0.0).locale("en"));
 
             Integer secondChargeId = loanTransactionHelper.addChargesForLoan(loanID,
@@ -1145,7 +1146,7 @@ public class DueDateRespectiveLoanRepaymentScheduleTest {
                     .updateGraceOnInterest(null).updateExtraTerms(null).build(loanID.toString());
             final HashMap<String, String> map = new HashMap<>();
             map.put("locale", "en");
-            map.put("dateFormat", "dd MMMM yyyy");
+            map.put("dateFormat", CommonConstants.DATE_FORMAT);
             map.put("approvedOnDate", "25 January 2023");
             final String aproveRequestJSON = new Gson().toJson(map);
 
@@ -1183,7 +1184,7 @@ public class DueDateRespectiveLoanRepaymentScheduleTest {
             assertEquals(1, response.getTransactions().get(1).getLoanChargePaidByList().size());
 
             PostLoansLoanIdTransactionsResponse reverseRepayment = loanTransactionHelper.reverseLoanTransaction((long) loanID,
-                    (long) firstRepaymentId, new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat("dd MMMM yyyy")
+                    (long) firstRepaymentId, new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(CommonConstants.DATE_FORMAT)
                             .transactionDate("15 February 2023").transactionAmount(0.0).locale("en"));
 
             Integer secondChargeId = loanTransactionHelper.addChargesForLoan(loanID,
@@ -1262,7 +1263,7 @@ public class DueDateRespectiveLoanRepaymentScheduleTest {
                     .date("2023.03.07").dateFormat("yyyy.MM.dd").locale("en"));
 
             PostLoansLoanIdTransactionsResponse secondReverseRepayment = loanTransactionHelper.reverseLoanTransaction((long) loanID,
-                    (long) secondRepayment, new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat("dd MMMM yyyy")
+                    (long) secondRepayment, new PostLoansLoanIdTransactionsTransactionIdRequest().dateFormat(CommonConstants.DATE_FORMAT)
                             .transactionDate("07 March 2023").transactionAmount(0.0).locale("en"));
 
             Integer thirdChargeId = loanTransactionHelper.addChargesForLoan(loanID,
@@ -1454,7 +1455,7 @@ public class DueDateRespectiveLoanRepaymentScheduleTest {
 
             final HashMap<String, String> map = new HashMap<>();
             map.put("locale", "en");
-            map.put("dateFormat", "dd MMMM yyyy");
+            map.put("dateFormat", CommonConstants.DATE_FORMAT);
             map.put("approvedOnDate", "11 June 2023");
             final String aproveRequestJSON = new Gson().toJson(map);
 
@@ -1505,8 +1506,8 @@ public class DueDateRespectiveLoanRepaymentScheduleTest {
             businessDateHelper.updateBusinessDate(new BusinessDateRequest().type(BusinessDateType.BUSINESS_DATE.getName())
                     .date("2023.06.17").dateFormat("yyyy.MM.dd").locale("en"));
             PostLoansLoanIdTransactionsResponse merchantIssuedRefund1 = loanTransactionHelper.makeMerchantIssuedRefund(Long.valueOf(loanID),
-                    new PostLoansLoanIdTransactionsRequest().locale("en").dateFormat("dd MMMM yyyy").transactionDate("17 June 2023")
-                            .transactionAmount(125.0));
+                    new PostLoansLoanIdTransactionsRequest().locale("en").dateFormat(CommonConstants.DATE_FORMAT)
+                            .transactionDate("17 June 2023").transactionAmount(125.0));
 
             loanDetails = loanTransactionHelper.getLoanDetails((long) loanID);
             assertEquals(6.6, loanDetails.getSummary().getTotalOutstanding());
@@ -1533,7 +1534,7 @@ public class DueDateRespectiveLoanRepaymentScheduleTest {
             assertEquals(0.0, loanDetails.getTransactions().get(2).getFeeChargesPortion());
             assertEquals(2.95, loanDetails.getTransactions().get(2).getOutstandingLoanBalance());
 
-            PostLoansLoanIdChargesChargeIdResponse chargeAdjustmentResponse = this.loanTransactionHelper.chargeAdjustment((long) loanID,
+            PostLoansLoanIdChargesChargeIdResponse chargeAdjustmentResponse = loanTransactionHelper.chargeAdjustment((long) loanID,
                     (long) penalty1LoanChargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(3.65));
 
             loanDetails = loanTransactionHelper.getLoanDetails((long) loanID);
@@ -1564,8 +1565,8 @@ public class DueDateRespectiveLoanRepaymentScheduleTest {
             assertEquals(0.0, loanDetails.getTransactions().get(3).getOutstandingLoanBalance());
 
             PostLoansLoanIdTransactionsResponse merchantIssuedRefund2 = loanTransactionHelper.makeMerchantIssuedRefund(Long.valueOf(loanID),
-                    new PostLoansLoanIdTransactionsRequest().locale("en").dateFormat("dd MMMM yyyy").transactionDate("17 June 2023")
-                            .transactionAmount(2.95));
+                    new PostLoansLoanIdTransactionsRequest().locale("en").dateFormat(CommonConstants.DATE_FORMAT)
+                            .transactionDate("17 June 2023").transactionAmount(2.95));
 
             loanDetails = loanTransactionHelper.getLoanDetails((long) loanID);
             assertEquals(0.0, loanDetails.getSummary().getTotalOutstanding());
@@ -1648,7 +1649,7 @@ public class DueDateRespectiveLoanRepaymentScheduleTest {
 
             final HashMap<String, String> map = new HashMap<>();
             map.put("locale", "en");
-            map.put("dateFormat", "dd MMMM yyyy");
+            map.put("dateFormat", CommonConstants.DATE_FORMAT);
             map.put("approvedOnDate", "11 June 2023");
             final String aproveRequestJSON = new Gson().toJson(map);
 
@@ -1700,8 +1701,8 @@ public class DueDateRespectiveLoanRepaymentScheduleTest {
                     .date("2023.06.17").dateFormat("yyyy.MM.dd").locale("en"));
 
             PostLoansLoanIdTransactionsResponse merchantIssuedRefund1 = loanTransactionHelper.makeMerchantIssuedRefund(Long.valueOf(loanID),
-                    new PostLoansLoanIdTransactionsRequest().locale("en").dateFormat("dd MMMM yyyy").transactionDate("17 June 2023")
-                            .transactionAmount(125.0));
+                    new PostLoansLoanIdTransactionsRequest().locale("en").dateFormat(CommonConstants.DATE_FORMAT)
+                            .transactionDate("17 June 2023").transactionAmount(125.0));
 
             loanDetails = loanTransactionHelper.getLoanDetails((long) loanID);
             assertEquals(6.6, loanDetails.getSummary().getTotalOutstanding());
@@ -1728,7 +1729,7 @@ public class DueDateRespectiveLoanRepaymentScheduleTest {
             assertEquals(0.0, loanDetails.getTransactions().get(2).getFeeChargesPortion());
             assertEquals(2.95, loanDetails.getTransactions().get(2).getOutstandingLoanBalance());
 
-            PostLoansLoanIdChargesChargeIdResponse chargeAdjustmentResponse = this.loanTransactionHelper.chargeAdjustment((long) loanID,
+            PostLoansLoanIdChargesChargeIdResponse chargeAdjustmentResponse = loanTransactionHelper.chargeAdjustment((long) loanID,
                     (long) penalty1LoanChargeId, new PostLoansLoanIdChargesChargeIdRequest().amount(3.65));
 
             loanDetails = loanTransactionHelper.getLoanDetails((long) loanID);
@@ -1759,8 +1760,8 @@ public class DueDateRespectiveLoanRepaymentScheduleTest {
             assertEquals(0.0, loanDetails.getTransactions().get(3).getOutstandingLoanBalance());
 
             PostLoansLoanIdTransactionsResponse merchantIssuedRefund2 = loanTransactionHelper.makeMerchantIssuedRefund(Long.valueOf(loanID),
-                    new PostLoansLoanIdTransactionsRequest().locale("en").dateFormat("dd MMMM yyyy").transactionDate("17 June 2023")
-                            .transactionAmount(2.95));
+                    new PostLoansLoanIdTransactionsRequest().locale("en").dateFormat(CommonConstants.DATE_FORMAT)
+                            .transactionDate("17 June 2023").transactionAmount(2.95));
 
             loanDetails = loanTransactionHelper.getLoanDetails((long) loanID);
             assertEquals(0.0, loanDetails.getSummary().getTotalOutstanding());

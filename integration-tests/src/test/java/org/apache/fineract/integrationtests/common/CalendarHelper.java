@@ -72,7 +72,7 @@ public final class CalendarHelper {
             final String startDate) {
 
         final HashMap<String, String> map = new HashMap<>();
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("locale", "en");
         map.put("frequency", frequency);
         map.put("interval", interval);
@@ -125,7 +125,7 @@ public final class CalendarHelper {
 
     private static String getTestCalendarMeetingAsJSON(String oldDate, String startDate) {
         final HashMap<String, String> map = new HashMap<>();
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("locale", "en");
         map.put("newMeetingDate", startDate);
         map.put("presentMeetingDate", oldDate);

@@ -56,6 +56,7 @@ import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.BusinessStepHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
 import org.apache.fineract.integrationtests.common.CollateralManagementHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.ExternalAssetOwnerHelper;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
@@ -93,7 +94,7 @@ public class ExternalAssetOwnerTransferCancelTest {
     private static LoanTransactionHelper LOAN_TRANSACTION_HELPER;
     private static SchedulerJobHelper SCHEDULER_JOB_HELPER;
     private static LocalDate TODAYS_DATE;
-    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
+    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern(CommonConstants.DATE_FORMAT).toFormatter();
 
     @BeforeAll
     public static void setupInvestorBusinessStep() {
@@ -270,7 +271,7 @@ public class ExternalAssetOwnerTransferCancelTest {
         // Add Charge Penalty
         Integer penalty = ChargesHelper.createCharges(REQUEST_SPEC, RESPONSE_SPEC,
                 ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, amount, true));
-        Integer penalty1LoanChargeId = this.LOAN_TRANSACTION_HELPER.addChargesForLoan(loanID,
+        Integer penalty1LoanChargeId = LOAN_TRANSACTION_HELPER.addChargesForLoan(loanID,
                 LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), "02 March 2020", amount));
         assertNotNull(penalty1LoanChargeId);
     }

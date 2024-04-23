@@ -69,27 +69,27 @@ public class HookHelper {
     public Integer updateHook(final String payloadURL, final Long hookId) {
         LOG.info("---------------------------------UPDATING HOOK---------------------------------------------");
         final String UPDATE_HOOK_URL = "/fineract-provider/api/v1/hooks/" + hookId + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPut(this.requestSpec, this.responseSpec, UPDATE_HOOK_URL, getTestHookAsJson(payloadURL), "resourceId");
+        return Utils.performServerPut(requestSpec, responseSpec, UPDATE_HOOK_URL, getTestHookAsJson(payloadURL), "resourceId");
     }
 
     public Integer deleteHook(final Long hookId) {
         LOG.info("---------------------------------DELETING HOOK---------------------------------------------");
         final String DELETE_HOOK_URL = "/fineract-provider/api/v1/hooks/" + hookId + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerDelete(this.requestSpec, this.responseSpec, DELETE_HOOK_URL, "resourceId");
+        return Utils.performServerDelete(requestSpec, responseSpec, DELETE_HOOK_URL, "resourceId");
     }
 
     public void verifyHookCreatedOnServer(final Long hookId) {
         LOG.info("------------------------------CHECK CREATE HOOK DETAILS------------------------------------\n");
         final String GET_URL = "/fineract-provider/api/v1/hooks/" + hookId + "?" + Utils.TENANT_IDENTIFIER;
-        final Integer responseHookId = Utils.performServerGet(this.requestSpec, this.responseSpec, GET_URL, "id");
+        final Integer responseHookId = Utils.performServerGet(requestSpec, responseSpec, GET_URL, "id");
         assertEquals(hookId.toString(), responseHookId.toString());
     }
 
     public void verifyUpdateHook(final String updateURL, final Long hookId) {
         LOG.info("------------------------------CHECK UPDATE HOOK DETAILS------------------------------------\n");
         final String GET_URL = "/fineract-provider/api/v1/hooks/" + hookId + "?" + Utils.TENANT_IDENTIFIER;
-        ArrayList<HashMap<String, String>> map = Utils.<ArrayList<HashMap<String, String>>>performServerGet(this.requestSpec,
-                this.responseSpec, GET_URL, "config");
+        ArrayList<HashMap<String, String>> map = Utils.<ArrayList<HashMap<String, String>>>performServerGet(requestSpec, responseSpec,
+                GET_URL, "config");
         HashMap<String, String> hash = map.get(1);
         assertEquals(updateURL, hash.get("fieldValue"));
     }
@@ -98,8 +98,8 @@ public class HookHelper {
         LOG.info("------------------------------CHECK DELETE HOOK DETAILS------------------------------------\n");
         final String GET_URL = "/fineract-provider/api/v1/hooks/" + hookId + "?" + Utils.TENANT_IDENTIFIER;
         ResponseSpecification responseSpec404 = new ResponseSpecBuilder().expectStatusCode(404).build();
-        ArrayList<HashMap<String, String>> array = Utils.<ArrayList<HashMap<String, String>>>performServerGet(this.requestSpec,
-                responseSpec404, GET_URL, "errors");
+        ArrayList<HashMap<String, String>> array = Utils.<ArrayList<HashMap<String, String>>>performServerGet(requestSpec, responseSpec404,
+                GET_URL, "errors");
         HashMap<String, String> map = array.get(0);
         assertEquals("error.msg.hook.identifier.not.found", map.get("userMessageGlobalisationCode"));
     }

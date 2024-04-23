@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import org.apache.fineract.client.models.GetRecurringDepositProductsProductIdResponse;
 import org.apache.fineract.client.util.JSON;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.slf4j.Logger;
@@ -111,7 +112,7 @@ public class RecurringDepositProductHelper {
         HashMap<String, Object> chartsMap = new HashMap<>();
         chartsMap.put("fromDate", validFrom);
         chartsMap.put("endDate", validTo);
-        chartsMap.put("dateFormat", "dd MMMM yyyy");
+        chartsMap.put("dateFormat", CommonConstants.DATE_FORMAT);
         chartsMap.put("locale", LOCALE);
         chartsMap.put("chartSlabs", chartSlabs);
         chartsMap.put("isPrimaryGroupingByAmount", this.isPrimaryGroupingByAmount);

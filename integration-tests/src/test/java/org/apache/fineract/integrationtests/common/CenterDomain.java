@@ -142,7 +142,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
         map.put("officeId", "1");
         map.put("name", randomNameGenerator("Center_Name_", 5));
         map.put("externalId", UUID.randomUUID().toString());
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("locale", "en");
         if (staffId != null) {
             map.put("staffId", String.valueOf(staffId));
@@ -150,7 +150,7 @@ public class CenterDomain implements Comparable<CenterDomain> {
         if (active) {
             map.put("active", "true");
             map.put("locale", "en");
-            map.put("dateFormat", "dd MMMM yyyy");
+            map.put("dateFormat", CommonConstants.DATE_FORMAT);
             map.put("activationDate", activationDate);
         } else {
             map.put("active", "false");

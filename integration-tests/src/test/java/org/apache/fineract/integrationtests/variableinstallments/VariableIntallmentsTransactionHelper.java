@@ -44,11 +44,11 @@ public class VariableIntallmentsTransactionHelper {
 
     public HashMap validateVariations(final String exceptions, Integer loanId) {
         String url = URL + loanId + "/schedule?command=calculateLoanSchedule&" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, url, exceptions, "");
+        return Utils.performServerPost(requestSpec, responseSpec, url, exceptions, "");
     }
 
     public HashMap submitVariations(final String exceptions, Integer loanId) {
         String url = URL + loanId + "/schedule?command=addVariations&" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, url, exceptions, "");
+        return Utils.performServerPost(requestSpec, responseSpec, url, exceptions, "");
     }
 }

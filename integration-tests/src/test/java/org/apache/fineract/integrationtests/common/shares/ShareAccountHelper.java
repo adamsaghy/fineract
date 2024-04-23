@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +68,7 @@ public class ShareAccountHelper {
         if (this.productId != null) {
             map.put("productId", this.productId);
         }
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
 
         if (this.savingsAccountId != null) {
             map.put("savingsAccountId", savingsAccountId);

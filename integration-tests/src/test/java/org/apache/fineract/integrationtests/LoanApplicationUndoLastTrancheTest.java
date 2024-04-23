@@ -61,10 +61,10 @@ public class LoanApplicationUndoLastTrancheTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
         this.loanApplicationApprovalTest = new LoanApplicationApprovalTest();
     }
 
@@ -78,11 +78,11 @@ public class LoanApplicationUndoLastTrancheTest {
         final String disbursalDate = "01 March 2014";
 
         // CREATE CLIENT
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2014");
         LOG.info("---------------------------------CLIENT CREATED WITH ID--------------------------------------------------- {}", clientID);
 
         // CREATE LOAN MULTIDISBURSAL PRODUCT
-        final Integer loanProductID = this.loanTransactionHelper
+        final Integer loanProductID = loanTransactionHelper
                 .getLoanProductId(new LoanProductTestBuilder().withInterestTypeAsDecliningBalance().withTranches(true)
                         .withInterestCalculationPeriodTypeAsRepaymentPeriod(true).build(null));
         LOG.info("----------------------------------LOAN PRODUCT CREATED WITH ID------------------------------------------- {}",
@@ -101,13 +101,13 @@ public class LoanApplicationUndoLastTrancheTest {
         // APPLY FOR LOAN WITH TRANCHES
         final Integer loanID = applyForLoanApplicationWithTranches(clientID, loanProductID, proposedAmount, "2", createTranches);
         LOG.info("-----------------------------------LOAN CREATED WITH LOANID------------------------------------------------- {}", loanID);
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
 
         // VALIDATE THE LOAN STATUS
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
-        loanStatusHashMap = this.loanTransactionHelper.approveLoanWithApproveAmount(approveDate, expectedDisbursementDate, approvalAmount,
+        loanStatusHashMap = loanTransactionHelper.approveLoanWithApproveAmount(approveDate, expectedDisbursementDate, approvalAmount,
                 loanID, approveTranches);
 
         // VALIDATE THE LOAN IS APPROVED
@@ -115,25 +115,25 @@ public class LoanApplicationUndoLastTrancheTest {
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         // DISBURSE A LOAN
-        String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(disbursalDate, loanID,
+        String loanDetails = loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
+        loanTransactionHelper.disburseLoanWithNetDisbursalAmount(disbursalDate, loanID,
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
-        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
 
         // VALIDATE THE LOAN IS ACTIVE STATUS
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         LOG.info("-------------Make repayment 1-----------");
-        this.loanTransactionHelper.makeRepayment("01 April 2014", Float.valueOf("420"), loanID);
+        loanTransactionHelper.makeRepayment("01 April 2014", Float.valueOf("420"), loanID);
         LOG.info("-------------Make repayment 2-----------");
-        this.loanTransactionHelper.makeRepayment("01 May 2014", Float.valueOf("412"), loanID);
+        loanTransactionHelper.makeRepayment("01 May 2014", Float.valueOf("412"), loanID);
         LOG.info("-------------Make repayment 3-----------");
-        this.loanTransactionHelper.makeRepayment("01 June 2014", Float.valueOf("204"), loanID);
+        loanTransactionHelper.makeRepayment("01 June 2014", Float.valueOf("204"), loanID);
         // DISBURSE A SECOND TRANCHE
-        this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("23 June 2014", loanID,
+        loanTransactionHelper.disburseLoanWithNetDisbursalAmount("23 June 2014", loanID,
                 JsonPath.from(loanDetails).get("netDisbursalAmount").toString());
         // UNDO LAST TRANCHE
-        Float disbursedAmount = this.loanTransactionHelper.undoLastDisbursal(loanID);
+        Float disbursedAmount = loanTransactionHelper.undoLastDisbursal(loanID);
         validateDisbursedAmount(disbursedAmount);
     }
 
@@ -147,11 +147,11 @@ public class LoanApplicationUndoLastTrancheTest {
         final String proposedAmount = "1000";
 
         // CREATE CLIENT
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2014");
         LOG.info("---------------------------------CLIENT CREATED WITH ID--------------------------------------------------- {}", clientID);
 
         // CREATE LOAN MULTIDISBURSAL PRODUCT
-        final Integer loanProductID = this.loanTransactionHelper
+        final Integer loanProductID = loanTransactionHelper
                 .getLoanProductId(new LoanProductTestBuilder().withInterestTypeAsDecliningBalance().withTranches(true)
                         .withDisallowExpectedDisbursements(true).withInterestCalculationPeriodTypeAsRepaymentPeriod(true).build(null));
         LOG.info("----------------------------------LOAN PRODUCT CREATED WITH ID------------------------------------------- {}",
@@ -163,7 +163,7 @@ public class LoanApplicationUndoLastTrancheTest {
         LOG.info("-----------------------------------LOAN CREATED WITH LOANID------------------------------------------------- {}", loanID);
 
         LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
-        this.loanTransactionHelper.approveLoan(operationDate, proposedAmount, loanID, null);
+        loanTransactionHelper.approveLoan(operationDate, proposedAmount, loanID, null);
 
         GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
         assertNotNull(getLoansLoanIdResponse);
@@ -205,7 +205,7 @@ public class LoanApplicationUndoLastTrancheTest {
         loanTransactionHelper.validateLoanTotalOustandingBalance(getLoansLoanIdResponse, Double.valueOf("500.00"));
 
         // UNDO LAST TRANCHE
-        this.loanTransactionHelper.undoLastDisbursal(loanID);
+        loanTransactionHelper.undoLastDisbursal(loanID);
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
         assertNotNull(getLoansLoanIdResponse);
@@ -222,11 +222,11 @@ public class LoanApplicationUndoLastTrancheTest {
         final String disbursalDate = "01 March 2014";
 
         // CREATE CLIENT
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, "01 January 2014");
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, "01 January 2014");
         LOG.info("---------------------------------CLIENT CREATED WITH ID--------------------------------------------------- {}", clientID);
 
         // CREATE LOAN MULTIDISBURSAL PRODUCT
-        final Integer loanProductID = this.loanTransactionHelper
+        final Integer loanProductID = loanTransactionHelper
                 .getLoanProductId(new LoanProductTestBuilder().withInterestTypeAsDecliningBalance().withTranches(true)
                         .withDisallowExpectedDisbursements(true).withInterestCalculationPeriodTypeAsRepaymentPeriod(true).build(null));
         LOG.info("----------------------------------LOAN PRODUCT CREATED WITH ID------------------------------------------- {}",
@@ -238,7 +238,7 @@ public class LoanApplicationUndoLastTrancheTest {
         LOG.info("-----------------------------------LOAN CREATED WITH LOANID------------------------------------------------- {}", loanID);
 
         LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------------------------");
-        this.loanTransactionHelper.approveLoan(approveDate, proposedAmount, loanID, null);
+        loanTransactionHelper.approveLoan(approveDate, proposedAmount, loanID, null);
 
         GetLoansLoanIdResponse getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
         assertNotNull(getLoansLoanIdResponse);
@@ -261,7 +261,7 @@ public class LoanApplicationUndoLastTrancheTest {
         loanTransactionHelper.evaluateLoanDisbursementDetails(getLoansLoanIdResponse, 2, Double.valueOf("3000.00"));
 
         // UNDO LAST TRANCHE
-        this.loanTransactionHelper.undoLastDisbursal(loanID);
+        loanTransactionHelper.undoLastDisbursal(loanID);
 
         getLoansLoanIdResponse = loanTransactionHelper.getLoan(requestSpec, responseSpec, loanID);
         assertNotNull(getLoansLoanIdResponse);
@@ -291,10 +291,10 @@ public class LoanApplicationUndoLastTrancheTest {
             final String interestRate, List<HashMap> tranches) {
         LOG.info("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         List<HashMap> collaterals = new ArrayList<>();
-        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(this.requestSpec, this.responseSpec);
+        final Integer collateralId = CollateralManagementHelper.createCollateralProduct(requestSpec, responseSpec);
         Assertions.assertNotNull(collateralId);
-        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(this.requestSpec, this.responseSpec,
-                clientID.toString(), collateralId);
+        final Integer clientCollateralId = CollateralManagementHelper.createClientCollateral(requestSpec, responseSpec, clientID.toString(),
+                collateralId);
         Assertions.assertNotNull(clientCollateralId);
         addCollaterals(collaterals, clientCollateralId, BigDecimal.valueOf(1));
         LoanApplicationTestBuilder loanApplication = new LoanApplicationTestBuilder() //
@@ -315,7 +315,7 @@ public class LoanApplicationUndoLastTrancheTest {
         }
         final String loanApplicationJSON = loanApplication.build(clientID.toString(), loanProductID.toString(), null);
 
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        return loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
 }

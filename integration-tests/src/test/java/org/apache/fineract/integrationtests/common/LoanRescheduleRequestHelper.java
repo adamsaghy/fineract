@@ -43,24 +43,24 @@ public class LoanRescheduleRequestHelper extends IntegrationTest {
 
     public Integer createLoanRescheduleRequest(final String requestJSON) {
         final String URL = LOAN_RESCHEDULE_REQUEST_URL + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, URL, requestJSON, "resourceId");
+        return Utils.performServerPost(requestSpec, responseSpec, URL, requestJSON, "resourceId");
     }
 
     public HashMap createLoanRescheduleRequestWithFullResponse(final String requestJSON) {
         final String URL = LOAN_RESCHEDULE_REQUEST_URL + "?" + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, URL, requestJSON, "");
+        return Utils.performServerPost(requestSpec, responseSpec, URL, requestJSON, "");
     }
 
     public Integer rejectLoanRescheduleRequest(final Integer requestId, final String requestJSON) {
         final String URL = LOAN_RESCHEDULE_REQUEST_URL + "/" + requestId + "?" + Utils.TENANT_IDENTIFIER + "&command=reject";
 
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, URL, requestJSON, "resourceId");
+        return Utils.performServerPost(requestSpec, responseSpec, URL, requestJSON, "resourceId");
     }
 
     public Integer approveLoanRescheduleRequest(final Integer requestId, final String requestJSON) {
         final String URL = LOAN_RESCHEDULE_REQUEST_URL + "/" + requestId + "?" + Utils.TENANT_IDENTIFIER + "&command=approve";
 
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, URL, requestJSON, "resourceId");
+        return Utils.performServerPost(requestSpec, responseSpec, URL, requestJSON, "resourceId");
     }
 
     public Object getLoanRescheduleRequest(final Integer requestId, final String param) {

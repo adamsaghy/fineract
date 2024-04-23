@@ -113,7 +113,7 @@ public final class CenterHelper {
         if (activationDate != null) {
             hm.put("active", true);
             hm.put("locale", "en");
-            hm.put("dateFormat", "dd MMMM yyyy");
+            hm.put("dateFormat", CommonConstants.DATE_FORMAT);
             hm.put("activationDate", activationDate);
         }
 
@@ -256,7 +256,7 @@ public final class CenterHelper {
 
     public static String activateCenterAsJSON(final String activationDate) {
         final HashMap<String, String> map = new HashMap<>();
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("locale", "en");
         if (!Strings.isNullOrEmpty(activationDate)) {
             map.put("activationDate", activationDate);

@@ -53,7 +53,7 @@ public class HolidayHelper {
 
         map.put("offices", offices);
         map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("name", Utils.uniqueRandomStringGenerator("HOLIDAY_", 5));
         map.put("fromDate", "01 April 2013");
         map.put("toDate", "01 April 2013");
@@ -73,7 +73,7 @@ public class HolidayHelper {
 
         map.put("offices", offices);
         map.put("locale", "en");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("name", Utils.uniqueRandomStringGenerator("HOLIDAY_", 5));
         map.put("fromDate", "04 April 2024");
         map.put("toDate", "04 April 2024");

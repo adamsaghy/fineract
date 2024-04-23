@@ -150,7 +150,7 @@ public class SavingsAccountHelper extends IntegrationTest {
 
     public Integer applyForSavingsApplicationOnDate(String savingsApplicationJson) {
         LOG.info("--------------------------------APPLYING FOR SAVINGS APPLICATION--------------------------------");
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER,
+        return Utils.performServerPost(requestSpec, responseSpec, SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER,
                 savingsApplicationJson, "savingsId");
     }
 
@@ -161,7 +161,7 @@ public class SavingsAccountHelper extends IntegrationTest {
                 .withSubmittedOnDate(submittedOnDate) //
                 .withDatatables(getTestDatatableAsJson(datatableName)) //
                 .build(id.toString(), savingsProductID.toString(), accountType);
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER,
+        return Utils.performServerPost(requestSpec, responseSpec, SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER,
                 savingsApplicationJSON, "savingsId");
     }
 
@@ -171,7 +171,7 @@ public class SavingsAccountHelper extends IntegrationTest {
         final String savingsApplicationJSON = new SavingsApplicationTestBuilder() //
                 .withSubmittedOnDate(submittedOnDate) //
                 .build(id.toString(), savingsProductID.toString(), accountType);
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER,
+        return Utils.performServerPost(requestSpec, responseSpec, SAVINGS_ACCOUNT_URL + "?" + Utils.TENANT_IDENTIFIER,
                 savingsApplicationJSON, responseAttribute);
     }
 
@@ -191,9 +191,8 @@ public class SavingsAccountHelper extends IntegrationTest {
                 .withSubmittedOnDate(CREATED_DATE_PLUS_ONE) //
                 .build(id.toString(), savingsProductID.toString(), accountType);
 
-        return Utils.performServerPut(this.requestSpec, this.responseSpec,
-                SAVINGS_ACCOUNT_URL + "/" + savingsId + "?" + Utils.TENANT_IDENTIFIER, savingsApplicationJSON,
-                CommonConstants.RESPONSE_CHANGES);
+        return Utils.performServerPut(requestSpec, responseSpec, SAVINGS_ACCOUNT_URL + "/" + savingsId + "?" + Utils.TENANT_IDENTIFIER,
+                savingsApplicationJSON, CommonConstants.RESPONSE_CHANGES);
     }
 
     // GLIM_GSIM_TESTING
@@ -216,7 +215,7 @@ public class SavingsAccountHelper extends IntegrationTest {
         map.put("withHoldTax", value);
         String json = new Gson().toJson(map);
 
-        return Utils.performServerPut(this.requestSpec, this.responseSpec,
+        return Utils.performServerPut(requestSpec, responseSpec,
                 SAVINGS_ACCOUNT_URL + "/" + savingsId + "?command=" + UPDATE_WITHHOLD_TAX_STATUS + "&" + Utils.TENANT_IDENTIFIER, json,
                 CommonConstants.RESPONSE_CHANGES);
     }
@@ -284,8 +283,8 @@ public class SavingsAccountHelper extends IntegrationTest {
 
     public Object deleteSavingsApplication(final Integer savingsId, final String jsonAttributeToGetBack) {
         LOG.info("---------------------------------- DELETE SAVINGS APPLICATION ----------------------------------");
-        return Utils.performServerDelete(this.requestSpec, this.responseSpec,
-                SAVINGS_ACCOUNT_URL + "/" + savingsId + "?" + Utils.TENANT_IDENTIFIER, jsonAttributeToGetBack);
+        return Utils.performServerDelete(requestSpec, responseSpec, SAVINGS_ACCOUNT_URL + "/" + savingsId + "?" + Utils.TENANT_IDENTIFIER,
+                jsonAttributeToGetBack);
 
     }
 
@@ -398,13 +397,13 @@ public class SavingsAccountHelper extends IntegrationTest {
     }
 
     public HashMap updateCharges(final Integer chargeId, final Integer savingsId) {
-        return Utils.performServerPut(this.requestSpec, this.responseSpec,
+        return Utils.performServerPut(requestSpec, responseSpec,
                 SAVINGS_ACCOUNT_URL + "/" + savingsId + "/charges/" + chargeId + "?" + Utils.TENANT_IDENTIFIER, getModifyChargeJSON(),
                 CommonConstants.RESPONSE_CHANGES);
     }
 
     public Integer deleteCharge(final Integer chargeId, final Integer savingsId) {
-        return Utils.performServerDelete(this.requestSpec, this.responseSpec,
+        return Utils.performServerDelete(requestSpec, responseSpec,
                 SAVINGS_ACCOUNT_URL + "/" + savingsId + "/charges/" + chargeId + "?" + Utils.TENANT_IDENTIFIER,
                 CommonConstants.RESPONSE_RESOURCE_ID);
     }
@@ -690,7 +689,7 @@ public class SavingsAccountHelper extends IntegrationTest {
         final String url = SAVINGS_ACCOUNT_URL + "/" + savingsId + "/transactions/search";
         queryParams.put(TENANT_PARAM_NAME, DEFAULT_TENANT);
         requestSpec.queryParams(queryParams);
-        String response = Utils.performServerGet(this.requestSpec, this.responseSpec, url);
+        String response = Utils.performServerGet(requestSpec, responseSpec, url);
         return GSON.fromJson(response, SavingsAccountTransactionsSearchResponse.class);
     }
 
@@ -732,7 +731,7 @@ public class SavingsAccountHelper extends IntegrationTest {
     private HashMap performSavingApplicationActions(final String postURLForSavingsTransaction, final String jsonToBeSent,
             final Boolean isBlock) {
         HashMap status = null;
-        final HashMap response = Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForSavingsTransaction, jsonToBeSent,
+        final HashMap response = Utils.performServerPost(requestSpec, responseSpec, postURLForSavingsTransaction, jsonToBeSent,
                 CommonConstants.RESPONSE_CHANGES);
         if (response != null) {
             status = (HashMap) response.get("status");
@@ -745,8 +744,7 @@ public class SavingsAccountHelper extends IntegrationTest {
 
     private Object performSavingActions(final String postURLForSavingsTransaction, final String jsonToBeSent,
             final String jsonAttributeToGetBack) {
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForSavingsTransaction, jsonToBeSent,
-                jsonAttributeToGetBack);
+        return Utils.performServerPost(requestSpec, responseSpec, postURLForSavingsTransaction, jsonToBeSent, jsonAttributeToGetBack);
     }
 
     public Object closeSavingsAccountAndGetBackRequiredField(final Integer savingsID, String withdrawBalance,
@@ -890,7 +888,7 @@ public class SavingsAccountHelper extends IntegrationTest {
 
     public String importSavingsTemplate(File file) {
         String locale = "en";
-        String dateFormat = "dd MMMM yyyy";
+        String dateFormat = CommonConstants.DATE_FORMAT;
         String legalFormType = null;
         requestSpec.header(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA);
         return Utils.performServerTemplatePost(requestSpec, responseSpec,

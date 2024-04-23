@@ -62,14 +62,14 @@ public class MakercheckerTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.makercheckersHelper = new MakercheckersHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.makercheckersHelper = new MakercheckersHelper(requestSpec, responseSpec);
         this.rolesHelper = new RolesHelper();
         this.auditHelper = new AuditHelper(requestSpec, responseSpec);
         this.savingsProductHelper = new SavingsProductHelper();
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
+        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
     }
 
     @Test
@@ -110,18 +110,18 @@ public class MakercheckerTest {
             Map<String, Boolean> permissionMap = Map.of("CREATE_CLIENT", true, "CREATE_CLIENT_CHECKER", true, "ACTIVATE_CLIENT", true,
                     "ACTIVATE_CLIENT_CHECKER", true, "WITHDRAWAL_SAVINGSACCOUNT", true, "WITHDRAWAL_SAVINGSACCOUNT_CHECKER", true);
             RolesHelper.addPermissionsToRole(requestSpec, responseSpec, roleId, permissionMap);
-            final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+            final Integer staffId = StaffHelper.createStaff(requestSpec, responseSpec);
             // create maker user
             String maker = Utils.uniqueRandomStringGenerator("user", 8);
-            final Integer makerUserId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, maker,
-                    "P4ssw0rd", "resourceId");
+            final Integer makerUserId = (Integer) UserHelper.createUser(requestSpec, responseSpec, roleId, staffId, maker, "P4ssw0rd",
+                    "resourceId");
 
             // create client - maker-checker disabled
             RequestSpecification makerRequestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build()
                     .header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(maker, "P4ssw0rd"));
-            Integer clientId = ClientHelper.createClient(makerRequestSpec, this.responseSpec);
+            Integer clientId = ClientHelper.createClient(makerRequestSpec, responseSpec);
             assertNotNull(clientId);
-            ClientHelper.verifyClientCreatedOnServer(requestSpec, this.responseSpec, clientId);
+            ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
 
             final Integer savingsId = createApproveActivateSavingsAccountDailyPosting(clientId, START_DATE_STRING);
             assertNotNull(savingsId);
@@ -136,7 +136,7 @@ public class MakercheckerTest {
             rolesHelper.updatePermissions(putPermissionsRequest);
 
             // create client - maker-checker enabled
-            clientId = ClientHelper.createClient(makerRequestSpec, this.responseSpec);
+            clientId = ClientHelper.createClient(makerRequestSpec, responseSpec);
             assertNull(clientId, "Client is created on the server");
 
             List<Map<String, Object>> auditDetails = makercheckersHelper
@@ -145,7 +145,7 @@ public class MakercheckerTest {
             Long clientCommandId = ((Double) auditDetails.get(0).get("id")).longValue();
 
             // savings withdrawal - maker-checker enabled
-            SavingsAccountHelper makerSavingsHelper = new SavingsAccountHelper(makerRequestSpec, this.responseSpec);
+            SavingsAccountHelper makerSavingsHelper = new SavingsAccountHelper(makerRequestSpec, responseSpec);
             Integer withdrawalId = (Integer) makerSavingsHelper.withdrawalFromSavingsAccount(savingsId, "100", TRANSACTION_DATE_STRING,
                     CommonConstants.RESPONSE_RESOURCE_ID);
             assertNull(withdrawalId, "Withdrawal performed on the server");
@@ -162,8 +162,8 @@ public class MakercheckerTest {
 
             // create checker user
             String checker = Utils.uniqueRandomStringGenerator("user", 8);
-            final Integer checkerUserId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, roleId, staffId, checker,
-                    "P4ssw0rd", "resourceId");
+            final Integer checkerUserId = (Integer) UserHelper.createUser(requestSpec, responseSpec, roleId, staffId, checker, "P4ssw0rd",
+                    "resourceId");
             RequestSpecification checkerRequestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build()
                     .header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(checker, "P4ssw0rd"));
 
@@ -182,9 +182,9 @@ public class MakercheckerTest {
             // add checker superuser permission - actions are performed in one step
             permissionMap = Map.of("CHECKER_SUPER_USER", true);
             RolesHelper.addPermissionsToRole(requestSpec, responseSpec, roleId, permissionMap);
-            clientId = ClientHelper.createClient(makerRequestSpec, this.responseSpec);
+            clientId = ClientHelper.createClient(makerRequestSpec, responseSpec);
             assertNotNull(clientId);
-            ClientHelper.verifyClientCreatedOnServer(requestSpec, this.responseSpec, clientId);
+            ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientId);
 
             withdrawalId = (Integer) makerSavingsHelper.withdrawalFromSavingsAccount(savingsId, "100", TRANSACTION_DATE_STRING,
                     CommonConstants.RESPONSE_RESOURCE_ID);

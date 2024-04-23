@@ -42,6 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.fineract.client.models.PostClientsRequest;
 import org.apache.fineract.client.models.PostClientsResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.Utils;
 import org.apache.fineract.integrationtests.common.accounting.Account;
 import org.apache.fineract.integrationtests.common.accounting.AccountHelper;
@@ -77,12 +78,12 @@ public class DateValidationTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
         this.errorResponseSpec = new ResponseSpecBuilder().expectStatusCode(400).build();
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-        this.loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
         this.interopHelper = new InteropHelper(requestSpec, errorResponseSpec);
         this.accountHelper = new AccountHelper(requestSpec, responseSpec);
     }
@@ -145,7 +146,7 @@ public class DateValidationTest {
         final Account expenseAccount = this.accountHelper.createExpenseAccount();
         final Account liabilityAccount = this.accountHelper.createLiabilityAccount();
 
-        DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter(Locale.US);
+        DateTimeFormatter formatter = new DateTimeFormatterBuilder().appendPattern(CommonConstants.DATE_FORMAT).toFormatter(Locale.US);
 
         LocalDate todaysDate = LocalDate.now(ZoneId.systemDefault()).minusMonths(3);
         final String VALID_FROM = todaysDate.format(formatter);
@@ -202,7 +203,7 @@ public class DateValidationTest {
 
     private Integer createFixedDepositProduct(final String validFrom, final String validTo, Account... accounts) {
         log.info("------------------------------CREATING NEW FIXED DEPOSIT PRODUCT ---------------------------------------");
-        FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(this.requestSpec, this.responseSpec);
+        FixedDepositProductHelper fixedDepositProductHelper = new FixedDepositProductHelper(requestSpec, responseSpec);
         fixedDepositProductHelper = fixedDepositProductHelper.withAccountingRuleAsCashBased(accounts);
         final String fixedDepositProductJSON = fixedDepositProductHelper.withPeriodRangeChart() //
                 .build(validFrom, validTo, true);
@@ -212,11 +213,10 @@ public class DateValidationTest {
     private String applyForFixedDepositApplication(final String clientID, final String productID, final String submittedOnDate,
             final Integer maturityInstructionId, final List<HashMap<String, String>> charges) {
         log.info("--------------------------------APPLYING FOR FIXED DEPOSIT ACCOUNT --------------------------------");
-        final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.errorResponseSpec) //
+        final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(requestSpec, this.errorResponseSpec) //
                 .withSubmittedOnDate(submittedOnDate).withMaturityInstructionId(maturityInstructionId).withCharges(charges)
                 .build(clientID, productID, WHOLE_TERM);
-        return FixedDepositAccountHelper.applyFixedDepositApplication(fixedDepositApplicationJSON, this.requestSpec,
-                this.errorResponseSpec);
+        return FixedDepositAccountHelper.applyFixedDepositApplication(fixedDepositApplicationJSON, requestSpec, this.errorResponseSpec);
     }
 
     private List<HashMap<String, String>> getCharges() {

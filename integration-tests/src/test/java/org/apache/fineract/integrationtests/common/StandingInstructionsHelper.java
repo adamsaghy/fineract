@@ -67,7 +67,7 @@ public class StandingInstructionsHelper {
 
         final HashMap<String, String> map = new HashMap<>();
         map.put("name", Utils.uniqueRandomStringGenerator("STANDING_INSTRUCTION_", 5));
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("monthDayFormat", "dd MMMM");
         map.put("locale", LOCALE);
         map.put("fromClientId", clientId);
@@ -97,9 +97,9 @@ public class StandingInstructionsHelper {
     public Integer createStandingInstruction(final String clientId, final String fromAccountId, final String toAccountId,
             final String fromAccountType, final String toAccountType, final String validFrom, final String validTo, final String monthDay) {
         log.info("-------------------------------- CREATE STANDING INSTRUCTIONS --------------------------------");
-        final String standingInstructionAsJSON = new StandingInstructionsHelper(this.requestSpec, this.responseSpec).build(clientId,
-                fromAccountId, toAccountId, fromAccountType, toAccountType, validFrom, validTo, monthDay);
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, STANDING_INSTRUCTIONS_URL + "?" + Utils.TENANT_IDENTIFIER,
+        final String standingInstructionAsJSON = new StandingInstructionsHelper(requestSpec, responseSpec).build(clientId, fromAccountId,
+                toAccountId, fromAccountType, toAccountType, validFrom, validTo, monthDay);
+        return Utils.performServerPost(requestSpec, responseSpec, STANDING_INSTRUCTIONS_URL + "?" + Utils.TENANT_IDENTIFIER,
                 standingInstructionAsJSON, "resourceId");
     }
 
@@ -108,7 +108,7 @@ public class StandingInstructionsHelper {
         log.info("----------------------------- RETRIEVING STANDING INSTRUCTION BY ID---------------------------");
         final String GET_STANDING_INSTRUCTION_BY_ID_URL = STANDING_INSTRUCTIONS_URL + "/" + standingInstructionId + "?"
                 + Utils.TENANT_IDENTIFIER;
-        return Utils.performServerGet(this.requestSpec, this.responseSpec, GET_STANDING_INSTRUCTION_BY_ID_URL, "");
+        return Utils.performServerGet(requestSpec, responseSpec, GET_STANDING_INSTRUCTION_BY_ID_URL, "");
     }
 
     public List<HashMap> getStandingInstructionHistory(Integer fromSavingsId, Integer fromAccountType, Integer fromClientId,
@@ -117,6 +117,6 @@ public class StandingInstructionsHelper {
                 + "&fromSavingsId=" + fromSavingsId + "&fromAccountType=" + fromAccountType + "&clientId=" + fromClientId + "&transferType="
                 + transferType;
         log.info("STANDING_INSTRUCTIONS_HISTORY_URL= {}", STANDING_INSTRUCTIONS_HISTORY_URL);
-        return Utils.performServerGet(this.requestSpec, this.responseSpec, STANDING_INSTRUCTIONS_HISTORY_URL, "pageItems");
+        return Utils.performServerGet(requestSpec, responseSpec, STANDING_INSTRUCTIONS_HISTORY_URL, "pageItems");
     }
 }

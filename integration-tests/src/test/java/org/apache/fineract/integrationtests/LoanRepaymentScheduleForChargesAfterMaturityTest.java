@@ -25,7 +25,6 @@ import org.apache.fineract.client.models.GetLoanProductsProductIdResponse;
 import org.apache.fineract.client.models.PostLoanProductsRequest;
 import org.apache.fineract.client.models.PostLoanProductsResponse;
 import org.apache.fineract.integrationtests.common.ClientHelper;
-import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
 import org.apache.fineract.integrationtests.common.loans.LoanRescheduleRequestTestBuilder;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleType;
@@ -33,14 +32,11 @@ import org.junit.jupiter.api.Test;
 
 public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIntegrationTest {
 
-    private final LoanRescheduleRequestHelper loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(this.requestSpec,
-            this.responseSpec);
-
     @Test
     public void loanNPlusOneInstallmentIsRetainedAfterLoanRescheduleTest() {
         runAt("03 March 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepayments();
 
@@ -81,10 +77,10 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
                     .updateAdjustedDueDate("30 April 2023").updateSubmittedOnDate("03 March 2023").updateRescheduleReasonId("1")
                     .build(loanId.toString());
 
-            Integer loanRescheduleRequest = loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
+            Integer loanRescheduleRequest = LOAN_RESCHEDULE_REQUEST_HELPER.createLoanRescheduleRequest(requestJSON);
             requestJSON = new LoanRescheduleRequestTestBuilder().updateSubmittedOnDate("03 March 2023")
                     .getApproveLoanRescheduleRequestJSON();
-            Integer approveLoanRescheduleRequest = loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequest,
+            Integer approveLoanRescheduleRequest = LOAN_RESCHEDULE_REQUEST_HELPER.approveLoanRescheduleRequest(loanRescheduleRequest,
                     requestJSON);
 
             // verify repayment schedule
@@ -104,7 +100,7 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
     public void loanNPlusOneInstallmentIsAdjustedAfterRescheduleIfDateFallBeforeMaturityDateTest() {
         runAt("03 March 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepayments();
 
@@ -146,10 +142,10 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
                     .updateAdjustedDueDate("30 April 2023").updateSubmittedOnDate("03 March 2023").updateRescheduleReasonId("1")
                     .build(loanId.toString());
 
-            Integer loanRescheduleRequest = loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
+            Integer loanRescheduleRequest = LOAN_RESCHEDULE_REQUEST_HELPER.createLoanRescheduleRequest(requestJSON);
             requestJSON = new LoanRescheduleRequestTestBuilder().updateSubmittedOnDate("03 March 2023")
                     .getApproveLoanRescheduleRequestJSON();
-            Integer approveLoanRescheduleRequest = loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequest,
+            Integer approveLoanRescheduleRequest = LOAN_RESCHEDULE_REQUEST_HELPER.approveLoanRescheduleRequest(loanRescheduleRequest,
                     requestJSON);
 
             // verify repayment schedule
@@ -168,7 +164,7 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
     public void loanNPlusOneInstallmentIsRetainedAfterLoanRescheduleForAdvancedPaymentAllocationTest() {
         runAt("03 March 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepaymentsWithAdvancedPaymentAllocationStrategy();
 
@@ -212,10 +208,10 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
                     .updateAdjustedDueDate("30 April 2023").updateSubmittedOnDate("03 March 2023").updateRescheduleReasonId("1")
                     .build(loanId.toString());
 
-            Integer loanRescheduleRequest = loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
+            Integer loanRescheduleRequest = LOAN_RESCHEDULE_REQUEST_HELPER.createLoanRescheduleRequest(requestJSON);
             requestJSON = new LoanRescheduleRequestTestBuilder().updateSubmittedOnDate("03 March 2023")
                     .getApproveLoanRescheduleRequestJSON();
-            Integer approveLoanRescheduleRequest = loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequest,
+            Integer approveLoanRescheduleRequest = LOAN_RESCHEDULE_REQUEST_HELPER.approveLoanRescheduleRequest(loanRescheduleRequest,
                     requestJSON);
 
             // verify repayment schedule
@@ -235,7 +231,7 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
     public void loanNPlusOneInstallmentIsAdjustedAfterRescheduleIfDateFallBeforeMaturityDateForAdvancedPaymentAllocationTest() {
         runAt("03 March 2023", () -> {
             // Create Client
-            Long clientId = clientHelper.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
+            Long clientId = CLIENT_HELPER.createClient(ClientHelper.defaultClientCreationRequest()).getClientId();
             // Create Loan Product
             Long loanProductId = createLoanProductWithMultiDisbursalAndRepaymentsWithAdvancedPaymentAllocationStrategy();
 
@@ -278,10 +274,10 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
                     .updateAdjustedDueDate("30 April 2023").updateSubmittedOnDate("03 March 2023").updateRescheduleReasonId("1")
                     .build(loanId.toString());
 
-            Integer loanRescheduleRequest = loanRescheduleRequestHelper.createLoanRescheduleRequest(requestJSON);
+            Integer loanRescheduleRequest = LOAN_RESCHEDULE_REQUEST_HELPER.createLoanRescheduleRequest(requestJSON);
             requestJSON = new LoanRescheduleRequestTestBuilder().updateSubmittedOnDate("03 March 2023")
                     .getApproveLoanRescheduleRequestJSON();
-            Integer approveLoanRescheduleRequest = loanRescheduleRequestHelper.approveLoanRescheduleRequest(loanRescheduleRequest,
+            Integer approveLoanRescheduleRequest = LOAN_RESCHEDULE_REQUEST_HELPER.approveLoanRescheduleRequest(loanRescheduleRequest,
                     requestJSON);
 
             // verify repayment schedule
@@ -310,8 +306,8 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
             product.overAppliedNumber(null);
         }
 
-        PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = loanProductHelper
+        PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(product);
+        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = LOAN_PRODUCT_HELPER
                 .retrieveLoanProductById(loanProductResponse.getResourceId());
         assertNotNull(getLoanProductsProductIdResponse);
         return loanProductResponse.getResourceId();
@@ -332,8 +328,8 @@ public class LoanRepaymentScheduleForChargesAfterMaturityTest extends BaseLoanIn
             product.overAppliedNumber(null);
         }
 
-        PostLoanProductsResponse loanProductResponse = loanProductHelper.createLoanProduct(product);
-        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = loanProductHelper
+        PostLoanProductsResponse loanProductResponse = LOAN_PRODUCT_HELPER.createLoanProduct(product);
+        GetLoanProductsProductIdResponse getLoanProductsProductIdResponse = LOAN_PRODUCT_HELPER
                 .retrieveLoanProductById(loanProductResponse.getResourceId());
         assertNotNull(getLoanProductsProductIdResponse);
         return loanProductResponse.getResourceId();

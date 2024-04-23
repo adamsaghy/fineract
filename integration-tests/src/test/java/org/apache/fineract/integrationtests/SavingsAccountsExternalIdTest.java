@@ -32,6 +32,7 @@ import org.apache.fineract.client.models.PutSavingsAccountsAccountIdRequest;
 import org.apache.fineract.client.models.PutSavingsAccountsAccountIdResponse;
 import org.apache.fineract.client.util.Calls;
 import org.apache.fineract.integrationtests.client.IntegrationTest;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -42,9 +43,9 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SavingsAccountsExternalIdTest.class);
     public static final String EXTERNAL_ID = UUID.randomUUID().toString();
-    private final String dateFormat = "dd MMMM yyyy";
     private final String locale = "en";
-    private final String formattedDate = LocalDate.now(ZoneId.systemDefault()).minusDays(5).format(DateTimeFormatter.ofPattern(dateFormat));
+    private final String formattedDate = LocalDate.now(ZoneId.systemDefault()).minusDays(5)
+            .format(DateTimeFormatter.ofPattern(CommonConstants.DATE_FORMAT));
 
     @Test
     @Order(1)
@@ -54,7 +55,7 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
         request.setClientId(1);
         request.setProductId(1);
         request.setLocale(locale);
-        request.setDateFormat(dateFormat);
+        request.setDateFormat(CommonConstants.DATE_FORMAT);
         request.submittedOnDate(formattedDate);
         request.setExternalId(EXTERNAL_ID);
 
@@ -82,7 +83,7 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
     void approveSavingsAccount() {
         LOG.info("------------------------------ APPROVING SAVINGS ACCOUNT ---------------------------------------");
         PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
-        request.dateFormat(dateFormat);
+        request.dateFormat(CommonConstants.DATE_FORMAT);
         request.setLocale(locale);
         request.setApprovedOnDate(formattedDate);
         Response<PostSavingsAccountsAccountIdResponse> response = okR(
@@ -97,7 +98,7 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
     void retrieveSavingsAccountWithExternalId() {
         LOG.info("------------------------------ RETRIEVING SAVINGS ACCOUNT ---------------------------------------");
         PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
-        request.dateFormat(dateFormat);
+        request.dateFormat(CommonConstants.DATE_FORMAT);
         request.setLocale(locale);
         request.setActivatedOnDate(formattedDate);
         Response<GetSavingsAccountsAccountIdResponse> response = okR(fineract().savingsAccounts.retrieveOne26(EXTERNAL_ID, false, "all"));
@@ -125,7 +126,7 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
     void retrieveSavingsAccountWithExternalIdSecondTime() {
         LOG.info("------------------------------ RETRIEVING SAVINGS ACCOUNT - SECOND TIME ---------------------------------------");
         PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
-        request.dateFormat(dateFormat);
+        request.dateFormat(CommonConstants.DATE_FORMAT);
         request.setLocale(locale);
         request.setActivatedOnDate(formattedDate);
         Response<GetSavingsAccountsAccountIdResponse> response = okR(fineract().savingsAccounts.retrieveOne26(EXTERNAL_ID, false, "all"));
@@ -140,7 +141,7 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
     void deleteSavingsAccountWithExternalId() {
         LOG.info("------------------------------ DELETING SAVINGS ACCOUNT ---------------------------------------");
         PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
-        request.dateFormat(dateFormat);
+        request.dateFormat(CommonConstants.DATE_FORMAT);
         request.setLocale(locale);
         request.setActivatedOnDate(formattedDate);
         Response<DeleteSavingsAccountsAccountIdResponse> response = okR(fineract().savingsAccounts.delete20(EXTERNAL_ID));
@@ -154,7 +155,7 @@ public class SavingsAccountsExternalIdTest extends IntegrationTest {
     void retrieveSavingsAccountWithExternalIdThirdTime() {
         LOG.info("------------------------------ RETRIEVING SAVINGS ACCOUNT - THIRD TIME ---------------------------------------");
         PostSavingsAccountsAccountIdRequest request = new PostSavingsAccountsAccountIdRequest();
-        request.dateFormat(dateFormat);
+        request.dateFormat(CommonConstants.DATE_FORMAT);
         request.setLocale(locale);
         request.setActivatedOnDate(formattedDate);
         Response<GetSavingsAccountsAccountIdResponse> response = Calls

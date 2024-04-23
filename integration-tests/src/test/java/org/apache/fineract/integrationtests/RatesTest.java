@@ -40,26 +40,26 @@ public class RatesTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
     }
 
     @Test
     public void testRatesForLoans() {
 
         // Retrieving all Rates
-        ArrayList<HashMap> allRatesData = RatesHelper.getRates(this.requestSpec, this.responseSpec);
+        ArrayList<HashMap> allRatesData = RatesHelper.getRates(requestSpec, responseSpec);
         Assertions.assertNotNull(allRatesData);
 
         // Testing Creation and Update of Loan Rate
-        final Integer loanRateId = RatesHelper.createRates(this.requestSpec, this.responseSpec, RatesHelper.getLoanRateJSON());
+        final Integer loanRateId = RatesHelper.createRates(requestSpec, responseSpec, RatesHelper.getLoanRateJSON());
         Assertions.assertNotNull(loanRateId);
 
         // Update Rate percentage
-        HashMap changes = RatesHelper.updateRates(this.requestSpec, this.responseSpec, loanRateId, RatesHelper.getModifyRateJSON());
+        HashMap changes = RatesHelper.updateRates(requestSpec, responseSpec, loanRateId, RatesHelper.getModifyRateJSON());
 
-        HashMap rateDataAfterChanges = RatesHelper.getRateById(this.requestSpec, this.responseSpec, loanRateId);
+        HashMap rateDataAfterChanges = RatesHelper.getRateById(requestSpec, responseSpec, loanRateId);
         Assertions.assertEquals(rateDataAfterChanges.get("percentage"), changes.get("percentage"), "Verifying Rate after modification");
 
     }

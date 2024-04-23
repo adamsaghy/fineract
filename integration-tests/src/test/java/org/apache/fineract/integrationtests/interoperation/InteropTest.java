@@ -97,7 +97,7 @@ public class InteropTest {
         String savingsExternalId = UUID.randomUUID().toString();
         String transactionCode = UUID.randomUUID().toString();
 
-        accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+        accountHelper = new AccountHelper(requestSpec, responseSpec);
         savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
         interopHelper = new InteropHelper(requestSpec, responseSpec, savingsExternalId, transactionCode);
     }

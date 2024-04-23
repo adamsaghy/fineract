@@ -96,18 +96,18 @@ public class ClientLoanChargeRefundIntegrationTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.loanTransactionHelperValidationError = new LoanTransactionHelper(this.requestSpec, new ResponseSpecBuilder().build());
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        loanTransactionHelperValidationError = new LoanTransactionHelper(requestSpec, new ResponseSpecBuilder().build());
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
         this.assetAccount = this.accountHelper.createAssetAccount();
         this.feeIncomeAccount = this.accountHelper.createIncomeAccount();
         this.penaltyIncomeAccount = this.accountHelper.createIncomeAccount();
         this.expenseAccount = this.accountHelper.createExpenseAccount();
         this.overpaymentAccount = this.accountHelper.createLiabilityAccount();
-        this.journalEntryHelper = new JournalEntryHelper(this.requestSpec, this.responseSpec);
+        this.journalEntryHelper = new JournalEntryHelper(requestSpec, responseSpec);
     }
 
     @Test
@@ -178,10 +178,9 @@ public class ClientLoanChargeRefundIntegrationTest {
         LOG.info("-------------Loancharge Refund -----------");
         final Integer installmentNumber = null;
         final String externalId = null;
-        Integer chargeRefundTxnId = (Integer) this.loanTransactionHelper.loanChargeRefund(loanChargeId, installmentNumber, refundAmount,
+        Integer chargeRefundTxnId = (Integer) loanTransactionHelper.loanChargeRefund(loanChargeId, installmentNumber, refundAmount,
                 externalId, this.disbursedLoanID, "resourceId");
-        HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, disbursedLoanID,
-                "status");
+        HashMap loanStatusHashMap = (HashMap) loanTransactionHelper.getLoanDetail(requestSpec, responseSpec, disbursedLoanID, "status");
         assertTrue((Boolean) loanStatusHashMap.get(expectedPostRefundStatus), "Invalid Post Refund Status");
 
         Float totalOutstandingPostRefund = getLoanDetailsSummaryTotalOutstanding(disbursedLoanID);
@@ -195,10 +194,9 @@ public class ClientLoanChargeRefundIntegrationTest {
         LOG.info("-------------Reverse Loancharge Refund -----------");
         final String reverseDate = getTodaysDate();
         final Float adjustmentAmount = 0.0f;
-        HashMap reverseHashMap = (HashMap) this.loanTransactionHelper.adjustLoanTransaction(disbursedLoanID, chargeRefundTxnId, reverseDate,
+        HashMap reverseHashMap = (HashMap) loanTransactionHelper.adjustLoanTransaction(disbursedLoanID, chargeRefundTxnId, reverseDate,
                 adjustmentAmount.toString(), "");
-        loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, disbursedLoanID,
-                "status");
+        loanStatusHashMap = (HashMap) loanTransactionHelper.getLoanDetail(requestSpec, responseSpec, disbursedLoanID, "status");
         assertTrue((Boolean) loanStatusHashMap.get(expectedPostRepaymentStatus), "Invalid Post Reversed Status");
 
         Float totalOutstandingPostReverse = getLoanDetailsSummaryTotalOutstanding(disbursedLoanID);
@@ -219,7 +217,7 @@ public class ClientLoanChargeRefundIntegrationTest {
         final Float refundAmount = 60.00f;
         final Integer installmentNumber = null;
         final String externalId = null;
-        ArrayList<HashMap> errors = (ArrayList<HashMap>) this.loanTransactionHelperValidationError.loanChargeRefund(loanChargeId,
+        ArrayList<HashMap> errors = (ArrayList<HashMap>) loanTransactionHelperValidationError.loanChargeRefund(loanChargeId,
                 installmentNumber, refundAmount, externalId, this.disbursedLoanID, CommonConstants.RESPONSE_ERROR);
         assertEquals("error.msg.loan.charge.transaction.amount.is.more.than.is.refundable",
                 errors.get(0).get(CommonConstants.RESPONSE_ERROR_MESSAGE_CODE));
@@ -235,7 +233,7 @@ public class ClientLoanChargeRefundIntegrationTest {
         final Float refundAmount = 90.01f; // 0.01 more than paid.
         final Integer installmentNumber = null;
         final String externalId = null;
-        ArrayList<HashMap> errors = (ArrayList<HashMap>) this.loanTransactionHelperValidationError.loanChargeRefund(loanChargeId,
+        ArrayList<HashMap> errors = (ArrayList<HashMap>) loanTransactionHelperValidationError.loanChargeRefund(loanChargeId,
                 installmentNumber, refundAmount, externalId, this.disbursedLoanID, CommonConstants.RESPONSE_ERROR);
 
         assertEquals("error.msg.loan.charge.transaction.amount.is.more.than.is.refundable",
@@ -254,17 +252,16 @@ public class ClientLoanChargeRefundIntegrationTest {
         final Float refundAmount = chargeAmountPaid; // refund charge paid
         final Integer installmentNumber = null;
         final String externalId = null;
-        Integer chargeRefundTxnId = (Integer) this.loanTransactionHelper.loanChargeRefund(loanChargeId, installmentNumber, refundAmount,
+        Integer chargeRefundTxnId = (Integer) loanTransactionHelper.loanChargeRefund(loanChargeId, installmentNumber, refundAmount,
                 externalId, this.disbursedLoanID, "resourceId");
-        HashMap loanDetailsHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec,
-                disbursedLoanID, "");
+        HashMap loanDetailsHashMap = (HashMap) loanTransactionHelper.getLoanDetail(requestSpec, responseSpec, disbursedLoanID, "");
         // refund 60 pays off remainder of charge leaving an amount 60 that could be refunded
 
         LOG.info("-------------Loancharge Refund 2 -----------");
         final Float smallRefund = 0.01f;
-        chargeRefundTxnId = (Integer) this.loanTransactionHelper.loanChargeRefund(loanChargeId, installmentNumber, smallRefund, externalId,
+        chargeRefundTxnId = (Integer) loanTransactionHelper.loanChargeRefund(loanChargeId, installmentNumber, smallRefund, externalId,
                 this.disbursedLoanID, "resourceId");
-        loanDetailsHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, disbursedLoanID, "");
+        loanDetailsHashMap = (HashMap) loanTransactionHelper.getLoanDetail(requestSpec, responseSpec, disbursedLoanID, "");
 
     }
 
@@ -283,12 +280,12 @@ public class ClientLoanChargeRefundIntegrationTest {
         final Float refundAmount = chargeAmountPaid; // refund charge paid
         final Integer installmentNumber = null;
         final String externalId = null;
-        Integer chargeRefundTxnId = (Integer) this.loanTransactionHelper.loanChargeRefund(loanChargeId, installmentNumber, refundAmount,
+        Integer chargeRefundTxnId = (Integer) loanTransactionHelper.loanChargeRefund(loanChargeId, installmentNumber, refundAmount,
                 externalId, this.disbursedLoanID, "resourceId");
         feeChargesPaid = getLoanDetailsSummaryfeeChargesPaid(disbursedLoanID);
         Assertions.assertEquals(feeChargesPaid, chargeAmountFull, "Incorrect Full feeChargesPaid");
 
-        ArrayList<HashMap> loanChargePaidByList = (ArrayList<HashMap>) this.loanTransactionHelper.getLoanTransactionDetails(disbursedLoanID,
+        ArrayList<HashMap> loanChargePaidByList = (ArrayList<HashMap>) loanTransactionHelper.getLoanTransactionDetails(disbursedLoanID,
                 chargeRefundTxnId, "loanChargePaidByList");
         Assertions.assertNotNull(loanChargePaidByList);
         Assertions.assertEquals(loanChargePaidByList.size(), 2);
@@ -341,7 +338,7 @@ public class ClientLoanChargeRefundIntegrationTest {
         LOG.info("-------------Loancharge Refund -----------");
         final Integer installmentNumber = null;
         final String externalId = null;
-        Integer chargeRefundTxnId = (Integer) this.loanTransactionHelper.loanChargeRefund(loanChargeId, installmentNumber,
+        Integer chargeRefundTxnId = (Integer) loanTransactionHelper.loanChargeRefund(loanChargeId, installmentNumber,
                 oneThirdChargeRefundAmount, externalId, this.disbursedLoanID, "resourceId");
         final String txnDate = getTodaysDate();
 
@@ -360,7 +357,7 @@ public class ClientLoanChargeRefundIntegrationTest {
         LOG.info("-------------Reverse Loancharge Refund -----------");
         final String reverseDate = getTodaysDate();
         final Float adjustmentAmount = 0.0f;
-        HashMap reverseHashMap = (HashMap) this.loanTransactionHelper.adjustLoanTransaction(disbursedLoanID, chargeRefundTxnId, reverseDate,
+        HashMap reverseHashMap = (HashMap) loanTransactionHelper.adjustLoanTransaction(disbursedLoanID, chargeRefundTxnId, reverseDate,
                 adjustmentAmount.toString(), "");
 
         this.journalEntryHelper.checkJournalEntryForAssetAccount(assetAccount, txnDate,
@@ -388,13 +385,13 @@ public class ClientLoanChargeRefundIntegrationTest {
         LOG.info("-------------Loancharge Refund -----------");
         final Integer installmentNumber = null;
         final String externalId = null;
-        final Integer chargeRefundTxnId = (Integer) this.loanTransactionHelper.loanChargeRefund(loanChargeId, installmentNumber,
+        final Integer chargeRefundTxnId = (Integer) loanTransactionHelper.loanChargeRefund(loanChargeId, installmentNumber,
                 oneThirdChargeRefundAmount, externalId, this.disbursedLoanID, "resourceId");
 
         final String reverseDate = getTodaysDate();
         final Float adjustmentAmount = 0.0f;
         LOG.info("-------------Reverse Repayment 2  -----------");
-        ArrayList<HashMap> errors = (ArrayList<HashMap>) this.loanTransactionHelperValidationError.adjustLoanTransaction(disbursedLoanID,
+        ArrayList<HashMap> errors = (ArrayList<HashMap>) loanTransactionHelperValidationError.adjustLoanTransaction(disbursedLoanID,
                 repayment2Id, reverseDate, adjustmentAmount.toString(), CommonConstants.RESPONSE_ERROR);
 
         assertEquals("error.msg.loan.transaction.cant.be.reversed.because.later.charge.refund.exists",
@@ -411,12 +408,12 @@ public class ClientLoanChargeRefundIntegrationTest {
         LOG.info("-------------Loancharge Refund -----------");
         final Integer installmentNumber = null;
         final String externalId = null;
-        final Integer chargeRefundTxnId = (Integer) this.loanTransactionHelper.loanChargeRefund(loanChargeId, installmentNumber,
+        final Integer chargeRefundTxnId = (Integer) loanTransactionHelper.loanChargeRefund(loanChargeId, installmentNumber,
                 oneThirdChargeRefundAmount, externalId, this.disbursedLoanID, "resourceId");
 
         final String repayment2Date = "20 January 2022";
         final Float repayment2Amount = oneInstallment; // installment 3
-        ArrayList<HashMap> errors = (ArrayList<HashMap>) this.loanTransactionHelperValidationError.makeRepaymentTypePayment(
+        ArrayList<HashMap> errors = (ArrayList<HashMap>) loanTransactionHelperValidationError.makeRepaymentTypePayment(
                 MAKE_REPAYMENT_COMMAND, repayment2Date, repayment2Amount, this.disbursedLoanID, CommonConstants.RESPONSE_ERROR);
 
         assertEquals("error.msg.loan.transaction.cant.be.created.because.later.charge.refund.exists",
@@ -433,8 +430,8 @@ public class ClientLoanChargeRefundIntegrationTest {
     private Integer fromStartToDisburseLoan(String submitApproveDisburseDate, String principal, final boolean penalty,
             final String accountingRule, final Account... accounts) {
 
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec);
-        ClientHelper.verifyClientCreatedOnServer(this.requestSpec, this.responseSpec, clientID);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
         boolean allowMultipleDisbursals = false;
         final Integer loanProductID = createLoanProduct(principal, allowMultipleDisbursals, accountingRule, accounts);
@@ -453,34 +450,33 @@ public class ClientLoanChargeRefundIntegrationTest {
         final List<HashMap> charges = null;
         final Integer loanID = applyForLoanApplication(clientID, loanProductID, charges, principal, submitApproveDisburseDate);
         Assertions.assertNotNull(loanID);
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan(submitApproveDisburseDate, loanID);
+        loanStatusHashMap = loanTransactionHelper.approveLoan(submitApproveDisburseDate, loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         LOG.info("-------------------------------DISBURSE LOAN -------------------------------------------"); //
-        // String loanDetails = this.loanTransactionHelper.getLoanDetails(this.requestSpec, this.responseSpec, loanID);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount(submitApproveDisburseDate, loanID, principal);
+        // String loanDetails = loanTransactionHelper.getLoanDetails(requestSpec, responseSpec, loanID);
+        loanStatusHashMap = loanTransactionHelper.disburseLoanWithNetDisbursalAmount(submitApproveDisburseDate, loanID, principal);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
         return loanID;
     }
 
     private HashMap makeRepaymentType(final String repaymentTypeCommand, final String repaymentDate, final Float repayment) {
         LOG.info("-------------Make repayment Type -----------");
-        createdRepaymentTypeResourceId = (Integer) this.loanTransactionHelper.makeRepaymentTypePayment(repaymentTypeCommand, repaymentDate,
+        createdRepaymentTypeResourceId = (Integer) loanTransactionHelper.makeRepaymentTypePayment(repaymentTypeCommand, repaymentDate,
                 repayment, this.disbursedLoanID, "resourceId");
-        HashMap loanStatusHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, disbursedLoanID,
-                "status");
+        HashMap loanStatusHashMap = (HashMap) loanTransactionHelper.getLoanDetail(requestSpec, responseSpec, disbursedLoanID, "status");
         return loanStatusHashMap;
     }
 
     private static String getLoanChargeAsJSON(final String chargeId, final String dueDate, final String amount, final String externalId) {
         final HashMap<String, String> map = new HashMap<>();
         map.put("locale", "en_GB");
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("amount", amount);
         map.put("dueDate", dueDate);
         map.put("chargeId", chargeId);
@@ -508,7 +504,7 @@ public class ClientLoanChargeRefundIntegrationTest {
             builder = builder.withInterestCalculationPeriodTypeAsRepaymentPeriod(true);
         }
         final String loanProductJSON = builder.build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        return loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID, List<HashMap> charges, String principal,
@@ -529,7 +525,7 @@ public class ClientLoanChargeRefundIntegrationTest {
                 .withExpectedDisbursementDate(loanDate) //
                 .withSubmittedOnDate(loanDate) //
                 .withCharges(charges).build(clientID.toString(), loanProductID.toString(), savingsId);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        return loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
     private Integer disburseAddChargeAndRepay(final Float repaymentAmount, final String expectedPostRepaymentStatus,
@@ -544,7 +540,7 @@ public class ClientLoanChargeRefundIntegrationTest {
         final String externalId = null;
         final float amount = 1.0f;
         final String chargeDueDate = "15 February 2022"; // will be added to the 2nd installment (March)
-        final Integer loanChargeId = this.loanTransactionHelper.addChargesForLoan(this.disbursedLoanID,
+        final Integer loanChargeId = loanTransactionHelper.addChargesForLoan(this.disbursedLoanID,
                 getLoanChargeAsJSON(String.valueOf(charge), chargeDueDate, String.valueOf(amount), externalId));
         Assertions.assertNotNull(loanChargeId);
 
@@ -556,8 +552,7 @@ public class ClientLoanChargeRefundIntegrationTest {
 
     private Float getLoanDetailsSummaryTotalOutstanding(final Integer loanId) {
 
-        HashMap loanDetailsHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanId,
-                "summary");
+        HashMap loanDetailsHashMap = (HashMap) loanTransactionHelper.getLoanDetail(requestSpec, responseSpec, loanId, "summary");
         Float amount = (Float) loanDetailsHashMap.get("totalOutstanding");
         if (amount == null) {
             amount = 0.0f;
@@ -567,8 +562,7 @@ public class ClientLoanChargeRefundIntegrationTest {
 
     private Float getLoanDetailsSummaryfeeChargesPaid(final Integer loanId) {
 
-        HashMap loanDetailsHashMap = (HashMap) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanId,
-                "summary");
+        HashMap loanDetailsHashMap = (HashMap) loanTransactionHelper.getLoanDetail(requestSpec, responseSpec, loanId, "summary");
         Float amount = (Float) loanDetailsHashMap.get("feeChargesPaid");
         if (amount == null) {
             amount = 0.0f;
@@ -578,7 +572,7 @@ public class ClientLoanChargeRefundIntegrationTest {
 
     private Float getLoanDetailsTotalOverpaidAmount(final Integer loanId) {
 
-        Float amount = (Float) this.loanTransactionHelper.getLoanDetail(this.requestSpec, this.responseSpec, loanId, "totalOverpaid");
+        Float amount = (Float) loanTransactionHelper.getLoanDetail(requestSpec, responseSpec, loanId, "totalOverpaid");
         if (amount == null) {
             amount = 0.0f;
         }
@@ -586,7 +580,7 @@ public class ClientLoanChargeRefundIntegrationTest {
     }
 
     private void verifyPaidByEntry(final Integer loanId, final Integer chargeRefundTxnId, final Float refundAmount) {
-        ArrayList<HashMap> loanChargePaidByList = (ArrayList<HashMap>) this.loanTransactionHelper.getLoanTransactionDetails(loanId,
+        ArrayList<HashMap> loanChargePaidByList = (ArrayList<HashMap>) loanTransactionHelper.getLoanTransactionDetails(loanId,
                 chargeRefundTxnId, "loanChargePaidByList");
         Assertions.assertNotNull(loanChargePaidByList);
         Assertions.assertEquals(loanChargePaidByList.size(), 1);
@@ -596,7 +590,7 @@ public class ClientLoanChargeRefundIntegrationTest {
     }
 
     private String getTodaysDate() {
-        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.US);
+        DateFormat dateFormat = new SimpleDateFormat(CommonConstants.DATE_FORMAT, Locale.US);
         dateFormat.setTimeZone(Utils.getTimeZoneOfTenant());
         Calendar todaysDate = Calendar.getInstance(Utils.getTimeZoneOfTenant());
         return dateFormat.format(todaysDate.getTime());

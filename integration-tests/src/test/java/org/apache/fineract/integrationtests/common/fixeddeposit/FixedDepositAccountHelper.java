@@ -107,7 +107,7 @@ public class FixedDepositAccountHelper {
         map.put("clientId", clientId);
         map.put("interestCalculationDaysInYearType", this.interestCalculationDaysInYearType);
         map.put("locale", LOCALE);
-        map.put("dateFormat", "dd MMMM yyyy");
+        map.put("dateFormat", CommonConstants.DATE_FORMAT);
         map.put("monthDayFormat", "dd MMM");
         map.put("interestCalculationType", this.interestCalculationType);
         map.put("interestCompoundingPeriodType", this.interestCompoundingPeriodType);
@@ -220,11 +220,11 @@ public class FixedDepositAccountHelper {
     public HashMap updateFixedDepositAccount(final String clientID, final String productID, final String accountID, final String validFrom,
             final String validTo, final String penalInterestType, final String submittedOnDate) {
 
-        final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec) //
+        final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(requestSpec, responseSpec) //
                 .withSubmittedOnDate(submittedOnDate) //
                 .build(clientID, productID, penalInterestType);
 
-        return Utils.performServerPut(this.requestSpec, this.responseSpec,
+        return Utils.performServerPut(requestSpec, responseSpec,
                 FIXED_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?" + Utils.TENANT_IDENTIFIER, fixedDepositApplicationJSON,
                 CommonConstants.RESPONSE_CHANGES);
     }
@@ -234,7 +234,7 @@ public class FixedDepositAccountHelper {
             final String penalInterestType, final String interestCalculationType, final String interestCompoundingPeriodType,
             final String interestPostingPeriodType) {
 
-        final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(this.requestSpec, this.responseSpec) //
+        final String fixedDepositApplicationJSON = new FixedDepositAccountHelper(requestSpec, responseSpec) //
                 .withSubmittedOnDate(submittedOnDate) //
                 .withNumberOfDaysPerYear(numberOfDaysPerYear) //
                 .withInterestCalculationPeriodType(interestCalculationType) //
@@ -242,7 +242,7 @@ public class FixedDepositAccountHelper {
                 .withInterestPostingPeriodType(interestPostingPeriodType) //
                 .build(clientID, productID, penalInterestType);
 
-        return Utils.performServerPut(this.requestSpec, this.responseSpec,
+        return Utils.performServerPut(requestSpec, responseSpec,
                 FIXED_DEPOSIT_ACCOUNT_URL + "/" + accountID + "?" + Utils.TENANT_IDENTIFIER, fixedDepositApplicationJSON,
                 CommonConstants.RESPONSE_CHANGES);
     }
@@ -281,7 +281,7 @@ public class FixedDepositAccountHelper {
 
     public Object deleteFixedDepositApplication(final Integer fixedDepositAccountID, final String jsonAttributeToGetBack) {
         LOG.info("---------------------------------- DELETE FIXED DEPOSIT APPLICATION ----------------------------------");
-        return Utils.performServerDelete(this.requestSpec, this.responseSpec,
+        return Utils.performServerDelete(requestSpec, responseSpec,
                 FIXED_DEPOSIT_ACCOUNT_URL + "/" + fixedDepositAccountID + "?" + Utils.TENANT_IDENTIFIER, jsonAttributeToGetBack);
 
     }
@@ -396,12 +396,12 @@ public class FixedDepositAccountHelper {
 
     private Object performFixedDepositActions(final String postURLForFixedDeposit, final String jsonToBeSent,
             final String jsonAttributeToGetBack) {
-        return Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForFixedDeposit, jsonToBeSent, jsonAttributeToGetBack);
+        return Utils.performServerPost(requestSpec, responseSpec, postURLForFixedDeposit, jsonToBeSent, jsonAttributeToGetBack);
     }
 
     private HashMap performFixedDepositApplicationActions(final String postURLForFixedDepositAction, final String jsonToBeSent) {
         HashMap status = null;
-        final HashMap response = Utils.performServerPost(this.requestSpec, this.responseSpec, postURLForFixedDepositAction, jsonToBeSent,
+        final HashMap response = Utils.performServerPost(requestSpec, responseSpec, postURLForFixedDepositAction, jsonToBeSent,
                 CommonConstants.RESPONSE_CHANGES);
         if (response != null) {
             status = (HashMap) response.get("status");

@@ -67,20 +67,19 @@ public class LoanTransactionAuditingIntegrationTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
 
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
     }
 
     @Test
     public void checkAuditDates() throws InterruptedException {
-        final Integer staffId = StaffHelper.createStaff(this.requestSpec, this.responseSpec);
+        final Integer staffId = StaffHelper.createStaff(requestSpec, responseSpec);
         String username = Utils.uniqueRandomStringGenerator("user", 8);
-        final Integer userId = (Integer) UserHelper.createUser(this.requestSpec, this.responseSpec, 1, staffId, username, "P4ssw0rd",
-                "resourceId");
+        final Integer userId = (Integer) UserHelper.createUser(requestSpec, responseSpec, 1, staffId, username, "P4ssw0rd", "resourceId");
 
         LOG.info("-------------------------Creating Client---------------------------");
 
@@ -98,17 +97,17 @@ public class LoanTransactionAuditingIntegrationTest {
         final Integer loanID = applyForLoanApplicationWithPaymentStrategyAndPastMonth(clientID, loanProductID, Collections.emptyList(),
                 null, "10000", LoanApplicationTestBuilder.DEFAULT_STRATEGY, "10 July 2022");
         Assertions.assertNotNull(loanID);
-        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(this.requestSpec, this.responseSpec, loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         LOG.info("-----------------------------------APPROVE LOAN-----------------------------------------");
-        loanStatusHashMap = this.loanTransactionHelper.approveLoan("11 July 2022", loanID);
+        loanStatusHashMap = loanTransactionHelper.approveLoan("11 July 2022", loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
-        loanStatusHashMap = this.loanTransactionHelper.disburseLoanWithNetDisbursalAmount("11 July 2022", loanID, "10000");
+        loanStatusHashMap = loanTransactionHelper.disburseLoanWithNetDisbursalAmount("11 July 2022", loanID, "10000");
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         OffsetDateTime now = Utils.getAuditDateTimeToCompare();
-        HashMap repaymentDetails = this.loanTransactionHelper.makeRepayment("11 July 2022", 100.0f, loanID);
+        HashMap repaymentDetails = loanTransactionHelper.makeRepayment("11 July 2022", 100.0f, loanID);
         Integer transactionId = (Integer) repaymentDetails.get("resourceId");
         HashMap auditFieldsResponse = LoanTransactionHelper.getLoanTransactionAuditFields(requestSpec, responseSpec, loanID, transactionId,
                 "");
@@ -126,13 +125,12 @@ public class LoanTransactionAuditingIntegrationTest {
 
         Thread.sleep(2000);
 
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization",
-                "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(username, "P4ssw0rd"));
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey(username, "P4ssw0rd"));
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
         OffsetDateTime now2 = Utils.getAuditDateTimeToCompare();
-        this.loanTransactionHelper.reverseRepayment(loanID, transactionId, "11 July 2022");
+        loanTransactionHelper.reverseRepayment(loanID, transactionId, "11 July 2022");
 
         auditFieldsResponse = LoanTransactionHelper.getLoanTransactionAuditFields(requestSpec, responseSpec, loanID, transactionId, "");
 
@@ -169,7 +167,7 @@ public class LoanTransactionAuditingIntegrationTest {
                 .withSubmittedOnDate(submittedOnDate) //
                 .withRepaymentStrategy(repaymentStrategy) //
                 .withCharges(charges).build(clientID.toString(), loanProductID.toString(), savingsId);
-        return this.loanTransactionHelper.getLoanId(loanApplicationJSON);
+        return loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
     private Integer createLoanProduct(final String inMultiplesOf, final String digitsAfterDecimal, final String repaymentStrategy,
@@ -186,7 +184,7 @@ public class LoanTransactionAuditingIntegrationTest {
                 .withAmortizationTypeAsEqualPrincipalPayment() //
                 .withInterestTypeAsDecliningBalance() //
                 .currencyDetails(digitsAfterDecimal, inMultiplesOf).withAccounting(accountingRule, accounts).build(null);
-        return this.loanTransactionHelper.getLoanProductId(loanProductJSON);
+        return loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
 }

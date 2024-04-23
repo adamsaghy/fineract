@@ -60,11 +60,11 @@ public class LoanAccountBackdatedDisbursementTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
     }
 
     @Test
@@ -184,8 +184,8 @@ public class LoanAccountBackdatedDisbursementTest {
 
             // make repayment on 7 March to pay down payment installment
             final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 March 2023").locale("en")
-                            .transactionAmount(125.00));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("7 March 2023")
+                            .locale("en").transactionAmount(125.00));
 
             loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
 
@@ -407,8 +407,8 @@ public class LoanAccountBackdatedDisbursementTest {
 
             // make repayment on 7 March to pay downpayment insatllment
             final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 March 2023").locale("en")
-                            .transactionAmount(125.00));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("7 March 2023")
+                            .locale("en").transactionAmount(125.00));
 
             loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
 
@@ -619,8 +619,8 @@ public class LoanAccountBackdatedDisbursementTest {
 
             // make repayment on 7 March to pay downpayment insatllment
             final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 March 2023").locale("en")
-                            .transactionAmount(125.00));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("7 March 2023")
+                            .locale("en").transactionAmount(125.00));
 
             loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
 
@@ -666,8 +666,8 @@ public class LoanAccountBackdatedDisbursementTest {
 
             // make 2nd repayment on 7 April to pay installment
             final PostLoansLoanIdTransactionsResponse repaymentTransaction_2 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 April 2023").locale("en")
-                            .transactionAmount(125.00));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("7 April 2023")
+                            .locale("en").transactionAmount(125.00));
 
             loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
 
@@ -767,7 +767,7 @@ public class LoanAccountBackdatedDisbursementTest {
         try {
 
             final ResponseSpecification errorResponse = new ResponseSpecBuilder().expectStatusCode(403).build();
-            final LoanTransactionHelper validationErrorHelper = new LoanTransactionHelper(this.requestSpec, errorResponse);
+            final LoanTransactionHelper validationErrorHelper = new LoanTransactionHelper(requestSpec, errorResponse);
 
             // Set business date
             LocalDate businessDate = LocalDate.of(2023, 3, 3);
@@ -975,8 +975,8 @@ public class LoanAccountBackdatedDisbursementTest {
 
             // make repayment on 7 March to pay installment
             final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("7 March 2023").locale("en")
-                            .transactionAmount(166.67));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("7 March 2023")
+                            .locale("en").transactionAmount(166.67));
 
             loanDetails = loanTransactionHelper.getLoanDetails(loanId.longValue());
 

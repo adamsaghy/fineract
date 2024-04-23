@@ -46,23 +46,23 @@ public class CreditBureauConfigurationTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
     }
 
     @Test
     public void creditBureauConfigurationTest() {
 
         // create creditBureauConfiguration
-        final Integer configurationId = CreditBureauConfigurationHelper.createCreditBureauConfiguration(this.requestSpec, this.responseSpec,
+        final Integer configurationId = CreditBureauConfigurationHelper.createCreditBureauConfiguration(requestSpec, responseSpec,
                 Utils.randomStringGenerator("testConfigKey_", 5));
         Assertions.assertNotNull(configurationId);
 
         // update creditBureauConfiguration
-        final String updateconfiguration = CreditBureauConfigurationHelper.updateCreditBureauConfiguration(this.requestSpec,
-                this.responseSpec, configurationId);
+        final String updateconfiguration = CreditBureauConfigurationHelper.updateCreditBureauConfiguration(requestSpec, responseSpec,
+                configurationId);
 
         Assertions.assertEquals("updateConfigKeyValue", updateconfiguration);
     }

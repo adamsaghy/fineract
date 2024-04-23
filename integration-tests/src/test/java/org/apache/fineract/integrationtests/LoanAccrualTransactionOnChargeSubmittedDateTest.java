@@ -44,6 +44,7 @@ import org.apache.fineract.infrastructure.businessdate.domain.BusinessDateType;
 import org.apache.fineract.infrastructure.core.service.DateUtils;
 import org.apache.fineract.integrationtests.common.BusinessDateHelper;
 import org.apache.fineract.integrationtests.common.ClientHelper;
+import org.apache.fineract.integrationtests.common.CommonConstants;
 import org.apache.fineract.integrationtests.common.GlobalConfigurationHelper;
 import org.apache.fineract.integrationtests.common.LoanRescheduleRequestHelper;
 import org.apache.fineract.integrationtests.common.SchedulerJobHelper;
@@ -66,7 +67,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;
     private ClientHelper clientHelper;
-    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern("dd MMMM yyyy").toFormatter();
+    private DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendPattern(CommonConstants.DATE_FORMAT).toFormatter();
     private PeriodicAccrualAccountingHelper periodicAccrualAccountingHelper;
     private AccountHelper accountHelper;
     private LoanRescheduleRequestHelper loanRescheduleRequestHelper;
@@ -75,16 +76,16 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.requestSpec.header("Fineract-Platform-TenantId", "default");
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.loanTransactionHelper = new LoanTransactionHelper(this.requestSpec, this.responseSpec);
-        this.clientHelper = new ClientHelper(this.requestSpec, this.responseSpec);
-        this.periodicAccrualAccountingHelper = new PeriodicAccrualAccountingHelper(this.requestSpec, this.responseSpec);
-        this.accountHelper = new AccountHelper(this.requestSpec, this.responseSpec);
-        this.loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(this.requestSpec, this.responseSpec);
-        this.inlineLoanCOBHelper = new InlineLoanCOBHelper(this.requestSpec, this.responseSpec);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        requestSpec.header("Fineract-Platform-TenantId", "default");
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
+        this.clientHelper = new ClientHelper(requestSpec, responseSpec);
+        periodicAccrualAccountingHelper = new PeriodicAccrualAccountingHelper(requestSpec, responseSpec);
+        this.accountHelper = new AccountHelper(requestSpec, responseSpec);
+        this.loanRescheduleRequestHelper = new LoanRescheduleRequestHelper(requestSpec, responseSpec);
+        this.inlineLoanCOBHelper = new InlineLoanCOBHelper(requestSpec, responseSpec);
     }
 
     @Test
@@ -103,7 +104,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "submitted-date");
+            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(requestSpec, responseSpec, "submitted-date");
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
@@ -123,7 +124,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             LocalDate targetDate = LocalDate.of(2023, 3, 10);
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+            Integer penalty1LoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
 
             assertNotNull(penalty1LoanChargeId);
@@ -134,13 +135,13 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
             targetDate = LocalDate.of(2023, 3, 14);
             final String feeChargeAddedDate = dateFormatter.format(targetDate);
-            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+            Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeChargeAddedDate, "10"));
 
             assertNotNull(feeLoanChargeId);
 
             // Run accrual for charge created date
-            this.periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(accrualRunTillDate);
+            periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(accrualRunTillDate);
 
             // verify accrual transaction created for charges create date
             checkAccrualTransaction(currentDate, 0.0f, 10.0f, 10.0f, loanId);
@@ -153,8 +154,8 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
             // make repayment
             final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("4 March 2023").locale("en")
-                            .transactionAmount(100.0));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("4 March 2023")
+                            .locale("en").transactionAmount(100.0));
 
             // Add Charge
             Integer feeCharge_1 = ChargesHelper.createCharges(requestSpec, responseSpec,
@@ -162,20 +163,20 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
             targetDate = LocalDate.of(2023, 3, 21);
             final String feeChargeAddedDate_1 = dateFormatter.format(targetDate);
-            Integer feeLoanChargeId_1 = this.loanTransactionHelper.addChargesForLoan(loanId,
+            Integer feeLoanChargeId_1 = loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge_1), feeChargeAddedDate_1, "10"));
 
             assertNotNull(feeLoanChargeId_1);
 
             // Run accrual for charge created date
-            this.periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(nextAccrualRunDate);
+            periodicAccrualAccountingHelper.runPeriodicAccrualAccounting(nextAccrualRunDate);
 
             // verify accrual transaction created for charges create date
             checkAccrualTransaction(futureDate, 0.0f, 10.0f, 0.0f, loanId);
 
         } finally {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "due-date");
+            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(requestSpec, responseSpec, "due-date");
         }
 
     }
@@ -197,7 +198,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "submitted-date");
+            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(requestSpec, responseSpec, "submitted-date");
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
@@ -217,7 +218,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             LocalDate targetDate = LocalDate.of(2023, 3, 10);
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+            Integer penalty1LoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
 
             assertNotNull(penalty1LoanChargeId);
@@ -228,7 +229,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
             targetDate = LocalDate.of(2023, 3, 14);
             final String feeChargeAddedDate = dateFormatter.format(targetDate);
-            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+            Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeChargeAddedDate, "10"));
 
             assertNotNull(feeLoanChargeId);
@@ -248,8 +249,8 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
             // make repayment
             final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("4 March 2023").locale("en")
-                            .transactionAmount(100.0));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("4 March 2023")
+                            .locale("en").transactionAmount(100.0));
 
             // Add Charge
             Integer feeCharge_1 = ChargesHelper.createCharges(requestSpec, responseSpec,
@@ -257,7 +258,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
             targetDate = LocalDate.of(2023, 3, 21);
             final String feeChargeAddedDate_1 = dateFormatter.format(targetDate);
-            Integer feeLoanChargeId_1 = this.loanTransactionHelper.addChargesForLoan(loanId,
+            Integer feeLoanChargeId_1 = loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge_1), feeChargeAddedDate_1, "10"));
 
             assertNotNull(feeLoanChargeId_1);
@@ -270,7 +271,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
         } finally {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "due-date");
+            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(requestSpec, responseSpec, "due-date");
         }
     }
 
@@ -291,7 +292,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "submitted-date");
+            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(requestSpec, responseSpec, "submitted-date");
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
@@ -311,7 +312,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             LocalDate targetDate = LocalDate.of(2023, 3, 10);
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+            Integer penalty1LoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
 
             assertNotNull(penalty1LoanChargeId);
@@ -322,7 +323,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
             targetDate = LocalDate.of(2023, 3, 14);
             final String feeChargeAddedDate = dateFormatter.format(targetDate);
-            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+            Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeChargeAddedDate, "10"));
 
             assertNotNull(feeLoanChargeId);
@@ -344,8 +345,8 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
             // make repayment
             final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("4 March 2023").locale("en")
-                            .transactionAmount(100.0));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("4 March 2023")
+                            .locale("en").transactionAmount(100.0));
 
             // Add Charge
             Integer feeCharge_1 = ChargesHelper.createCharges(requestSpec, responseSpec,
@@ -353,7 +354,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
             targetDate = LocalDate.of(2023, 3, 21);
             final String feeChargeAddedDate_1 = dateFormatter.format(targetDate);
-            Integer feeLoanChargeId_1 = this.loanTransactionHelper.addChargesForLoan(loanId,
+            Integer feeLoanChargeId_1 = loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge_1), feeChargeAddedDate_1, "10"));
 
             assertNotNull(feeLoanChargeId_1);
@@ -367,7 +368,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
         } finally {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "due-date");
+            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(requestSpec, responseSpec, "due-date");
         }
     }
 
@@ -388,7 +389,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "submitted-date");
+            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(requestSpec, responseSpec, "submitted-date");
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
@@ -408,7 +409,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             LocalDate targetDate = LocalDate.of(2023, 3, 10);
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+            Integer penalty1LoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
 
             assertNotNull(penalty1LoanChargeId);
@@ -419,7 +420,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
             targetDate = LocalDate.of(2023, 3, 14);
             final String feeChargeAddedDate = dateFormatter.format(targetDate);
-            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+            Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeChargeAddedDate, "10"));
 
             assertNotNull(feeLoanChargeId);
@@ -439,8 +440,8 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
             // make repayment
             final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("4 March 2023").locale("en")
-                            .transactionAmount(100.0));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("4 March 2023")
+                            .locale("en").transactionAmount(100.0));
 
             // Add Charge
             Integer feeCharge_1 = ChargesHelper.createCharges(requestSpec, responseSpec,
@@ -448,7 +449,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
             targetDate = LocalDate.of(2023, 3, 21);
             final String feeChargeAddedDate_1 = dateFormatter.format(targetDate);
-            Integer feeLoanChargeId_1 = this.loanTransactionHelper.addChargesForLoan(loanId,
+            Integer feeLoanChargeId_1 = loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge_1), feeChargeAddedDate_1, "10"));
 
             assertNotNull(feeLoanChargeId_1);
@@ -461,7 +462,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
         } finally {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "due-date");
+            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(requestSpec, responseSpec, "due-date");
         }
     }
 
@@ -482,7 +483,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "submitted-date");
+            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(requestSpec, responseSpec, "submitted-date");
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
@@ -503,7 +504,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             LocalDate targetDate = LocalDate.of(2023, 3, 10);
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+            Integer penalty1LoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
 
             assertNotNull(penalty1LoanChargeId);
@@ -515,7 +516,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             // Due for future date in different of the schedule
             targetDate = LocalDate.of(2023, 3, 17);
             final String penaltyChargeAddedDate = dateFormatter.format(targetDate);
-            Integer penaltyLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+            Integer penaltyLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty_1), penaltyChargeAddedDate, "10"));
 
             assertNotNull(penaltyLoanChargeId);
@@ -530,7 +531,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
         } finally {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "due-date");
+            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(requestSpec, responseSpec, "due-date");
         }
     }
 
@@ -550,7 +551,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "submitted-date");
+            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(requestSpec, responseSpec, "submitted-date");
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
 
@@ -573,7 +574,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             LocalDate targetDate = LocalDate.of(2023, 3, 9);
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+            Integer penalty1LoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
 
             assertNotNull(penalty1LoanChargeId);
@@ -600,7 +601,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
         } finally {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "due-date");
+            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(requestSpec, responseSpec, "due-date");
         }
     }
 
@@ -619,7 +620,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.TRUE);
             BusinessDateHelper.updateBusinessDate(requestSpec, responseSpec, BusinessDateType.BUSINESS_DATE, currentDate);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "submitted-date");
+            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(requestSpec, responseSpec, "submitted-date");
 
             // Loan ExternalId
             String loanExternalIdStr = UUID.randomUUID().toString();
@@ -646,7 +647,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             Integer feeCharge = ChargesHelper.createCharges(requestSpec, responseSpec,
                     ChargesHelper.getLoanSpecifiedDueDateJSON(ChargesHelper.CHARGE_CALCULATION_TYPE_FLAT, "10", false));
 
-            Integer feeLoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+            Integer feeLoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(feeCharge), feeChargeDueDate, "10"));
 
             assertNotNull(feeLoanChargeId);
@@ -657,7 +658,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
                     .updateGraceOnInterest(null).updateExtraTerms(null).build(loanId.toString());
             final HashMap<String, String> map = new HashMap<>();
             map.put("locale", "en");
-            map.put("dateFormat", "dd MMMM yyyy");
+            map.put("dateFormat", CommonConstants.DATE_FORMAT);
             map.put("approvedOnDate", "19 May 2023");
             final String aproveRequestJSON = new Gson().toJson(map);
 
@@ -680,8 +681,8 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
             // make repayment
             final PostLoansLoanIdTransactionsResponse repaymentTransaction_1 = loanTransactionHelper.makeLoanRepayment(loanExternalIdStr,
-                    new PostLoansLoanIdTransactionsRequest().dateFormat("dd MMMM yyyy").transactionDate("18 July 2023").locale("en")
-                            .transactionAmount(1010.0));
+                    new PostLoansLoanIdTransactionsRequest().dateFormat(CommonConstants.DATE_FORMAT).transactionDate("18 July 2023")
+                            .locale("en").transactionAmount(1010.0));
 
             // update business date
             currentDate = LocalDate.of(2023, 07, 19);
@@ -697,7 +698,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
             LocalDate targetDate = LocalDate.of(2023, 07, 19);
             final String penaltyCharge1AddedDate = dateFormatter.format(targetDate);
 
-            Integer penalty1LoanChargeId = this.loanTransactionHelper.addChargesForLoan(loanId,
+            Integer penalty1LoanChargeId = loanTransactionHelper.addChargesForLoan(loanId,
                     LoanTransactionHelper.getSpecifiedDueDateChargesForLoanAsJSON(String.valueOf(penalty), penaltyCharge1AddedDate, "10"));
 
             assertNotNull(penalty1LoanChargeId);
@@ -722,7 +723,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
 
         } finally {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, Boolean.FALSE);
-            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(this.requestSpec, this.responseSpec, "due-date");
+            GlobalConfigurationHelper.updateChargeAccrualDateConfiguration(requestSpec, responseSpec, "due-date");
         }
     }
 
@@ -735,8 +736,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
     }
 
     private void checkAccrualTransactionsForMultipleRepaymentSchedulesChargeDueDate(LocalDate transactionDate, Integer loanId) {
-        ArrayList<HashMap> transactions = (ArrayList<HashMap>) loanTransactionHelper.getLoanTransactions(this.requestSpec,
-                this.responseSpec, loanId);
+        ArrayList<HashMap> transactions = (ArrayList<HashMap>) loanTransactionHelper.getLoanTransactions(requestSpec, responseSpec, loanId);
         boolean isTransactionFound = false;
         for (int i = 0; i < transactions.size(); i++) {
             HashMap transactionType = (HashMap) transactions.get(i).get("type");
@@ -864,8 +864,7 @@ public class LoanAccrualTransactionOnChargeSubmittedDateTest {
     private void checkAccrualTransaction(final LocalDate transactionDate, final Float interestPortion, final Float feePortion,
             final Float penaltyPortion, final Integer loanID) {
 
-        ArrayList<HashMap> transactions = (ArrayList<HashMap>) loanTransactionHelper.getLoanTransactions(this.requestSpec,
-                this.responseSpec, loanID);
+        ArrayList<HashMap> transactions = (ArrayList<HashMap>) loanTransactionHelper.getLoanTransactions(requestSpec, responseSpec, loanID);
         boolean isTransactionFound = false;
         for (int i = 0; i < transactions.size(); i++) {
             HashMap transactionType = (HashMap) transactions.get(i).get("type");

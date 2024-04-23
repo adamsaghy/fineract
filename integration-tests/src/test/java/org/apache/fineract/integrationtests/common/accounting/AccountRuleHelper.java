@@ -44,7 +44,7 @@ public class AccountRuleHelper {
     }
 
     public ArrayList<GetAccountRulesResponse> getAccountingRules() {
-        final String response = Utils.performServerGet(this.requestSpec, this.responseSpec, ACCOUNTINGRULES_URL);
+        final String response = Utils.performServerGet(requestSpec, responseSpec, ACCOUNTINGRULES_URL);
         Type accountRuleListType = new TypeToken<ArrayList<GetAccountRulesResponse>>() {}.getType();
         return GSON.fromJson(response, accountRuleListType);
     }

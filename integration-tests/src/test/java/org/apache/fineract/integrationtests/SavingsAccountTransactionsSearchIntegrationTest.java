@@ -61,7 +61,6 @@ import org.springframework.data.domain.Sort;
 public class SavingsAccountTransactionsSearchIntegrationTest {
 
     public static final String ACCOUNT_TYPE_INDIVIDUAL = "INDIVIDUAL";
-    public static final String DEFAULT_DATE_FORMAT = "dd MMMM yyyy";
     public static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
     final String startDate = "01 May 2023";
     final String firstDepositDate = "05 May 2023";
@@ -80,18 +79,18 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
     @BeforeEach
     public void setup() {
         Utils.initializeRESTAssured();
-        this.requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
-        this.requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
-        this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
-        this.savingsAccountHelper = new SavingsAccountHelper(this.requestSpec, this.responseSpec);
-        this.responseSpecForValidationError = new ResponseSpecBuilder().expectStatusCode(400).build();
-        this.savingsAccountHelperValidationError = new SavingsAccountHelper(this.requestSpec, this.responseSpecForValidationError);
+        requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
+        requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
+        responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
+        this.savingsAccountHelper = new SavingsAccountHelper(requestSpec, responseSpec);
+        responseSpecForValidationError = new ResponseSpecBuilder().expectStatusCode(400).build();
+        this.savingsAccountHelperValidationError = new SavingsAccountHelper(requestSpec, responseSpecForValidationError);
         this.savingsProductHelper = new SavingsProductHelper();
     }
 
     @Test
     public void testSavingsTransactionsSearchAmountFrom() throws JsonProcessingException {
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
 
@@ -113,7 +112,7 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
 
     @Test
     public void testSavingsTransactionsSearchAmountFromTo() throws JsonProcessingException {
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
 
@@ -136,7 +135,7 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
 
     @Test
     public void testSavingsTransactionsSearchDateFromTo() throws JsonProcessingException {
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
 
@@ -145,8 +144,9 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
         this.savingsAccountHelper.withdrawalFromSavingsAccount(savingsId, "100", withdrawDate, CommonConstants.RESPONSE_RESOURCE_ID);
 
         TransactionSearchRequest searchParameters = new TransactionSearchRequest()
-                .fromDate(firstDepositDate, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE).toDate(withdrawDate, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
-        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
+                .fromDate(firstDepositDate, CommonConstants.DATE_FORMAT, DEFAULT_LOCALE)
+                .toDate(withdrawDate, CommonConstants.DATE_FORMAT, DEFAULT_LOCALE);
+        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, CommonConstants.DATE_FORMAT, DEFAULT_LOCALE);
         SavingsAccountTransactionsSearchResponse transactionsResponse = this.savingsAccountHelper.searchSavingsTransactions(savingsId,
                 queryParams);
 
@@ -155,14 +155,14 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
         Assertions.assertNotNull(transactionsResponse.getContent());
         List<GetSavingsAccountTransactionsPageItem> pageItemsList = List.copyOf(transactionsResponse.getContent());
         assertEquals(3, pageItemsList.size());
-        assertEquals(parseLocalDate(withdrawDate, DEFAULT_DATE_FORMAT), pageItemsList.get(0).getDate());
-        assertEquals(parseLocalDate(secondDepositDate, DEFAULT_DATE_FORMAT), pageItemsList.get(1).getDate());
+        assertEquals(parseLocalDate(withdrawDate, CommonConstants.DATE_FORMAT), pageItemsList.get(0).getDate());
+        assertEquals(parseLocalDate(secondDepositDate, CommonConstants.DATE_FORMAT), pageItemsList.get(1).getDate());
     }
 
     @Test
     public void testSavingsTransactionsSearchSubmittedDateFromTo() throws JsonProcessingException {
         LocalDate businessDate = Utils.getLocalDateOfTenant();
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
 
@@ -176,11 +176,11 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
         } finally {
             GlobalConfigurationHelper.updateIsBusinessDateEnabled(requestSpec, responseSpec, false);
         }
-        String submittedDate = DateUtils.format(businessDate, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
+        String submittedDate = DateUtils.format(businessDate, CommonConstants.DATE_FORMAT, DEFAULT_LOCALE);
         TransactionSearchRequest searchParameters = new TransactionSearchRequest()
-                .fromSubmittedDate(submittedDate, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE)
-                .toSubmittedDate(submittedDate, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
-        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
+                .fromSubmittedDate(submittedDate, CommonConstants.DATE_FORMAT, DEFAULT_LOCALE)
+                .toSubmittedDate(submittedDate, CommonConstants.DATE_FORMAT, DEFAULT_LOCALE);
+        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, CommonConstants.DATE_FORMAT, DEFAULT_LOCALE);
         SavingsAccountTransactionsSearchResponse transactionsResponse = this.savingsAccountHelper.searchSavingsTransactions(savingsId,
                 queryParams);
 
@@ -196,7 +196,7 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
 
     @Test
     public void testSavingsTransactionsSearchTransactionTypeDepositAndDefaultSort() {
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
 
@@ -206,7 +206,7 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
 
         int typeD = SavingsAccountTransactionType.DEPOSIT.getId();
         TransactionSearchRequest searchParameters = new TransactionSearchRequest().types(String.valueOf(typeD));
-        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
+        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, CommonConstants.DATE_FORMAT, DEFAULT_LOCALE);
         SavingsAccountTransactionsSearchResponse transactionsResponse = this.savingsAccountHelper.searchSavingsTransactions(savingsId,
                 queryParams);
 
@@ -218,16 +218,16 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
         GetSavingsAccountTransactionsPageItem first = pageItemsList.get(0);
         assertEquals(Long.valueOf(typeD), first.getTransactionType().getId());
         assertTrue(MathUtil.isEqualTo(BigDecimal.valueOf(300), first.getAmount()));
-        assertEquals(parseLocalDate(secondDepositDate, DEFAULT_DATE_FORMAT), first.getDate());
+        assertEquals(parseLocalDate(secondDepositDate, CommonConstants.DATE_FORMAT), first.getDate());
         GetSavingsAccountTransactionsPageItem second = pageItemsList.get(1);
         assertEquals(Long.valueOf(typeD), second.getTransactionType().getId());
         assertTrue(MathUtil.isEqualTo(BigDecimal.valueOf(100), second.getAmount()));
-        assertEquals(parseLocalDate(firstDepositDate, DEFAULT_DATE_FORMAT), second.getDate());
+        assertEquals(parseLocalDate(firstDepositDate, CommonConstants.DATE_FORMAT), second.getDate());
     }
 
     @Test
     public void testSavingsTransactionsSearchTransactionTypesWithdrawAndDeposit() throws JsonProcessingException {
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
 
@@ -238,7 +238,7 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
         int typeD = SavingsAccountTransactionType.DEPOSIT.getId();
         int typeW = SavingsAccountTransactionType.WITHDRAWAL.getId();
         TransactionSearchRequest searchParameters = new TransactionSearchRequest().types(String.valueOf(typeD) + ',' + typeW);
-        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
+        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, CommonConstants.DATE_FORMAT, DEFAULT_LOCALE);
         SavingsAccountTransactionsSearchResponse transactionsResponse = this.savingsAccountHelper.searchSavingsTransactions(savingsId,
                 queryParams);
 
@@ -257,7 +257,7 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
 
     @Test
     public void testSavingsTransactionsSearchPaginationAndNoFilter() {
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
 
@@ -278,7 +278,7 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
 
     @Test
     public void testSavingsTransactionsSearchTransactionTypeDepositAndSortByAmountAsc() {
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
 
@@ -289,7 +289,7 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
         int typeD = SavingsAccountTransactionType.DEPOSIT.getId();
         TransactionSearchRequest searchParameters = new TransactionSearchRequest().types(String.valueOf(typeD)).pageable(null, null,
                 "amount", Sort.Direction.ASC);
-        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
+        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, CommonConstants.DATE_FORMAT, DEFAULT_LOCALE);
         SavingsAccountTransactionsSearchResponse transactionsResponse = this.savingsAccountHelper.searchSavingsTransactions(savingsId,
                 queryParams);
 
@@ -301,16 +301,16 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
         GetSavingsAccountTransactionsPageItem first = pageItemsList.get(0);
         assertEquals(Long.valueOf(typeD), first.getTransactionType().getId());
         assertTrue(MathUtil.isEqualTo(BigDecimal.valueOf(100), first.getAmount()));
-        assertEquals(parseLocalDate(firstDepositDate, DEFAULT_DATE_FORMAT), first.getDate());
+        assertEquals(parseLocalDate(firstDepositDate, CommonConstants.DATE_FORMAT), first.getDate());
         GetSavingsAccountTransactionsPageItem second = pageItemsList.get(1);
         assertEquals(Long.valueOf(typeD), second.getTransactionType().getId());
         assertTrue(MathUtil.isEqualTo(BigDecimal.valueOf(300), second.getAmount()));
-        assertEquals(parseLocalDate(secondDepositDate, DEFAULT_DATE_FORMAT), second.getDate());
+        assertEquals(parseLocalDate(secondDepositDate, CommonConstants.DATE_FORMAT), second.getDate());
     }
 
     @Test
     public void testSavingsTransactionsSearchWithFiltersSortingAndPagination() {
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
 
@@ -323,10 +323,10 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
 
         int typeD = SavingsAccountTransactionType.DEPOSIT.getId();
         TransactionSearchRequest searchParameters = new TransactionSearchRequest().fromAmount(BigDecimal.valueOf(100))
-                .toAmount(BigDecimal.valueOf(500)).fromDate("2023-05-06", DateUtils.DEFAULT_DATE_FORMAT, DEFAULT_LOCALE)
-                .toDate("2023-06-01", DateUtils.DEFAULT_DATE_FORMAT, DEFAULT_LOCALE).types(String.valueOf(typeD))
+                .toAmount(BigDecimal.valueOf(500)).fromDate("2023-05-06", CommonConstants.DATE_FORMAT, DEFAULT_LOCALE)
+                .toDate("2023-06-01", CommonConstants.DATE_FORMAT, DEFAULT_LOCALE).types(String.valueOf(typeD))
                 .pageable(0, 2, "amount", Sort.Direction.DESC);
-        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, DateUtils.DEFAULT_DATE_FORMAT, DEFAULT_LOCALE);
+        Map<String, Object> queryParams = buildTransactionsSearchQuery(searchParameters, CommonConstants.DATE_FORMAT, DEFAULT_LOCALE);
         SavingsAccountTransactionsSearchResponse transactionsResponse = this.savingsAccountHelper.searchSavingsTransactions(savingsId,
                 queryParams);
 
@@ -338,16 +338,16 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
         GetSavingsAccountTransactionsPageItem first = pageItemsList.get(0);
         assertEquals(Long.valueOf(typeD), first.getTransactionType().getId());
         assertTrue(MathUtil.isEqualTo(BigDecimal.valueOf(400), first.getAmount()));
-        assertEquals(parseLocalDate(thirdDepositDate, DEFAULT_DATE_FORMAT), first.getDate());
+        assertEquals(parseLocalDate(thirdDepositDate, CommonConstants.DATE_FORMAT), first.getDate());
         GetSavingsAccountTransactionsPageItem second = pageItemsList.get(1);
         assertEquals(Long.valueOf(typeD), second.getTransactionType().getId());
         assertTrue(MathUtil.isEqualTo(BigDecimal.valueOf(300), second.getAmount()));
-        assertEquals(parseLocalDate(secondDepositDate, DEFAULT_DATE_FORMAT), second.getDate());
+        assertEquals(parseLocalDate(secondDepositDate, CommonConstants.DATE_FORMAT), second.getDate());
     }
 
     @Test
     public void testSavingsTransactionsSearchDateValidationError() {
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
 
@@ -367,7 +367,7 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
 
     @Test
     public void testSavingsTransactionsSearchTransactionAmountValidationError() {
-        final Integer clientID = ClientHelper.createClient(this.requestSpec, this.responseSpec, startDate);
+        final Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, startDate);
         Assertions.assertNotNull(clientID);
         final Integer savingsId = createSavingsAccountDailyPosting(clientID, startDate);
         this.savingsAccountHelper.depositToSavingsAccount(savingsId, "100", firstDepositDate, CommonConstants.RESPONSE_RESOURCE_ID);
@@ -454,8 +454,8 @@ public class SavingsAccountTransactionsSearchIntegrationTest {
     // Reset configuration fields
     @AfterEach
     public void tearDown() {
-        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
-        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(this.requestSpec, this.responseSpec);
+        GlobalConfigurationHelper.resetAllDefaultGlobalConfigurations(requestSpec, responseSpec);
+        GlobalConfigurationHelper.verifyAllDefaultGlobalConfigurations(requestSpec, responseSpec);
     }
 
 }

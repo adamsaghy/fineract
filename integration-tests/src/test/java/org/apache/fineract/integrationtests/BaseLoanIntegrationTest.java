@@ -525,7 +525,7 @@ public abstract class BaseLoanIntegrationTest {
                 "Expected installments are not matching with the installments configured on the loan");
 
         int installmentNumber = 0;
-        for (int i = 1; i < installments.length; i++) {
+        for (int i = 0; i < installments.length; i++) {
             GetLoansLoanIdRepaymentPeriod period = loanResponse.getRepaymentSchedule().getPeriods().get(i);
             Double principalDue = period.getPrincipalDue();
             Double amount = installments[i].principalAmount;

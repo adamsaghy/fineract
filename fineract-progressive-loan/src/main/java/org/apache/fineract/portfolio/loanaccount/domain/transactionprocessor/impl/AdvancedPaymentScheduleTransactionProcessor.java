@@ -79,7 +79,7 @@ import org.apache.fineract.portfolio.loanaccount.domain.reaging.LoanReAgeParamet
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.AbstractLoanRepaymentScheduleTransactionProcessor;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.MoneyHolder;
 import org.apache.fineract.portfolio.loanaccount.domain.transactionprocessor.TransactionCtx;
-import org.apache.fineract.portfolio.loanaccount.loanschedule.data.ProgressiveLoanInterestRepaymentModel;
+import org.apache.fineract.portfolio.loanaccount.loanschedule.data.EmiRepaymentPeriod;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.data.ProgressiveLoanInterestScheduleModel;
 import org.apache.fineract.portfolio.loanaccount.loanschedule.domain.LoanScheduleProcessingType;
 import org.apache.fineract.portfolio.loanproduct.calc.EMICalculator;
@@ -778,7 +778,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                 amortizableAmount);
 
         if (amortizableAmount.isGreaterThanZero()) {
-            progressiveTransactionCtx.getModel().repayments().forEach(rm -> {
+            progressiveTransactionCtx.getModel().repaymentPeriods().forEach(rm -> {
                 LoanRepaymentScheduleInstallment installment = transactionCtx.getInstallments().stream()
                         .filter(ri -> ri.getDueDate().equals(rm.getDueDate()) && !ri.isDownPayment()
                                 && !ri.getDueDate().isBefore(disbursementTransaction.getTransactionDate()))
@@ -959,7 +959,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     }
 
     private void updateInstallmentsPrincipalAndInterestByModel(ProgressiveTransactionCtx ctx) {
-        ctx.getModel().repayments().forEach(repayment -> {
+        ctx.getModel().repaymentPeriods().forEach(repayment -> {
             LoanRepaymentScheduleInstallment installment = ctx.getInstallments().stream()
                     .filter(ri -> !ri.isDownPayment() && Objects.equals(ri.getFromDate(), repayment.getFromDate())) //
                     .findFirst().orElse(null);
@@ -1468,7 +1468,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
                                             throw new IllegalStateException("Unexpected PreClosureInterestCalculationStrategy: NONE");
                                     };
 
-                                    ProgressiveLoanInterestRepaymentModel payableDetails = emiCalculator
+                                    EmiRepaymentPeriod payableDetails = emiCalculator
                                             .getPayableDetails(model, inAdvanceInstallment.getDueDate(), payDate).orElseThrow();
 
                                     switch (paymentAllocationType) {

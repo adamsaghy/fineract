@@ -228,7 +228,7 @@ public class ProgressiveLoanScheduleGenerator implements LoanScheduleGenerator {
 
             final Money disbursementRemainingBalance = disbursedAmount.minus(downPaymentAmount);
             scheduleParams.addPrincipalToBeScheduled(disbursementRemainingBalance);
-            emiCalculator.addDisbursement(interestScheduleModel, disbursementDate, disbursementRemainingBalance);
+            emiCalculator.addDisbursement(interestScheduleModel, disbursementDate, periodDueDate, disbursementRemainingBalance);
         }
     }
 

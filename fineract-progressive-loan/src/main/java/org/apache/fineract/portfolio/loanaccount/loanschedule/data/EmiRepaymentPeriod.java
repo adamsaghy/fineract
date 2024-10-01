@@ -86,7 +86,7 @@ public class EmiRepaymentPeriod {
 
     public void updateInterestPeriods(final List<EmiInterestPeriod> interestPeriods) {
         this.interestPeriods = interestPeriods.stream()
-                .filter(interestPeriod -> interestPeriod.getRepaymentPeriod() == this
+                .filter(interestPeriod -> interestPeriod.getRepaymentPeriod().equals(this)
                         || interestPeriod.getRepaymentPeriod().getDueDate().equals(this.dueDate))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
@@ -97,16 +97,6 @@ public class EmiRepaymentPeriod {
 
     public Optional<EmiRepaymentPeriod> getNext() {
         return Optional.ofNullable(next);
-    }
-
-    @ToString.Include(name = "previousPeriodDueDate")
-    public LocalDate getPreviousPeriodDueDate() {
-        return previous != null ? previous.getDueDate() : null;
-    }
-
-    @ToString.Include(name = "nextPeriodDueDate")
-    public LocalDate getNextPeriodDueDate() {
-        return next != null ? next.getDueDate() : null;
     }
 
     /**

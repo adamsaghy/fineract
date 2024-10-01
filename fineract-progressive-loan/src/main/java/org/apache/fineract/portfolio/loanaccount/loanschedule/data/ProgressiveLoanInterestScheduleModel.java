@@ -129,12 +129,12 @@ public class ProgressiveLoanInterestScheduleModel {
     }
 
     public BigDecimal getInterestRate(final LocalDate effectiveDate) {
-        return interestRates.isEmpty() ? loanProductRelatedDetail.getNominalInterestRatePerPeriod() : findInterestRate(effectiveDate);
+        return interestRates.isEmpty() ? loanProductRelatedDetail.getAnnualNominalInterestRate() : findInterestRate(effectiveDate);
     }
 
     private BigDecimal findInterestRate(final LocalDate effectiveDate) {
         return interestRates.stream().filter(ir -> !ir.effectiveFrom().isAfter(effectiveDate)).map(EmiInterestRate::interestRate)
-                .findFirst().orElse(loanProductRelatedDetail.getNominalInterestRatePerPeriod());
+                .findFirst().orElse(loanProductRelatedDetail.getAnnualNominalInterestRate());
     }
 
     public Optional<EmiRepaymentPeriod> findRepaymentPeriod(final LocalDate repaymentPeriodDueDate) {
@@ -205,9 +205,9 @@ public class ProgressiveLoanInterestScheduleModel {
         return previousInterestPeriod;
     }
 
-    public Optional<EmiRepaymentPeriod> changeOutstandingBalanceAndUpdateInterestPeriods(final LocalDate balanceChangeDate,
-            final Money disbursedAmount, final Money correctionAmount) {
-        return findRepaymentPeriodForBalanceChange(balanceChangeDate).stream()//
+    public Optional<EmiRepaymentPeriod> changeOutstandingBalanceAndUpdateInterestPeriods(final LocalDate repaymentPeriodDueDate,
+            final LocalDate balanceChangeDate, final Money disbursedAmount, final Money correctionAmount) {
+        return findRepaymentPeriodForBalanceChange(repaymentPeriodDueDate).stream()//
                 .peek(updateInterestPeriodOnRepaymentPeriod(balanceChangeDate, disbursedAmount, correctionAmount, false))//
                 .findFirst();//
     }
@@ -219,13 +219,12 @@ public class ProgressiveLoanInterestScheduleModel {
                 .findFirst();//
     }
 
-    Optional<EmiRepaymentPeriod> findRepaymentPeriodForBalanceChange(final LocalDate balanceChangeDate) {
-        if (balanceChangeDate == null) {
+    Optional<EmiRepaymentPeriod> findRepaymentPeriodForBalanceChange(final LocalDate repaymentPeriodDueDate) {
+        if (repaymentPeriodDueDate == null) {
             return Optional.empty();
         }
         return repaymentPeriods.stream()//
-                .filter(repaymentPeriod -> !balanceChangeDate.isBefore(repaymentPeriod.getFromDate())
-                        && (repaymentPeriod.isLastPeriod() || balanceChangeDate.isBefore(repaymentPeriod.getDueDate())))//
+                .filter(repaymentPeriod -> repaymentPeriodDueDate.isEqual(repaymentPeriod.getDueDate()))//
                 .findFirst();
     }
 
@@ -286,7 +285,9 @@ public class ProgressiveLoanInterestScheduleModel {
         final Money zeroAmount = Money.zero(disbursedAmount.getCurrency());
         // interestPeriodFromDate is after disb.date because this case when disbursement date is different then interest
         // we always have at least one period
-        final EmiInterestPeriod selectedInterestPeriod = repaymentPeriod.getInterestPeriods().get(0);
+        final EmiInterestPeriod selectedInterestPeriod = repaymentPeriod.getInterestPeriods().stream()
+                .filter(ip -> ip.getFromDate().equals(repaymentPeriod.getFromDate())).findFirst()
+                .orElse(repaymentPeriod.getInterestPeriods().get(0));
 
         final LocalDate interestPeriodDueDate = selectedInterestPeriod.getFromDate();
         final var newInterestPeriod = new EmiInterestPeriod(selectedInterestPeriod.getRepaymentPeriod(),

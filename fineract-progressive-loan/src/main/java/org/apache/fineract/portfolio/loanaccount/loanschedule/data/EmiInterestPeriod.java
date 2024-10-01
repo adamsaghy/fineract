@@ -21,19 +21,20 @@ package org.apache.fineract.portfolio.loanaccount.loanschedule.data;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.apache.fineract.organisation.monetary.domain.Money;
 
-@AllArgsConstructor
 @EqualsAndHashCode(exclude = { "repaymentPeriod" })
 @Data
 public class EmiInterestPeriod implements Comparable<EmiInterestPeriod> {
 
     @ToString.Exclude
     private EmiRepaymentPeriod repaymentPeriod;
+
+    @ToString.Exclude
+    private EmiRepaymentPeriod originalRepaymentPeriod;
 
     private LocalDate fromDate;
     private LocalDate dueDate;
@@ -44,19 +45,27 @@ public class EmiInterestPeriod implements Comparable<EmiInterestPeriod> {
     private Money correctionAmount;
     private Money interestDue;
 
+    public EmiInterestPeriod(EmiRepaymentPeriod repaymentPeriod, LocalDate fromDate, LocalDate dueDate, BigDecimal rateFactorMinus1,
+            Money disbursedAmount, Money correctionAmount, Money interestDue) {
+        this.repaymentPeriod = repaymentPeriod;
+        this.fromDate = fromDate;
+        this.dueDate = dueDate;
+        this.rateFactorMinus1 = rateFactorMinus1;
+        this.disbursedAmount = disbursedAmount;
+        this.correctionAmount = correctionAmount;
+        this.interestDue = interestDue;
+        this.originalRepaymentPeriod = repaymentPeriod;
+    }
+
     public EmiInterestPeriod(final EmiInterestPeriod period, final EmiRepaymentPeriod repaymentPeriod) {
         this(repaymentPeriod, period.fromDate, period.dueDate, period.rateFactorMinus1, period.disbursedAmount, period.correctionAmount,
                 period.interestDue);
+        this.originalRepaymentPeriod = period.originalRepaymentPeriod;
     }
 
     @Override
     public int compareTo(@NotNull EmiInterestPeriod o) {
         return dueDate.compareTo(o.dueDate);
-    }
-
-    @ToString.Include(name = "repaymentPeriodDueDate")
-    public LocalDate getRepaymentPeriodDueDate() {
-        return repaymentPeriod != null ? repaymentPeriod.getDueDate() : null;
     }
 
     public void addDisbursedAmount(final Money outstandingBalance) {
@@ -69,10 +78,5 @@ public class EmiInterestPeriod implements Comparable<EmiInterestPeriod> {
         if (correctionAmount != null && !correctionAmount.isZero()) {
             this.correctionAmount = this.correctionAmount.add(correctionAmount);
         }
-    }
-
-    public boolean isAssignedOwnRepaymentPeriod() {
-        return repaymentPeriod != null && !this.getFromDate().isBefore(repaymentPeriod.getFromDate())
-                && (repaymentPeriod.isLastPeriod() || this.getFromDate().isBefore(repaymentPeriod.getDueDate()));
     }
 }

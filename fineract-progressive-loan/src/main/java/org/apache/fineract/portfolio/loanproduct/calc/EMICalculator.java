@@ -40,13 +40,14 @@ public interface EMICalculator {
 
     Optional<EmiRepaymentPeriod> findInterestRepaymentPeriod(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate dueDate);
 
-    void addDisbursement(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate disbursementDueDate, Money disbursedAmount);
+    void addDisbursement(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate repaymentPeriodDueDate,
+            LocalDate disbursementDueDate, Money disbursedAmount);
 
     void changeInterestRate(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate newInterestSubmittedOnDate,
             BigDecimal newInterestRate);
 
-    void addBalanceCorrection(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate balanceCorrectionDate,
-            Money balanceCorrectionAmount);
+    void addBalanceCorrection(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate repaymentPeriodDueDate,
+            LocalDate balanceCorrectionDate, Money balanceCorrectionAmount);
 
     Optional<EmiRepaymentPeriod> getPayableDetails(ProgressiveLoanInterestScheduleModel scheduleModel, LocalDate periodDueDate,
             LocalDate payDate);

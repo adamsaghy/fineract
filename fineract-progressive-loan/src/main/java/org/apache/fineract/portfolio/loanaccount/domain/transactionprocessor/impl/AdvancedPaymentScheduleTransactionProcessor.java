@@ -1509,26 +1509,26 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
 
     private Money handlingPaymentAllocationForInterestBearingProgressiveLoan(LoanTransaction loanTransaction,
             Money transactionAmountUnprocessed, Balances balances, PaymentAllocationType paymentAllocationType,
-            LoanRepaymentScheduleInstallment inAdvanceInstallment, ProgressiveTransactionCtx ctx,
+            LoanRepaymentScheduleInstallment installment, ProgressiveTransactionCtx ctx,
             LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping,
-            Set<LoanCharge> inAdvanceInstallmentCharges) {
+            Set<LoanCharge> charges) {
         Money paidPortion;
         ProgressiveLoanInterestScheduleModel model = ctx.getModel();
         LocalDate payDate = loanTransaction.getTransactionDate();
         if (DueType.IN_ADVANCE.equals(paymentAllocationType.getDueType())) {
-            payDate = calculateNewPayDateInCaseOfInAdvancePayment(loanTransaction, inAdvanceInstallment);
-            updateRepaymentPeriodBalances(paymentAllocationType, inAdvanceInstallment, model, payDate);
+            payDate = calculateNewPayDateInCaseOfInAdvancePayment(loanTransaction, installment);
+            updateRepaymentPeriodBalances(paymentAllocationType, installment, model, payDate);
         }
 
-        paidPortion = processPaymentAllocation(paymentAllocationType, inAdvanceInstallment, loanTransaction, transactionAmountUnprocessed,
-                loanTransactionToRepaymentScheduleMapping, inAdvanceInstallmentCharges, balances,
+        paidPortion = processPaymentAllocation(paymentAllocationType, installment, loanTransaction, transactionAmountUnprocessed,
+                loanTransactionToRepaymentScheduleMapping, charges, balances,
                 LoanRepaymentScheduleInstallment.PaymentAction.PAY);
 
         if (PRINCIPAL.equals(paymentAllocationType.getAllocationType())) {
-            emiCalculator.payPrincipal(model, inAdvanceInstallment.getDueDate(), payDate, paidPortion);
+            emiCalculator.payPrincipal(model, installment.getDueDate(), payDate, paidPortion);
             updateRepaymentPeriods(loanTransaction, ctx, model);
         } else if (INTEREST.equals(paymentAllocationType.getAllocationType())) {
-            emiCalculator.payInterest(model, inAdvanceInstallment.getDueDate(), payDate, paidPortion);
+            emiCalculator.payInterest(model, installment.getDueDate(), payDate, paidPortion);
             updateRepaymentPeriods(loanTransaction, ctx, model);
         }
         return paidPortion;

@@ -157,7 +157,8 @@ public final class ProgressiveEMICalculator implements EMICalculator {
 
         Money calculatedEmi = outstandingLoanBalance.plus(payableInterest);
         if (calculatedEmi.isLessThan(repaymentPeriod.getEmi())) {
-            repaymentPeriod.setEmi(outstandingLoanBalance.plus(payableInterest));
+            // Review this logic
+            repaymentPeriod.setEmi(outstandingLoanBalance.plus(payableInterest).plus(repaymentPeriod.getPaidInterest()).plus(repaymentPeriod.getPaidPrincipal()));
         }
         Money payablePrincipal = repaymentPeriod.getEmi().minus(payableInterest);
         return new PayableDetails(repaymentPeriod.getEmi(), payablePrincipal, payableInterest,

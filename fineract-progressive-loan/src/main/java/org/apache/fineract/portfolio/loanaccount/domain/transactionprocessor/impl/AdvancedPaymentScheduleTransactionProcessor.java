@@ -1510,8 +1510,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
     private Money handlingPaymentAllocationForInterestBearingProgressiveLoan(LoanTransaction loanTransaction,
             Money transactionAmountUnprocessed, Balances balances, PaymentAllocationType paymentAllocationType,
             LoanRepaymentScheduleInstallment installment, ProgressiveTransactionCtx ctx,
-            LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping,
-            Set<LoanCharge> charges) {
+            LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping, Set<LoanCharge> charges) {
         Money paidPortion;
         ProgressiveLoanInterestScheduleModel model = ctx.getModel();
         LocalDate payDate = loanTransaction.getTransactionDate();
@@ -1521,8 +1520,7 @@ public class AdvancedPaymentScheduleTransactionProcessor extends AbstractLoanRep
         }
 
         paidPortion = processPaymentAllocation(paymentAllocationType, installment, loanTransaction, transactionAmountUnprocessed,
-                loanTransactionToRepaymentScheduleMapping, charges, balances,
-                LoanRepaymentScheduleInstallment.PaymentAction.PAY);
+                loanTransactionToRepaymentScheduleMapping, charges, balances, LoanRepaymentScheduleInstallment.PaymentAction.PAY);
 
         if (PRINCIPAL.equals(paymentAllocationType.getAllocationType())) {
             emiCalculator.payPrincipal(model, installment.getDueDate(), payDate, paidPortion);

@@ -2396,7 +2396,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
                 .determineProcessor(this.transactionProcessingStrategyCode);
 
-        final LoanRepaymentScheduleInstallment currentInstallment = fetchLoanRepaymentScheduleInstallment(
+        final LoanRepaymentScheduleInstallment currentInstallment = fetchLoanRepaymentScheduleInstallmentByDueDate(
                 loanTransaction.getTransactionDate());
 
         boolean reprocess = isForeclosure() || !isTransactionChronologicallyLatest || adjustedTransaction != null
@@ -2471,7 +2471,7 @@ public class Loan extends AbstractAuditableWithUTCDateTimeCustom<Long> {
         return loanTransactionDate;
     }
 
-    public LoanRepaymentScheduleInstallment fetchLoanRepaymentScheduleInstallment(LocalDate dueDate) {
+    public LoanRepaymentScheduleInstallment fetchLoanRepaymentScheduleInstallmentByDueDate(LocalDate dueDate) {
         return getRepaymentScheduleInstallments().stream() //
                 .filter(installment -> dueDate.equals(installment.getDueDate())).findFirst() //
                 .orElse(null);

@@ -54,8 +54,6 @@ public interface LoanAccountDomainService {
     LoanTransaction makeRefundForActiveLoan(Long accountId, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
             BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, ExternalId txnExternalId);
 
-    void updateLoanCollateralTransaction(Set<LoanCollateralManagement> loanCollateralManagementList);
-
     void updateLoanCollateralStatus(Set<LoanCollateralManagement> loanCollateralManagementSet, boolean isReleased);
 
     /**
@@ -94,6 +92,9 @@ public interface LoanAccountDomainService {
     LoanTransaction creditBalanceRefund(Loan loan, LocalDate transactionDate, BigDecimal transactionAmount, String noteText,
             ExternalId externalId, PaymentDetail paymentDetail);
 
+    void updateAndSavePostDatedChecksForIndividualAccount(Loan loan, LoanTransaction transaction);
+
     LoanTransaction applyInterestRefund(Loan loan, LoanRefundRequestData loanRefundRequest);
 
+    void updateAndSaveLoanCollateralTransactionsForIndividualAccounts(Loan loan, LoanTransaction transaction);
 }

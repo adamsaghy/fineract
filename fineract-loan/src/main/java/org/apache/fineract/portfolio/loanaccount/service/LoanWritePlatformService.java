@@ -134,4 +134,6 @@ public interface LoanWritePlatformService {
 
     @Transactional
     CommandProcessingResult undoChargeOff(JsonCommand command);
+
+    CommandProcessingResult makeMerchantIssuedRefund(Long loanId, JsonCommand command);
 }

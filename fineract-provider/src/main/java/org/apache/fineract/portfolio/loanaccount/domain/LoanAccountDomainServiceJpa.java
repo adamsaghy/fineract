@@ -80,6 +80,7 @@ import org.apache.fineract.portfolio.account.domain.StandingInstructionRepositor
 import org.apache.fineract.portfolio.account.domain.StandingInstructionStatus;
 import org.apache.fineract.portfolio.client.domain.Client;
 import org.apache.fineract.portfolio.client.exception.ClientNotActiveException;
+import org.apache.fineract.portfolio.collateralmanagement.domain.ClientCollateralManagement;
 import org.apache.fineract.portfolio.delinquency.domain.LoanDelinquencyAction;
 import org.apache.fineract.portfolio.delinquency.helper.DelinquencyEffectivePauseHelper;
 import org.apache.fineract.portfolio.delinquency.service.DelinquencyReadPlatformService;
@@ -148,12 +149,6 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             boolean isAccountTransfer, HolidayDetailDTO holidayDetailDto, Boolean isHolidayValidationDone) {
         return makeRepayment(repaymentTransactionType, loan, transactionDate, transactionAmount, paymentDetail, noteText, txnExternalId,
                 isRecoveryRepayment, chargeRefundChargeType, isAccountTransfer, holidayDetailDto, isHolidayValidationDone, false);
-    }
-
-    @Transactional
-    @Override
-    public void updateLoanCollateralTransaction(Set<LoanCollateralManagement> loanCollateralManagementSet) {
-        this.loanCollateralManagementRepository.saveAll(loanCollateralManagementSet);
     }
 
     @Transactional
@@ -842,6 +837,59 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 for (AccountTransferStandingInstruction accountTransferStandingInstruction : accountTransferStandingInstructions) {
                     accountTransferStandingInstruction.updateStatus(StandingInstructionStatus.DISABLED.getValue());
                     this.standingInstructionRepository.save(accountTransferStandingInstruction);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void updateAndSaveLoanCollateralTransactionsForIndividualAccounts(Loan loan, LoanTransaction loanTransaction) {
+        if (loan.getLoanType().isIndividualAccount()) {
+            Set<LoanCollateralManagement> loanCollateralManagements = loan.getLoanCollateralManagements();
+            for (LoanCollateralManagement loanCollateralManagement : loanCollateralManagements) {
+                if (loanTransaction != null) {
+                    loanCollateralManagement.setLoanTransactionData(loanTransaction);
+                }
+                ClientCollateralManagement clientCollateralManagement = loanCollateralManagement.getClientCollateralManagement();
+
+                if (loan.getStatus().isClosed()) {
+                    loanCollateralManagement.setIsReleased(true);
+                    BigDecimal quantity = loanCollateralManagement.getQuantity();
+                    clientCollateralManagement.updateQuantity(clientCollateralManagement.getQuantity().add(quantity));
+                    loanCollateralManagement.setClientCollateralManagement(clientCollateralManagement);
+                }
+            }
+            this.loanCollateralManagementRepository.saveAll(loanCollateralManagements);
+        }
+    }
+
+    @Override
+    public void updateAndSavePostDatedChecksForIndividualAccount(final Loan loan, final LoanTransaction transaction) {
+        if (loan.getLoanType().isIndividualAccount()) {
+            // Mark Post Dated Check as paid.
+            final Set<LoanTransactionToRepaymentScheduleMapping> loanTransactionToRepaymentScheduleMappings = transaction
+                    .getLoanTransactionToRepaymentScheduleMappings();
+
+            if (loanTransactionToRepaymentScheduleMappings != null) {
+                for (LoanTransactionToRepaymentScheduleMapping loanTransactionToRepaymentScheduleMapping : loanTransactionToRepaymentScheduleMappings) {
+                    LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment = loanTransactionToRepaymentScheduleMapping
+                            .getLoanRepaymentScheduleInstallment();
+                    if (loanRepaymentScheduleInstallment != null) {
+                        final boolean isPaid = loanRepaymentScheduleInstallment.isNotFullyPaidOff();
+                        PostDatedChecks postDatedChecks = this.postDatedChecksRepository
+                                .getPendingPostDatedCheck(loanRepaymentScheduleInstallment);
+
+                        if (postDatedChecks != null) {
+                            if (!isPaid) {
+                                postDatedChecks.setStatus(PostDatedChecksStatus.POST_DATED_CHECKS_PAID);
+                            } else {
+                                postDatedChecks.setStatus(PostDatedChecksStatus.POST_DATED_CHECKS_PENDING);
+                            }
+                            this.postDatedChecksRepository.saveAndFlush(postDatedChecks);
+                        } else {
+                            break;
+                        }
+                    }
                 }
             }
         }

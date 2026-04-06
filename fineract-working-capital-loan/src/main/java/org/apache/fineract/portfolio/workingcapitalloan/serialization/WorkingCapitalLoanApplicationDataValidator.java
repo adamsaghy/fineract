@@ -58,6 +58,7 @@ import org.apache.fineract.portfolio.workingcapitalloan.domain.WorkingCapitalLoa
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanApplicationDateException;
 import org.apache.fineract.portfolio.workingcapitalloan.exception.WorkingCapitalLoanApplicationNotInSubmittedStateCannotBeModifiedException;
 import org.apache.fineract.portfolio.workingcapitalloan.repository.WorkingCapitalLoanRepository;
+import org.apache.fineract.portfolio.workingcapitalloannearbreach.validator.WorkingCapitalNearBreachParseAndValidator;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.WorkingCapitalLoanProductConstants;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanDelinquencyStartType;
 import org.apache.fineract.portfolio.workingcapitalloanproduct.domain.WorkingCapitalLoanProduct;
@@ -89,7 +90,7 @@ public class WorkingCapitalLoanApplicationDataValidator {
             WorkingCapitalLoanProductConstants.repaymentFrequencyTypeParamName, WorkingCapitalLoanConstants.submittedOnNoteParameterName,
             WorkingCapitalLoanProductConstants.breachIdParamName, WorkingCapitalLoanProductConstants.allowAttributeOverridesParamName,
             WorkingCapitalLoanProductConstants.paymentAllocationParamName, WorkingCapitalLoanProductConstants.delinquencyGraceDaysParamName,
-            WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName));
+            WorkingCapitalLoanProductConstants.delinquencyStartTypeParamName, WorkingCapitalLoanProductConstants.nearBreachIdParamName));
 
     private final FromJsonHelper fromApiJsonHelper;
     private final WorkingCapitalPaymentAllocationDataValidator paymentAllocationDataValidator;
@@ -97,6 +98,7 @@ public class WorkingCapitalLoanApplicationDataValidator {
     private final ClientRepository clientRepository;
     private final WorkingCapitalLoanRepository workingCapitalLoanRepository;
     private final ExpectedDisbursementDateValidator expectedDisbursementDateValidator;
+    private final WorkingCapitalNearBreachParseAndValidator workingCapitalNearBreachValidator;
 
     /**
      * Validates the create loan application request. Mandatory: clientId, productId, principal (disbursement amount),
@@ -592,14 +594,31 @@ public class WorkingCapitalLoanApplicationDataValidator {
                         .failWithCode("override.not.allowed.by.product");
             }
         }
+        Long breachId = null;
         if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.breachIdParamName, element)) {
             if (config.isBreach()) {
-                final Long breachId = this.fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanProductConstants.breachIdParamName,
-                        element);
+                breachId = this.fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanProductConstants.breachIdParamName, element);
                 baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.breachIdParamName).value(breachId).ignoreIfNull()
                         .longGreaterThanZero();
             } else {
                 baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.breachIdParamName)
+                        .failWithCode("override.not.allowed.by.product");
+            }
+        }
+        if (this.fromApiJsonHelper.parameterExists(WorkingCapitalLoanProductConstants.nearBreachIdParamName, element)) {
+            if (config.isBreach()) {
+                final Long nearBreachId = this.fromApiJsonHelper.extractLongNamed(WorkingCapitalLoanProductConstants.nearBreachIdParamName,
+                        element);
+                baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.nearBreachIdParamName).value(nearBreachId)
+                        .ignoreIfNull().longGreaterThanZero();
+                if (breachId == null && nearBreachId != null) {
+                    baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.nearBreachIdParamName)
+                            .failWithCode("cannot.enable.near.breach.without.breach");
+                } else {
+                    workingCapitalNearBreachValidator.validateNearBreachAgainstBreach(baseDataValidator, breachId, nearBreachId);
+                }
+            } else {
+                baseDataValidator.reset().parameter(WorkingCapitalLoanProductConstants.nearBreachIdParamName)
                         .failWithCode("override.not.allowed.by.product");
             }
         }

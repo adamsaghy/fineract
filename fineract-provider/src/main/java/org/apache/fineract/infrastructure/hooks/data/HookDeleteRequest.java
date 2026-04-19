@@ -18,20 +18,21 @@
  */
 package org.apache.fineract.infrastructure.hooks.data;
 
+import java.io.Serial;
 import java.io.Serializable;
-import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
 
-@SuppressWarnings("unused")
+@Builder
 @Data
 @NoArgsConstructor
-@Accessors(chain = true)
-public class Grouping implements Serializable {
+@AllArgsConstructor
+public class HookDeleteRequest implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
-    private String name;
-    private List<Entity> entities;
+    private Long id;
 }

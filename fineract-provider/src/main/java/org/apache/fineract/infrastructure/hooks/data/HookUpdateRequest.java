@@ -18,30 +18,34 @@
  */
 package org.apache.fineract.infrastructure.hooks.data;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
+import lombok.experimental.FieldNameConstants;
 
-@SuppressWarnings("unused")
+@Builder
 @Data
 @NoArgsConstructor
-@Accessors(chain = true)
-public final class Field implements Serializable {
+@AllArgsConstructor
+@FieldNameConstants
+public class HookUpdateRequest implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
-    private String fieldName;
-    private String fieldValue;
-    private String fieldType;
-    private Boolean optional;
-    private String placeholder;
-
-    public static Field fromConfig(final String fieldName, final String fieldValue) {
-        return new Field().setFieldName(fieldName).setFieldValue(fieldValue);
-    }
-
-    public static Field fromSchema(final String fieldType, final String fieldName, final Boolean optional, final String placeholder) {
-        return new Field().setFieldName(fieldName).setFieldType(fieldType).setOptional(optional).setPlaceholder(placeholder);
-    }
+    @NotNull(message = "{org.apache.fineract.infrastructure.hooks.id.not-null}")
+    private Long id;
+    @Size(max = 100, message = "{org.apache.fineract.infrastructure.hooks.name.size}")
+    private String name;
+    private Boolean isActive;
+    private String displayName;
+    private Long templateId;
+    private List<HookEventData> events;
+    private List<HookFieldData> config;
 }

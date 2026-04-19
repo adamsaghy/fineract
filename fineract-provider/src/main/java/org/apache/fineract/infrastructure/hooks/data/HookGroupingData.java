@@ -18,22 +18,25 @@
  */
 package org.apache.fineract.infrastructure.hooks.data;
 
+import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+@Builder
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Accessors(chain = true)
-public final class Event implements Serializable {
+public class HookGroupingData implements Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
-    private String actionName;
-    private String entityName;
-
-    public static Event instance(final String actionName, final String entityName) {
-        return new Event().setActionName(actionName).setEntityName(entityName);
-    }
+    private String name;
+    private List<HookEntityData> entities;
 }

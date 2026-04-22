@@ -16,23 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 package org.apache.fineract.test.data.workingcapitalproduct;
 
-public enum DefaultWorkingCapitalLoanProduct implements WorkingCapitalLoanProduct {
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-    WCLP, //
-    WCLP_DISCOUNT, //
-    WCLP_DISALLOW_ATTRIBUTES_OVERRIDE, //
-    WCLP_DISCOUNT_DISALLOW_ATTRIBUTES_OVERRIDE, //
-    WCLP_FOR_UPDATE, //
-    WCLP_DELINQUENCY_RESCHEDULE, //
-    WCLP_BREACH, //
-    WCLP_BREACH_NEAR_BREACH, //
-    WCLP_BREACH_DISALLOW_ATTRIBUTES_OVERRIDE, //
-    WCLP_BREACH_NEAR_BREACH_DISALLOW_ATTRIBUTES_OVERRIDE; //
+@Getter
+@RequiredArgsConstructor
+public enum WorkingCapitalBreachCalculationType {
 
-    @Override
-    public String getName() {
-        return name();
-    }
+    FLAT(0L, "FLAT", "Flat"), //
+    PERCENTAGE(1L, "PERCENTAGE", "Percentage"); //
+
+    private final Long id;
+    private final String code;
+    private final String value;
 }

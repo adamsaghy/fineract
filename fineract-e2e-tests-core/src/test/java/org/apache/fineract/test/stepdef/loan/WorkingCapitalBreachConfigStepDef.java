@@ -221,6 +221,20 @@ public class WorkingCapitalBreachConfigStepDef extends AbstractStepDef {
         assertThat(exception.getDeveloperMessage()).contains(ErrorMessageHelper.workingCapitalBreachNotFoundFailure(id));
     }
 
+    @Then("Admin failed to delete WC Breach that is assigned to a Working Capital Loan Product")
+    public void adminFailedToDeleteWCBreachAssignedToLoanProduct() {
+        final Long id = TestContext.GLOBAL.get(TestContextKey.WORKING_CAPITAL_BREACH_ID);
+        final CallFailedRuntimeException exception = fail(
+                () -> fineractFeignClient.workingCapitalBreaches().deleteWorkingCapitalBreach(id));
+
+        assertThat(exception.getStatus()).as(ErrorMessageHelper.incorrectExpectedValueInResponse()).isEqualTo(403);
+        assertThat(exception.getUserMessageGlobalisationCode()).isEqualTo(ErrorMessageHelper.DATA_INTEGRITY_ISSUE_ENTITY_LINKED_CODE);
+        assertThat(exception.getDeveloperMessage()) //
+                .contains(ErrorMessageHelper.workingCapitalBreachLinkedToLoanProductFailure(id)) //
+                .doesNotContain("Cannot delete or update a parent row") //
+                .doesNotContain("m_wc_loan_product");
+    }
+
     private void checkRetrieveWCBreachNotFoundFailure(final Long id) {
         final CallFailedRuntimeException exception = fail(
                 () -> fineractFeignClient.workingCapitalBreaches().retrieveWorkingCapitalBreach(id));

@@ -73,3 +73,10 @@ Feature: Working Capital Breach Configuration
       | wcb_field_name_incorrect_value |
       | 565465                         |
       | 0                              |
+
+  Scenario: Verify deleting WC Breach assigned to a Working Capital Loan Product is rejected with entity-linked error
+    When Admin creates WC Breach With Values
+    When Admin creates a new Working Capital Loan Product with existing WC Breach
+    Then Admin failed to delete WC Breach that is assigned to a Working Capital Loan Product
+    Then Admin deletes a Working Capital Loan Product
+    When Admin deletes WC Breach With Values

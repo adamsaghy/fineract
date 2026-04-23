@@ -62,6 +62,7 @@ import org.apache.fineract.test.factory.WorkingCapitalRequestFactory;
 import org.apache.fineract.test.helper.ErrorMessageHelper;
 import org.apache.fineract.test.helper.Utils;
 import org.apache.fineract.test.stepdef.AbstractStepDef;
+import org.apache.fineract.test.support.TestContext;
 import org.apache.fineract.test.support.TestContextKey;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Assertions;
@@ -179,6 +180,32 @@ public class WorkingCapitalStepDef extends AbstractStepDef {
                 .breachId(breachId) //
                 .delinquencyGraceDays(graceDays);
 
+        final PostWorkingCapitalLoanProductsResponse response = createWorkingCapitalLoanProduct(request);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST, request);
+        checkWorkingCapitalLoanProductCreate();
+    }
+
+    @When("Admin creates a new Working Capital Loan Product with existing WC Delinquency Bucket")
+    public void createWorkingCapitalLoanProductWithExistingDelinquencyBucket() {
+        final Long bucketId = TestContext.GLOBAL.get(TestContextKey.DELINQUENCY_BUCKET_ID);
+        final String name = DefaultWorkingCapitalLoanProduct.WCLP.getName() + Utils.randomStringGenerator("_", 10);
+        final PostWorkingCapitalLoanProductsRequest request = workingCapitalRequestFactory.defaultWorkingCapitalLoanProductRequest() //
+                .name(name) //
+                .delinquencyBucketId(bucketId);
+        final PostWorkingCapitalLoanProductsResponse response = createWorkingCapitalLoanProduct(request);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
+        testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST, request);
+        checkWorkingCapitalLoanProductCreate();
+    }
+
+    @When("Admin creates a new Working Capital Loan Product with existing WC Breach")
+    public void createWorkingCapitalLoanProductWithExistingBreach() {
+        final Long breachId = TestContext.GLOBAL.get(TestContextKey.WORKING_CAPITAL_BREACH_ID);
+        final String name = DefaultWorkingCapitalLoanProduct.WCLP.getName() + Utils.randomStringGenerator("_", 10);
+        final PostWorkingCapitalLoanProductsRequest request = workingCapitalRequestFactory.defaultWorkingCapitalLoanProductRequest() //
+                .name(name) //
+                .breachId(breachId);
         final PostWorkingCapitalLoanProductsResponse response = createWorkingCapitalLoanProduct(request);
         testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_RESPONSE, response);
         testContext().set(TestContextKey.WORKING_CAPITAL_LOAN_PRODUCT_CREATE_REQUEST, request);

@@ -168,41 +168,31 @@ public class LoanBalanceService {
         loanTransactions.sort(LoanTransactionComparator.INSTANCE);
 
         for (LoanTransaction loanTransaction : loanTransactions) {
-            if (loanTransaction.isDisbursement() || loanTransaction.isIncomePosting() || loanTransaction.isCapitalizedIncome()) {
-                outstanding = outstanding.plus(loanTransaction.getAmount(loan.getCurrency()))
-                        .minus(loanTransaction.getOverPaymentPortion(loan.getCurrency()));
-                loanTransaction.updateOutstandingLoanBalance(MathUtil.negativeToZero(outstanding.getAmount()));
-            } else if (loanTransaction.isChargeback() || loanTransaction.isCreditBalanceRefund()) {
-                Money transactionOutstanding = loanTransaction.getPrincipalPortion(loan.getCurrency());
-                if (loanTransaction.isOverPaid()) {
-                    // in case of advanced payment strategy and creditAllocations the full amount is recognized first
-                    if (loan.getCreditAllocationRules() != null && !loan.getCreditAllocationRules().isEmpty()) {
-                        Money payedPrincipal = loanTransaction.getLoanTransactionToRepaymentScheduleMappings().stream() //
-                                .map(mapping -> mapping.getPrincipalPortion(loan.getCurrency())) //
-                                .reduce(Money.zero(loan.getCurrency()), Money::plus);
-                        transactionOutstanding = loanTransaction.getPrincipalPortion(loan.getCurrency()).minus(payedPrincipal);
-                    } else {
-                        // in case legacy payment strategy
-                        transactionOutstanding = loanTransaction.getAmount(loan.getCurrency())
-                                .minus(loanTransaction.getOverPaymentPortion(loan.getCurrency()));
-                    }
-                    if (transactionOutstanding.isLessThanZero()) {
-                        transactionOutstanding = Money.zero(loan.getCurrency());
-                    }
-                }
-                outstanding = outstanding.plus(transactionOutstanding);
-                loanTransaction.updateOutstandingLoanBalance(MathUtil.negativeToZero(outstanding.getAmount()));
-            } else if (!loanTransaction.isAccrualActivity()) {
-                if (loan.getLoanInterestRecalculationDetails() != null
-                        && loan.getLoanInterestRecalculationDetails().isCompoundingToBePostedAsTransaction()
-                        && !loanTransaction.isRepaymentAtDisbursement()) {
-                    outstanding = outstanding.minus(loanTransaction.getAmount(loan.getCurrency()));
-                } else {
-                    outstanding = outstanding.minus(loanTransaction.getPrincipalPortion(loan.getCurrency()));
-                }
-                loanTransaction.updateOutstandingLoanBalance(MathUtil.negativeToZero(outstanding.getAmount()));
+            if (isOutstandingLoanBalanceIncreasingTransaction(loanTransaction)) {
+                outstanding = outstanding.plus(getOutstandingLoanBalanceIncrease(loan, loanTransaction));
+            } else if (isOutstandingLoanBalanceDecreasingTransaction(loanTransaction)) {
+                outstanding = outstanding.minus(loanTransaction.getPrincipalPortion(loan.getCurrency()));
             }
+            outstanding = Money.of(loan.getCurrency(), MathUtil.negativeToZero(outstanding.getAmount()));
+            loanTransaction.updateOutstandingLoanBalance(outstanding.getAmount());
         }
+    }
+
+    private boolean isOutstandingLoanBalanceIncreasingTransaction(final LoanTransaction loanTransaction) {
+        return loanTransaction.isDisbursement() || loanTransaction.isCapitalizedIncome() || loanTransaction.isCreditBalanceRefund()
+                || loanTransaction.isChargeback();
+    }
+
+    private Money getOutstandingLoanBalanceIncrease(final Loan loan, final LoanTransaction loanTransaction) {
+        if (loanTransaction.isCreditBalanceRefund() || loanTransaction.isChargeback()) {
+            return loanTransaction.getPrincipalPortion(loan.getCurrency());
+        }
+        return loanTransaction.getAmount(loan.getCurrency());
+    }
+
+    private boolean isOutstandingLoanBalanceDecreasingTransaction(final LoanTransaction loanTransaction) {
+        return loanTransaction.isRepaymentLikeType() || loanTransaction.isRepaymentAtDisbursement()
+                || loanTransaction.isRecoveryRepayment();
     }
 
     public void updateLoanToLastDisbursalState(final Loan loan, final LoanDisbursementDetails disbursementDetail) {

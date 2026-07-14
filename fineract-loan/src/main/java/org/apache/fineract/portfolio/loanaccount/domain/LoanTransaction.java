@@ -175,9 +175,11 @@ public class LoanTransaction extends AbstractAuditableWithUTCDateTimeCustom<Long
         // portion calculation and side effect would be reverse-replay
         LoanTransaction disbursement = new LoanTransaction(null, loan.getOffice(), LoanTransactionType.DISBURSEMENT, paymentDetail,
                 amount.getAmount(), disbursementDate, externalId);
+        disbursement.principalPortion = amount.getAmount();
         if (LoanScheduleType.PROGRESSIVE.equals(loan.getLoanProductRelatedDetail().getLoanScheduleType())) {
             Money overPaymentPortion = amount.isGreaterThan(loanTotalOverpaid) ? loanTotalOverpaid : amount;
             disbursement.setOverPayments(overPaymentPortion);
+            disbursement.principalPortion = MathUtil.subtract(disbursement.getPrincipalPortion(), overPaymentPortion.getAmount());
         }
         return disbursement;
     }

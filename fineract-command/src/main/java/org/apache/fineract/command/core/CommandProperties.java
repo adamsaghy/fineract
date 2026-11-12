@@ -49,9 +49,6 @@ public final class CommandProperties implements Serializable {
     private Map<String, Boolean> hooks = new HashMap<>();
 
     @Builder.Default
-    private String idemPotencyKeyHeaderName = "Idempotency-Key";
-
-    @Builder.Default
     private Boolean hookServletHeadersEnabled = true;
 
     @Builder.Default

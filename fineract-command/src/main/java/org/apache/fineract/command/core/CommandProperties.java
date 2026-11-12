@@ -18,6 +18,8 @@
  */
 package org.apache.fineract.command.core;
 
+import static org.apache.fineract.command.core.CommandConstants.COMMAND_PROPERTIES_PREFIX;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -34,7 +36,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldNameConstants
-@ConfigurationProperties(prefix = "fineract.command")
+@ConfigurationProperties(prefix = COMMAND_PROPERTIES_PREFIX)
 public final class CommandProperties implements Serializable {
 
     @Serial
@@ -48,4 +50,13 @@ public final class CommandProperties implements Serializable {
 
     @Builder.Default
     private String idemPotencyKeyHeaderName = "Idempotency-Key";
+
+    @Builder.Default
+    private Boolean hookServletHeadersEnabled = true;
+
+    @Builder.Default
+    private Boolean hookTimestampEnabled = true;
+
+    @Builder.Default
+    private Boolean hookUsernameEnabled = true;
 }
